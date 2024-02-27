@@ -29,6 +29,9 @@ dependencies:
   '@tanstack/react-query':
     specifier: ^5.18.1
     version: 5.24.1(react@18.2.0)
+  '@uniswap/token-lists':
+    specifier: 1.0.0-beta.33
+    version: 1.0.0-beta.33
   '@wagmi/core':
     specifier: ^2.6.4
     version: 2.6.5(@types/react@18.2.60)(react@18.2.0)(typescript@5.3.3)(viem@2.7.15)
@@ -4433,6 +4436,11 @@ packages:
   /@ungap/structured-clone@1.2.0:
     resolution: {integrity: sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==}
     dev: true
+
+  /@uniswap/token-lists@1.0.0-beta.33:
+    resolution: {integrity: sha512-JQkXcpRI3jFG8y3/CGC4TS8NkDgcxXaOQuYW8Qdvd6DcDiIyg2vVYCG9igFEzF0G6UvxgHkBKC7cWCgzZNYvQg==}
+    engines: {node: '>=10'}
+    dev: false
 
   /@vue/compiler-core@3.4.20:
     resolution: {integrity: sha512-l7M+xUuL8hrGtRLkrf+62d9zucAdgqNBTbJ/NufCOIuJQhauhfyAKH9ra/qUctCXcULwmclGAVpvmxjbBO30qg==}
