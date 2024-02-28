@@ -1,5 +1,5 @@
 import { TokenList } from '@uniswap/token-lists';
-
+//https://raw.githubusercontent.com/viaprotocol/tokenlists/main/all_tokens/all.json
 export const tokenList: TokenList = {
   name: 'Outrun Default List',
   timestamp: '2024-02-28T00:00:00.000Z',
@@ -14,7 +14,8 @@ export const tokenList: TokenList = {
       chainId: 1,
       name: 'Wrapped Ether',
       symbol: 'WETH',
-      logoURI: 'https://assets.coingecko.com/coins/images/2518/small/weth.png',
+      logoURI:
+        'https://raw.githubusercontent.com/Uniswap/assets/master/blockchains/ethereum/assets/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2/logo.png',
       decimals: 18,
     },
     {
@@ -38,8 +39,12 @@ export const tokenList: TokenList = {
       chainId: 1,
       name: 'Tether USD',
       symbol: 'USDT',
-      logoURI: 'https://assets.coingecko.com/coins/images/325/small/USDT_1.png',
+      logoURI: 'https://assets.coingecko.com/coins/images/325/thumb/Tether.png?1668148663',
       decimals: 6,
     },
   ],
 };
+
+export function getToken(tokenSymbol: string) {
+  return tokenList.tokens.find((token) => token.symbol === tokenSymbol);
+}
