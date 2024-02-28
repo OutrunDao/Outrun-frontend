@@ -1,13 +1,5 @@
 "use client";
-import {
-  Box,
-  Flex,
-  Spacer,
-  Text,
-  Button,
-  HStack,
-  Heading,
-  Image,
+import { useColorMode, useColorModeValue, Box, Flex, Spacer, Text, Button, HStack, Heading, Image,
 } from "@chakra-ui/react";
 import { Link } from "@chakra-ui/next-js";
 import { Silkscreen } from "next/font/google";
@@ -15,8 +7,11 @@ import { Silkscreen } from "next/font/google";
 const silk = Silkscreen({ subsets: ["latin"], weight: "700" });
 
 export default function Layout({ children }: { children: React.ReactNode }) {
+  const {colorMode, toggleColorMode} = useColorMode();
+  const bgColor = useColorModeValue('rgb(29 12 23)', 'white');
+  
   return (
-    <Box bgColor={"rgb(29 12 23)"} height={"100vh"}>
+    <Box bgColor={bgColor} height={"100vh"}>
       <Flex align="center">
         <Flex p={"24px "} align="center">
           {/* <Box boxSize={40}><Logo width={40} height={40}></Logo></Box> */}
@@ -32,13 +27,22 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </Flex>
         <Box ml={"100px"}>
           <HStack spacing={"40px"}>
-            <Button textColor={"#54c0e6"} variant={"plain"}>
+            <Text >
               <Link href={"/swap"}>Swap</Link>
-            </Button>
-            <Button textColor={"#54c0e6"} variant={"plain"}>
+            </Text>
+            <Text>
               <Link href={"/swap"}>Liquity</Link>
-            </Button>
+            </Text>
+            <Text>
+              <Link href={"/pool"}>Pool</Link>
+            </Text>
           </HStack>
+        </Box>
+        <Spacer />
+        <Box>
+          <Button onClick={toggleColorMode}>
+            { colorMode === 'light' ? 'Light' : <Text color="#000">Dark</Text>}
+          </Button>
         </Box>
         <Spacer />
         <Box>
