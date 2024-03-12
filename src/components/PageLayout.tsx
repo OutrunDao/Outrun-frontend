@@ -24,7 +24,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <Link href={'/pool'}>Pool</Link>
             </Text>
             <Text>
-              <Link href={'/swap'}>Stack</Link>
+              <Link href={'/stack'}>Stack</Link>
             </Text>
           </HStack>
         </Box>
