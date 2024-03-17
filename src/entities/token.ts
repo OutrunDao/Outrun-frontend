@@ -1,6 +1,6 @@
 import { BaseCurrency, Currency, Token } from '@pancakeswap/swap-sdk-core';
 import { Address } from 'viem';
-import { validateAndParseAddress } from '../utils';
+import validateAndParseAddress from '@/utils/validateAndParseAddress';
 
 export interface SerializedToken {
   chainId: number;

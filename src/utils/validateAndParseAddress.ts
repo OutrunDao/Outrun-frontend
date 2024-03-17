@@ -4,7 +4,7 @@ import warning from 'tiny-warning';
 
 // warns if addresses are not checksummed
 // eslint-disable-next-line consistent-return
-export function validateAndParseAddress(address: string): Address {
+export default function validateAndParseAddress(address: string): Address {
   try {
     const checksummedAddress = getAddress(address);
     warning(address === checksummedAddress, `${address} is not checksummed.`);
