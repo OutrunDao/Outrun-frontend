@@ -7,7 +7,7 @@ const silk = Silkscreen({ subsets: ['latin'], weight: '700' });
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <Box bgImage="url(../assets/bg.jpeg)" bgColor="rgb(29 12 23)" height={'100vh'}>
+    <Box  bgColor="rgb(29 12 23)" minHeight={'100vh'}>
       <Flex align="center">
         <Flex p={'24px '} align="center">
           {/* <Box boxSize={40}><Logo width={40} height={40}></Logo></Box> */}
@@ -24,7 +24,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <Link href={'/pool'}>Pool</Link>
             </Text>
             <Text>
-              <Link href={'/stack'}>Stack</Link>
+              <Link href={'/stake'}>Stake</Link>
             </Text>
           </HStack>
         </Box>
