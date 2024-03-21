@@ -1,4 +1,4 @@
-import { Img, Tabs,Tag, Flex, Input, TabList, TabPanels, Tab, TabPanel, Box, Icon, Text, useColorMode, useColorModeValue, Heading ,Container, Button, Center } from '@chakra-ui/react'
+import { Flex, Box, Text } from '@chakra-ui/react'
 import { ReactElement, useEffect, useState } from 'react'
 
 interface IProps {

@@ -1,3 +1,5 @@
+import { LocalTokenSymbol, TokenAddressMap } from '@/types/index.d';
+
 export const enum TabType {
   Mint = 'Mint',
   Stake = 'Stake',
@@ -18,12 +20,25 @@ export const tabList = [
   { key: TabType.Stake, label: TabType.Stake },
 ];
 
-export const enum SupportCoins {
-  ETH = 'ETH',
-  RETH = 'RETH',
-}
+// Mint的交易对
+export const MintPairs = [
+  [LocalTokenSymbol.ETH, LocalTokenSymbol.RETH],
+  [LocalTokenSymbol.USDB, LocalTokenSymbol.RUSD],
+];
+
+// stake的交易对
+export const StakePairs = [
+  [LocalTokenSymbol.RETH, LocalTokenSymbol.PETH],
+  [LocalTokenSymbol.RUSD, LocalTokenSymbol.PUSD],
+  [LocalTokenSymbol.REY, LocalTokenSymbol.RUY],
+];
+
+export const PairSelectList = {
+  [TabType.Mint]: MintPairs,
+  [TabType.Stake]: StakePairs,
+};
 
 export interface IIswitch {
-  [TabType.Mint]: boolean;
-  [TabType.Stake]: boolean;
+  [TabType.Mint]: 0 | 1;
+  [TabType.Stake]: 0 | 1;
 }

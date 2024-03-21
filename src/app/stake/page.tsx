@@ -4,56 +4,75 @@ import { Img, Tabs,Tag, Flex, Input, TabList, TabPanels, Tab, TabPanel, Box, Ico
 import { useEffect, useState } from 'react'
 import { useBalance, useAccount, useAccountEffect, type UseBalanceParameters, type UseAccountEffectParameters } from 'wagmi'
 import { formatUnits, formatEther } from 'viem'
-import { tabList, TabType, IIswitch, MintType, StakeType } from './types'
+import { tabList, TabType, IIswitch, MintType, StakeType, PairSelectList, } from './types'
+import { LocalTokenSymbol } from '@/types/index.d'
 import { ArrowDownIcon } from '@chakra-ui/icons'
 
 import PriceCoin from './components/PriceCoin'
 import BalanceCoin from './components/BalanceCoin'
 import StakeButton from './components/StakeButton'
+import InputSelect from './components/InputSelect'
 
 export default function Stake () {
   const [currentTabType, setTabId] = useState<TabType>(TabType.Mint)
-  const [mintValue, setMintValue] = useState<string>("0")
+  const [inputValue, setInputValue] = useState<string>("0")
   const [isSwitchCoin, setIsSwitchCoin] = useState<IIswitch>({
-    [TabType.Mint]: true,
-    [TabType.Stake]: true,
+    [TabType.Mint]: 0,
+    [TabType.Stake]: 0,
   })
-  const [coinPairs, setCoinPairs] = useState(['ETH', 'RETH'])
-  
-  let account = useAccount().address
-  
+  const [selectedToken, setSelectedToken] = useState<LocalTokenSymbol>(LocalTokenSymbol.ETH)
+  const [currList, setCurrList] = useState<Array<Array<LocalTokenSymbol>>>(PairSelectList[currentTabType]) 
+  const [currIndex, setCurrIndex] = useState<number>(0) 
+
+  const account = useAccount().address
+  const isConnect = !!account  
   let balance = "0"
   const value = useBalance({ address: account }).data?.value
+
   if (value) {
     balance = formatEther(value)
     balance = parseFloat(balance).toFixed(4)
   }
 
-  useAccountEffect({
-    onConnect(data) {
-      console.log('Connected!', data.address)
-    },
-    onDisconnect() {
-      console.log('Disconnected!')
-    },
-  })
+  // 点击切换Token交换顺序
+  useEffect(() => {
+    const newList = currList.map((item, index) => {
+      if (item.includes(selectedToken)) {
+        [item[1], item[0]] = [item[0], item[1]]
+        setCurrIndex(index)
+      }
+      return item
+    })
+    
+    setCurrList(newList)
+  }, [isSwitchCoin[currentTabType]])
+
+  useEffect(() => {
+    setCurrList(PairSelectList[currentTabType])
+    setCurrIndex(0)
+    setIsSwitchCoin({
+      [TabType.Mint]: 0,
+      [TabType.Stake]: 0,
+    })
+  }, [currentTabType])
+
+  useEffect(() => {
+    currList.forEach((item, index) => {
+      if (item.includes(selectedToken)) {
+        setCurrIndex(index)
+      }
+    })
+  }, [selectedToken])
   
   const onSwitchCoinType =() => {
-    const switchPairs = [coinPairs[1], coinPairs[0]]
-    setCoinPairs(switchPairs)
     setIsSwitchCoin({
       ...isSwitchCoin,
-      [currentTabType]: !isSwitchCoin[currentTabType]
+      [currentTabType]: isSwitchCoin[currentTabType] === 0 ? 1 : 0,
     })
   }
 
-  // useEffect(() => {
-  //   if (currentTabType === TabType.Mint) {
-  //     setMintState(isSwitchCoin ? MintType.Mint : MintType.Redeem)
-  //   } else {
-  //     setStakeState(isSwitchCoin ? StakeType.Stake : StakeType.Unstake)
-  //   }
-  // }, [isSwitchCoin])
+  console.log('currList', currList);
+  
 
   return(
     <Container className="stack" color="#fff" fontSize="14px" marginTop="100px">
@@ -69,24 +88,26 @@ export default function Stake () {
 
           <Container>
             <Box marginTop="32px" padding="22px" backgroundColor="#1E1E38" borderRadius="12px">
-              <Flex>
-                <Input width="280px" boxShadow="0 0 0 1px #3182ce" borderColor="#3182ce" placeholder="0.00000" value={mintValue} onChange={(e) => setMintValue(e.target.value)} marginRight="22px" border="none" />
-                <Flex flex="1" alignItems="center" justifyContent="center" backgroundColor="rgb(52 30 56 / 50%)" borderRadius="18px">
-                  <Img height="18px" src="eth.png"></Img>
-                  <Text textAlign="center">{coinPairs[0]}</Text>
-                </Flex>
-              </Flex>
-
-              <BalanceCoin 
-                coinSymbol={coinPairs[0]} 
-                setMintValue={(value) => setMintValue(value)} ></BalanceCoin>
+              <InputSelect
+                coinSymbol={currList[currIndex][0]}
+                currList={currList}
+                inputValue={inputValue}
+                onChangeInput={(value) => setInputValue(value)}
+                onChangeSelect={(value) => setSelectedToken(value)}
+                currentTabType={currentTabType}></InputSelect>
+              
+              <BalanceCoin
+                isConnect={isConnect}
+                balance={balance}
+                coinSymbol={currList[currIndex][1]}
+                setMintValue={(value) => setInputValue(value)} ></BalanceCoin>
             </Box>
             <Flex justifyContent="center" marginTop="-12px">
               <ArrowDownIcon onClick={() => onSwitchCoinType()} boxSize={8} w={6} cursor="pointer" _hover={{ opacity: '0.5' }} />
             </Flex>
             
             {/* 带价格的 coin */}
-            <PriceCoin  coinSymbol={coinPairs[1]}></PriceCoin>
+            <PriceCoin coinSymbol={currList[currIndex][1]}></PriceCoin>
 
             <Box marginTop="32px" padding="16px" backgroundColor="rgb(52 30 56 / 50%)" borderRadius="12px">
               <Flex justifyContent="space-between" marginTop="12px">
@@ -103,7 +124,7 @@ export default function Stake () {
               </Flex>
             </Box>
             
-            <StakeButton isSwitchCoin={isSwitchCoin} currentTabType={currentTabType}></StakeButton>
+            <StakeButton isConnect={isConnect} isSwitchCoin={isSwitchCoin} currentTabType={currentTabType}></StakeButton>
           </Container>
         </Tabs>
       </Box>

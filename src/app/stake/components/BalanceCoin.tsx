@@ -5,19 +5,13 @@ import { useBalance, useAccount, useAccountEffect, type UseBalanceParameters, ty
 
 interface IProps {
   coinSymbol: string
+  balance: string,
+  isConnect: boolean,
   setMintValue: (val: string) => void,
 }
 
 const BalanceCoin = (props: IProps) => {
-  const { coinSymbol } = props  
-  
-  let address = useAccount().address
-  let balance = "0"
-  const value = useBalance({ address }).data?.value
-  if (value) {
-    balance = formatEther(value)
-    balance = parseFloat(balance).toFixed(4)
-  }
+  const { isConnect, balance, coinSymbol } = props  
   
   return (
     <Flex justifyContent="flex-end" marginTop="12px">
@@ -25,7 +19,7 @@ const BalanceCoin = (props: IProps) => {
       <Box color="#999" fontSize="14px">
         Balance: {balance}
         <Button 
-          isDisabled={!address}
+          isDisabled={!isConnect}
           onClick={() => {props.setMintValue(balance);}}
           marginLeft="12px" colorScheme='teal' size='xs'>Max</Button>
       </Box>
