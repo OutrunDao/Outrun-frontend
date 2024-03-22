@@ -23,7 +23,6 @@ import { ArrowDownIcon } from '@chakra-ui/icons';
 import { TradeSettingsModal } from './TradeSettingsModal';
 import { Fetcher } from '@/packages/swap-sdk/fetcher';
 import { Pair } from '@/packages/swap-sdk';
-import { Token } from '@/packages/swap-core';
 import { all } from 'radash';
 import { Trade } from '@/packages/swap-sdk';
 import { toToken, toCurrencyAmount } from './fns';

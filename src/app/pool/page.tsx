@@ -16,7 +16,7 @@ import {
 } from '@chakra-ui/react';
 import { PiSwimmingPoolDuotone } from 'react-icons/pi';
 import TokenSelect from '@/components/TokenSelect';
-import { useGetPair } from '@/hook/contracts/useSwapFactory';
+// import { useGetPair } from '@/hook/contracts/useSwapFactory';
 import { useState } from 'react';
 
 const PoolIndex = () => {
@@ -24,7 +24,7 @@ const PoolIndex = () => {
   const bgColor = useColorModeValue('#000', 'skyblue');
   const [tokenA, setTokenA] = useState('USDC');
   const [tokenB, setTokenB] = useState('WETH');
-  const pair = useGetPair(tokenA, tokenB);
+  const pair = [];
 
   function addLiquidity() {
     console.log('add liquidity', tokenA, tokenB, pair);
