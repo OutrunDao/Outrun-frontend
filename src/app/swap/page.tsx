@@ -17,10 +17,25 @@ import {
 } from '@chakra-ui/react';
 import TokenSelect from '@/components/TokenSelect';
 import { tokenList } from '@/tokens/list';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { TokenInfo } from '@uniswap/token-lists';
-import { ArrowDownIcon, SettingsIcon } from '@chakra-ui/icons';
+import { ArrowDownIcon } from '@chakra-ui/icons';
 import { TradeSettingsModal } from './TradeSettingsModal';
+import { Fetcher } from '@/packages/swap-sdk/fetcher';
+import { Pair } from '@/packages/swap-sdk';
+import { Token } from '@/packages/swap-core';
+import { all } from 'radash';
+import { Trade } from '@/packages/swap-sdk';
+import { toToken, toCurrencyAmount } from './fns';
+import { Router as SwapRouter } from '@/packages/swap-sdk/router';
+async function makePairs(tokenA: TokenInfo, tokenB: TokenInfo): Promise<Pair[]> {
+  let pairTable = [[tokenA, tokenB]];
+  let pairs: Pair[] = await all(
+    pairTable.map(([_tokenA, _tokenB]) => Fetcher.fetchPairData(toToken(_tokenA), toToken(_tokenB)))
+  );
+  return pairs;
+}
+
 export default function Swap() {
   const [pairs, setPairs] = useState<Array<TokenInfo | undefined>>([tokenList.tokens[0]]);
   const [pairsInput, setPairsInput] = useState<Array<string>>(['', '']);
@@ -41,6 +56,27 @@ export default function Swap() {
       return [...pairsInput];
     });
   };
+
+  useEffect(() => {
+    if (pairs[0] && pairs[1]) {
+      makePairs(pairs[0], pairs[1])
+        .then((routePairs) => {
+          return Trade.bestTradeExactIn(
+            routePairs,
+            toCurrencyAmount(pairs[0]!, pairsInput[0]),
+            toToken(pairs[1]!)
+          );
+        })
+        .then((bestRoutes) => {
+          console.log(bestRoutes);
+        });
+    }
+  }, [pairs, pairsInput]);
+
+  function swap() {
+    // SwapRouter.swapCallParameters(bestRoutes, tradeOptions);
+  }
+
   return (
     <Container
       w={'480px'}
@@ -106,7 +142,7 @@ export default function Swap() {
           <Text fontSize={'xs'}>1WETH = 1222 bb</Text>
         </Container>
 
-        <Button width={'100%'} mt={4} size="lg" variant="custom">
+        <Button width={'100%'} mt={4} size="lg" variant="custom" onClick={swap}>
           swap token
         </Button>
       </VStack>
