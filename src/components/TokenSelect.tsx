@@ -17,16 +17,16 @@ import {
 import { tokenList } from '@/tokens/list';
 import { ChevronDownIcon } from '@chakra-ui/icons';
 import { useState } from 'react';
+import { TokenInfo } from '@uniswap/token-lists';
 
 export default function TokenSelect({
   onSelect,
-  selectedTokenSymbol,
+  selectedToken,
 }: {
-  onSelect?: (token: string) => void;
-  selectedTokenSymbol: string;
+  onSelect: (token: TokenInfo) => void;
+  selectedToken?: TokenInfo;
 }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const token = tokenList.tokens.find((token) => token.symbol === selectedTokenSymbol)!;
   return (
     <>
       <Button
@@ -37,10 +37,19 @@ export default function TokenSelect({
         bg={'transparent'}
         color={'#fff'}
         px={'10px'}
-        leftIcon={<Image src={token.logoURI} width={'20px'} height={'20px'} alt={token.symbol}></Image>}
+        leftIcon={
+          selectedToken && (
+            <Image
+              src={selectedToken.logoURI}
+              width={'20px'}
+              height={'20px'}
+              alt={selectedToken.symbol}
+            ></Image>
+          )
+        }
         rightIcon={<ChevronDownIcon />}
       >
-        {selectedTokenSymbol}
+        {selectedToken ? selectedToken.symbol : 'Select Token'}
       </Button>
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
@@ -62,6 +71,10 @@ export default function TokenSelect({
                     w={'100%'}
                     leftIcon={<Image src={token.logoURI} width={'20px'} height={'20px'} alt={token.symbol} />}
                     key={token.address}
+                    onClick={() => {
+                      onSelect(token);
+                      onClose();
+                    }}
                   >
                     {token.symbol}
                   </Button>
