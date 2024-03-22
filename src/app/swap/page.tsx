@@ -20,6 +20,7 @@ import { tokenList } from '@/tokens/list';
 import { useMemo, useState } from 'react';
 import { TokenInfo } from '@uniswap/token-lists';
 import { ArrowDownIcon, SettingsIcon } from '@chakra-ui/icons';
+import { TradeSettingsModal } from './TradeSettingsModal';
 export default function Swap() {
   const [pairs, setPairs] = useState<Array<TokenInfo | undefined>>([tokenList.tokens[0]]);
   const [pairsInput, setPairsInput] = useState<Array<string>>(['', '']);
@@ -56,7 +57,7 @@ export default function Swap() {
         SWAP
       </Heading>
       <Container textAlign={'right'}>
-        <SettingsIcon></SettingsIcon>
+        <TradeSettingsModal></TradeSettingsModal>
       </Container>
       <VStack mt={'2.5rem'} spacing={4} paddingX={'2rem'} fontSize={16}>
         <InputGroup>
@@ -104,32 +105,7 @@ export default function Swap() {
         <Container textAlign={'right'} pr={0}>
           <Text fontSize={'xs'}>1WETH = 1222 bb</Text>
         </Container>
-        <InputGroup>
-          <Text color={'#3aaa7a'} mt={'6px'}>
-            tolerance:
-          </Text>
-          <RadioGroup>
-            <Stack direction="row">
-              <Radio size="sm" value="0.1">
-                0.1%
-              </Radio>
-              <Radio size="sm" value="0.5">
-                0.5%
-              </Radio>
-              <Radio size="sm" value="1">
-                1%
-              </Radio>
-            </Stack>
-          </RadioGroup>
-          <Input variant="unstyled" size="xs" placeholder="5%" width={'4rem'} ml={3} />
-        </InputGroup>
-        <InputGroup>
-          <Text color={'#3aaa7a'} mt={'6px'}>
-            DeadLine
-          </Text>
-          <Input variant="unstyled" size="xs" placeholder="10" width={'4rem'} ml={1} />
-          <Text color={'#3aaa7a'}> Minutes</Text>
-        </InputGroup>
+
         <Button width={'100%'} mt={4} size="lg" variant="custom">
           swap token
         </Button>
