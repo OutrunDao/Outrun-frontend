@@ -1,10 +1,9 @@
 "use client"
-import Link from 'next/link'
-import { Img, Tabs,Tag, Flex, Input, TabList, TabPanels, Tab, TabPanel, Box, Icon, Text, useColorMode, useColorModeValue, Heading ,Container, Button, Center } from '@chakra-ui/react'
+import { Tabs, Flex, TabList, Tab, Box, Text, Container } from '@chakra-ui/react'
 import { useEffect, useState } from 'react'
-import { useBalance, useAccount, useAccountEffect, type UseBalanceParameters, type UseAccountEffectParameters } from 'wagmi'
+import { useBalance, useAccount } from 'wagmi'
 import { formatUnits, formatEther } from 'viem'
-import { tabList, TabType, IIswitch, MintType, StakeType, PairSelectList, } from './types'
+import { tabList, TabType, IIswitch, PairSelectList } from './types'
 import { LocalTokenSymbol } from '@/types/index.d'
 import { ArrowDownIcon } from '@chakra-ui/icons'
 

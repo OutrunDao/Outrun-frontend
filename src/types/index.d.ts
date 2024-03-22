@@ -1,3 +1,9 @@
+/// <reference types="react-scripts" />
+
+interface Window {
+  ethereum: any;
+}
+
 export enum LocalTokenSymbol {
   'ETH' = 'ETH',
   'USDB' = 'USDB',
@@ -7,6 +13,16 @@ export enum LocalTokenSymbol {
   'RUSD' = 'RUSD',
   'PUSD' = 'PUSD',
   'RUY' = 'RUY',
+}
+
+export enum ContractAddrKey {
+  OutETHVault = 'OutETHVault',
+  OutUSDBVault = 'OutUSDBVault',
+  RETHStakeManager = 'RETHStakeManager',
+  RUSDStakeManager = 'RUSDStakeManager',
+  OutswapV1Factory = 'OutswapV1Factory',
+  OutswapV1Router = 'OutswapV1Router',
+  EthFFLauncher = 'EthFFLauncher',
 }
 
 export interface TokenAddressMap {

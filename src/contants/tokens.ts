@@ -1,4 +1,16 @@
-import { LocalTokenSymbol, TokenAddressMap } from '@/types';
+import { LocalTokenSymbol, TokenAddressMap, ContractAddrKey } from '@/types';
+
+type AddrMap = Record<string, string>;
+
+export const ContractAddressMap: AddrMap = {
+  [ContractAddrKey.OutETHVault]: '0x611F3e1568cafDff2A1AF9695821e8CB65abFcb6',
+  [ContractAddrKey.OutUSDBVault]: '0xC9dBa182b33B3dc8D08e6262ebfB156636fD1d3a',
+  [ContractAddrKey.RETHStakeManager]: '0xC5Bb4e3C1e6143E6d70D65Ce51CA43f5da02dF24',
+  [ContractAddrKey.RUSDStakeManager]: '0x93Ff1C58D4602282E6caD4459FCD1246af846204',
+  [ContractAddrKey.OutswapV1Factory]: '0x5A32bca57480f0B9910EcDB8DB854649b1E4F38C',
+  [ContractAddrKey.OutswapV1Router]: '0x7a90a8d701584e9029c14b444a519eC33567F388',
+  [ContractAddrKey.EthFFLauncher]: '0xE5Bb547f3258aFe21E8e783ab703478486c645e9',
+};
 
 export const LocalTokenAddress: TokenAddressMap = {
   [LocalTokenSymbol.RETH]: '0xdaC9Ed63dada8A7005ce2c69F8FF8bF6C272a3D0',
