@@ -23,10 +23,9 @@ export default function Stake () {
   const [currList, setCurrList] = useState<Array<Array<LocalTokenSymbol>>>(PairSelectList[currentTabType]) 
   const [currIndex, setCurrIndex] = useState<number>(0) 
 
-  const account = useAccount().address
-  const isConnect = !!account  
+  const { address, isConnected} = useAccount()
   let balance = "0"
-  const value = useBalance({ address: account }).data?.value
+  const value = useBalance({ address }).data?.value
 
   if (value) {
     balance = formatEther(value)
@@ -96,11 +95,13 @@ export default function Stake () {
                 currentTabType={currentTabType}></InputSelect>
               
               <BalanceCoin
-                isConnect={isConnect}
+                account={address}
+                isConnected={isConnected}
                 balance={balance}
-                coinSymbol={currList[currIndex][1]}
+                coinSymbol={currList[currIndex][0]}
                 setMintValue={(value) => setInputValue(value)} ></BalanceCoin>
             </Box>
+
             <Flex justifyContent="center" marginTop="-12px">
               <ArrowDownIcon onClick={() => onSwitchCoinType()} boxSize={8} w={6} cursor="pointer" _hover={{ opacity: '0.5' }} />
             </Flex>
@@ -123,7 +124,13 @@ export default function Stake () {
               </Flex>
             </Box>
             
-            <StakeButton isConnect={isConnect} isSwitchCoin={isSwitchCoin} currentTabType={currentTabType}></StakeButton>
+            <StakeButton 
+              coinSymbol={currList[currIndex][1]}
+              account={address}
+              inputValue={inputValue}
+              isConnected={isConnected} 
+              isSwitchCoin={isSwitchCoin} 
+              currentTabType={currentTabType}></StakeButton>
           </Container>
         </Tabs>
       </Box>

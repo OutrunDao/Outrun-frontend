@@ -17,6 +17,7 @@ export enum LocalTokenSymbol {
 
 export enum ContractAddrKey {
   OutETHVault = 'OutETHVault',
+  OutETHVault = 'OutETHVault',
   OutUSDBVault = 'OutUSDBVault',
   RETHStakeManager = 'RETHStakeManager',
   RUSDStakeManager = 'RUSDStakeManager',
