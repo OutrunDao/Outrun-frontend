@@ -1,9 +1,6 @@
 import { Text, Flex, Box, Button } from '@chakra-ui/react'
-import { publicClient, walletClient } from '@/config/viem-config'
-import RETHABI from '@/ABI/RETH'
 import { useReadContract } from 'wagmi'
 import { TokenABIMap } from '@/ABI'
-import { useEffect } from 'react'
 import { formatUnits, formatEther } from 'viem'
 import { LocalTokenAddress } from '@/contants/address'
 import { LocalTokenSymbol } from '@/types/index.d';
