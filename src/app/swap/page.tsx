@@ -1,9 +1,81 @@
 'use client';
 
-import { Button, Container, Heading, Input, InputGroup, Text, VStack } from '@chakra-ui/react';
+import {
+  Box,
+  Button,
+  Container,
+  Heading,
+  IconButton,
+  Input,
+  InputGroup,
+  InputRightElement,
+  Radio,
+  RadioGroup,
+  Stack,
+  Text,
+  VStack,
+} from '@chakra-ui/react';
 import TokenSelect from '@/components/TokenSelect';
+import { tokenList } from '@/tokens/list';
+import { useEffect, useMemo, useState } from 'react';
+import { TokenInfo } from '@uniswap/token-lists';
+import { ArrowDownIcon } from '@chakra-ui/icons';
+import { TradeSettingsModal } from './TradeSettingsModal';
+import { Fetcher } from '@/packages/swap-sdk/fetcher';
+import { Pair } from '@/packages/swap-sdk';
+import { all } from 'radash';
+import { Trade } from '@/packages/swap-sdk';
+import { toToken, toCurrencyAmount } from './fns';
+import { Router as SwapRouter } from '@/packages/swap-sdk/router';
+async function makePairs(tokenA: TokenInfo, tokenB: TokenInfo): Promise<Pair[]> {
+  let pairTable = [[tokenA, tokenB]];
+  let pairs: Pair[] = await all(
+    pairTable.map(([_tokenA, _tokenB]) => Fetcher.fetchPairData(toToken(_tokenA), toToken(_tokenB)))
+  );
+  return pairs;
+}
 
 export default function Swap() {
+  const [pairs, setPairs] = useState<Array<TokenInfo | undefined>>([tokenList.tokens[0]]);
+  const [pairsInput, setPairsInput] = useState<Array<string>>(['', '']);
+  const onSelctToken = (token: TokenInfo, index: number) => {
+    let nextIndex = (index + 1) % 2;
+    pairs[index] = token;
+    if (pairs[index] && pairs[index]!.address === (pairs[nextIndex] && pairs[nextIndex]!.address))
+      pairs[(index + 1) % 2] = undefined;
+    setPairs([...pairs]);
+  };
+  const onReverse = () => {
+    setPairs([pairs[1], pairs[0]]);
+    setPairsInput([pairsInput[1], pairsInput[0]]);
+  };
+  const onPairsInput = (value: string, index: number) => {
+    setPairsInput((pairsInput) => {
+      pairsInput[index] = value;
+      return [...pairsInput];
+    });
+  };
+
+  useEffect(() => {
+    if (pairs[0] && pairs[1]) {
+      makePairs(pairs[0], pairs[1])
+        .then((routePairs) => {
+          return Trade.bestTradeExactIn(
+            routePairs,
+            toCurrencyAmount(pairs[0]!, pairsInput[0]),
+            toToken(pairs[1]!)
+          );
+        })
+        .then((bestRoutes) => {
+          console.log(bestRoutes);
+        });
+    }
+  }, [pairs, pairsInput]);
+
+  function swap() {
+    // SwapRouter.swapCallParameters(bestRoutes, tradeOptions);
+  }
+
   return (
     <Container
       w={'480px'}
@@ -19,22 +91,57 @@ export default function Swap() {
       <Heading as="h3" size="lg" fontWeight={''}>
         SWAP
       </Heading>
+      <Container textAlign={'right'}>
+        <TradeSettingsModal></TradeSettingsModal>
+      </Container>
       <VStack mt={'2.5rem'} spacing={4} paddingX={'2rem'} fontSize={16}>
         <InputGroup>
           <Text color={'#3aaa7a'} ml={4} mt={'6px'}>
             INPUT:{' '}
           </Text>
-          <Input variant="unstyled" size="lg" placeholder="Intput token amount" ml={4} mr={6} />
-          <TokenSelect selectedTokenSymbol="WETH" />
+          <Input
+            variant="unstyled"
+            size="lg"
+            placeholder="Intput token amount"
+            ml={4}
+            mr={6}
+            value={pairsInput[0]}
+            onChange={(e) => onPairsInput(e.target.value, 0)}
+          />
+          <TokenSelect selectedToken={pairs[0]} onSelect={(token) => onSelctToken(token, 0)} />
+          <br />
         </InputGroup>
+        <Container textAlign={'right'} pr={0}>
+          <Text fontSize={'xs'}>Balance: 12</Text>
+        </Container>
+        <Container>
+          <IconButton
+            icon={<ArrowDownIcon />}
+            colorScheme="teal"
+            aria-label="ArrowDown"
+            onClick={onReverse}
+          />
+        </Container>
         <InputGroup>
           <Text color={'#3aaa7a'} mt={'6px'}>
             OUTPUT:{' '}
           </Text>
-          <Input variant="unstyled" size="lg" placeholder="Output token amount" ml={4} mr={6} />
-          <TokenSelect selectedTokenSymbol="USDC" />
+          <Input
+            variant="unstyled"
+            size="lg"
+            placeholder="Output token amount"
+            ml={4}
+            mr={6}
+            value={pairsInput[1]}
+            onChange={(e) => onPairsInput(e.target.value, 1)}
+          />
+          <TokenSelect selectedToken={pairs[1]} onSelect={(token) => onSelctToken(token, 1)} />
         </InputGroup>
-        <Button width={'100%'} mt={4} size="lg" variant="custom">
+        <Container textAlign={'right'} pr={0}>
+          <Text fontSize={'xs'}>1WETH = 1222 bb</Text>
+        </Container>
+
+        <Button width={'100%'} mt={4} size="lg" variant="custom" onClick={swap}>
           swap token
         </Button>
       </VStack>
