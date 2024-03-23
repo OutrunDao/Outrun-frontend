@@ -50,9 +50,10 @@ export abstract class Fetcher {
     symbol: string,
     name?: string
   ): Promise<Token> {
-    const erc20 = publicClient.getContract({
+    const erc20 = getContract({
       abi: erc20ABI,
       address,
+      client: publicClient,
     });
     const parsedDecimals =
       typeof TOKEN_DECIMALS_CACHE?.[chainId]?.[address] === 'number'
@@ -83,15 +84,16 @@ export abstract class Fetcher {
   ): Promise<Pair> {
     invariant(tokenA.chainId === tokenB.chainId, 'CHAIN_ID');
     const address = Pair.getAddress(tokenA, tokenB) as Address;
-    const pairContract = publicClient.getContract({
+    const pairContract = getContract({
       abi: PairABI,
       address,
+      client: publicClient,
     });
     const [reserves0, reserves1] = await pairContract.read.getReserves();
     const balances = tokenA.sortsBefore(tokenB) ? [reserves0, reserves1] : [reserves1, reserves0];
     return new Pair(
-      CurrencyAmount.fromRawAmount(tokenA, balances[0]),
-      CurrencyAmount.fromRawAmount(tokenB, balances[1])
+      CurrencyAmount.fromRawAmount(tokenA, balances[0].toString()),
+      CurrencyAmount.fromRawAmount(tokenB, balances[1].toString())
     );
   }
 }

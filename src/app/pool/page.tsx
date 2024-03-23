@@ -4,9 +4,8 @@ import {
   Box,
   Icon,
   Text,
-  useColorMode,
-  useColorModeValue,
   Heading,
+  IconButton,
   Container,
   Button,
   Input,
@@ -16,18 +15,81 @@ import {
 } from '@chakra-ui/react';
 import { PiSwimmingPoolDuotone } from 'react-icons/pi';
 import TokenSelect from '@/components/TokenSelect';
+import { ArrowDownIcon } from '@chakra-ui/icons';
 // import { useGetPair } from '@/hook/contracts/useSwapFactory';
-import { useState } from 'react';
-
+import { useState, useEffect } from 'react';
+import { tokenList } from '@/tokens/list';
+import { TokenInfo } from '@uniswap/token-lists';
+import { Fetcher } from '@/packages/swap-sdk/fetcher';
+import { toToken } from '../swap/fns';
+import { useAccount, useChainId } from 'wagmi';
+import useToken from '@/hook/useToken';
+import { useLiquidity } from './useContract';
+import { V2_ROUTER_ADDRESSES } from '@/packages/swap-core';
+import { formatUnits, getAddress } from 'viem';
 const PoolIndex = () => {
-  const { colorMode, toggleColorMode } = useColorMode();
-  const bgColor = useColorModeValue('#000', 'skyblue');
-  const [tokenA, setTokenA] = useState('USDC');
-  const [tokenB, setTokenB] = useState('WETH');
-  const pair = [];
+  const [pairs, setPairs] = useState<Array<TokenInfo | undefined>>([tokenList.tokens[0]]);
+  const [pairsInput, setPairsInput] = useState<Array<string>>(['', '']);
+  const [pair, setPair] = useState<any>();
+  const account = useAccount();
+  const {
+    balance: balanceOfToken0,
+    allowance: allowanceA,
+    fetchBalance: fetchBalanceA,
+    fetchAllowance: fetchAllowanceA,
+    approve: approveA,
+  } = useToken(pairs[0]);
+  const {
+    balance: balanceOfToken1,
+    allowance: allowanceB,
+    fetchBalance: fetchBalanceB,
+    fetchAllowance: fetchAllowanceB,
+    approve: approveB,
+  } = useToken(pairs[1]);
+  const { addLiquidity } = useLiquidity(pairs[0], pairs[1], pairsInput[0], pairsInput[1], account.address);
+  const chainId = useChainId();
+  const onSelctToken = (token: TokenInfo, index: number) => {
+    let nextIndex = (index + 1) % 2;
+    pairs[index] = token;
+    if (pairs[index] && pairs[index]!.address === (pairs[nextIndex] && pairs[nextIndex]!.address))
+      pairs[(index + 1) % 2] = undefined;
+    setPairs([...pairs]);
+  };
 
-  function addLiquidity() {
-    console.log('add liquidity', tokenA, tokenB, pair);
+  const onPairsInput = (value: string, index: number) => {
+    setPairsInput((pairsInput) => {
+      pairsInput[index] = value;
+      return [...pairsInput];
+    });
+  };
+
+  useEffect(() => {
+    // console.log('pairs', pairs);
+    if (pairs[0] && pairs[1]) {
+      Fetcher.fetchPairData(toToken(pairs[0]), toToken(pairs[1])).then((pair) => {
+        console.log('pair', pair.token0Price.toFixed(6));
+        setPair(pair);
+        // pair.token0Price
+      });
+      fetchBalanceA(account.address!);
+      fetchBalanceB(account.address!);
+      fetchAllowanceA(account.address!, getAddress(V2_ROUTER_ADDRESSES[chainId]));
+      fetchAllowanceB(account.address!, getAddress(V2_ROUTER_ADDRESSES[chainId]));
+    }
+  }, [pairs]);
+
+  function _addLiquidity() {
+    // console.log('add liquidity', tokenA, tokenB, pair);
+    addLiquidity();
+  }
+
+  function _Approve() {
+    if (formatUnits(allowanceA, 18) < pairsInput[0]) {
+      return approveA(getAddress(V2_ROUTER_ADDRESSES[chainId]), pairsInput[0]);
+    }
+    if (formatUnits(allowanceB, 18) < pairsInput[1]) {
+      return approveB(getAddress(V2_ROUTER_ADDRESSES[chainId]), pairsInput[1]);
+    }
   }
 
   return (
@@ -51,19 +113,63 @@ const PoolIndex = () => {
             <Text color={'#3aaa7a'} ml={4} mt={'6px'}>
               INPUT:{' '}
             </Text>
-            <Input variant="unstyled" size="lg" placeholder="Intput token amount" ml={4} mr={6} />
-            <TokenSelect selectedTokenSymbol="WETH" />
+            <Input
+              variant="unstyled"
+              size="lg"
+              placeholder="Intput token amount"
+              ml={4}
+              mr={6}
+              value={pairsInput[0]}
+              onChange={(e) => onPairsInput(e.target.value, 0)}
+            />
+            <TokenSelect selectedToken={pairs[0]} onSelect={(token) => onSelctToken(token, 0)} />
+            <br />
           </InputGroup>
+          <Container textAlign={'right'} pr={0}>
+            <Text fontSize={'xs'}>
+              Balance: {balanceOfToken0} {allowanceA.toString()}
+            </Text>
+          </Container>
+          <Container>
+            <IconButton icon={<ArrowDownIcon />} colorScheme="teal" aria-label="ArrowDown" />
+          </Container>
           <InputGroup>
             <Text color={'#3aaa7a'} mt={'6px'}>
               OUTPUT:{' '}
             </Text>
-            <Input variant="unstyled" size="lg" placeholder="Output token amount" ml={4} mr={6} />
-            <TokenSelect selectedTokenSymbol="USDC" />
+            <Input
+              variant="unstyled"
+              size="lg"
+              placeholder="Output token amount"
+              ml={4}
+              mr={6}
+              value={pairsInput[1]}
+              onChange={(e) => onPairsInput(e.target.value, 1)}
+            />
+            <TokenSelect selectedToken={pairs[1]} onSelect={(token) => onSelctToken(token, 1)} />
           </InputGroup>
-          <Button width={'100%'} mt={4} size="lg" variant="custom" onClick={addLiquidity}>
-            Add Liquidity
-          </Button>
+          <Container textAlign={'right'} pr={0}>
+            <Text fontSize={'xs'}>
+              Balance: {balanceOfToken1} {allowanceB.toString()}
+            </Text>
+          </Container>
+          <Container textAlign={'right'} pr={0}>
+            {pair ? (
+              <Text fontSize={'xs'}>
+                1{pairs[0]?.symbol} = {pair.token0Price.toFixed(6)} {pairs[1]?.symbol}
+              </Text>
+            ) : null}
+          </Container>
+
+          {formatUnits(allowanceA, 18) >= pairsInput[0] && formatUnits(allowanceB, 18) >= pairsInput[1] ? (
+            <Button width={'100%'} mt={4} size="lg" variant="custom" onClick={_addLiquidity}>
+              add liquidity
+            </Button>
+          ) : (
+            <Button width={'100%'} mt={4} size="lg" variant="custom" onClick={_Approve}>
+              Set Approve
+            </Button>
+          )}
         </VStack>
       </Container>
       <Container>

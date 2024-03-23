@@ -26,6 +26,7 @@ function constructSameAddressMap(address: string, additionalNetworks: ChainId[] 
 export const V2_FACTORY_ADDRESS = '0x5A32bca57480f0B9910EcDB8DB854649b1E4F38C';
 export const V2_FACTORY_ADDRESSES: AddressMap = {
   [ChainId.BLAST]: '0x5A32bca57480f0B9910EcDB8DB854649b1E4F38C',
+  [ChainId.BLAST_SEPOLIA]: '0x5A32bca57480f0B9910EcDB8DB854649b1E4F38C',
 };
 /**
  * @deprecated use V2_ROUTER_ADDRESSES instead
@@ -33,6 +34,7 @@ export const V2_FACTORY_ADDRESSES: AddressMap = {
 export const V2_ROUTER_ADDRESS = '0x7a90a8d701584e9029c14b444a519eC33567F388';
 export const V2_ROUTER_ADDRESSES: AddressMap = {
   [ChainId.BLAST]: '0x7a90a8d701584e9029c14b444a519eC33567F388',
+  [ChainId.BLAST_SEPOLIA]: '0x7a90a8d701584e9029c14b444a519eC33567F388',
 };
 
 // sepolia v3 addresses

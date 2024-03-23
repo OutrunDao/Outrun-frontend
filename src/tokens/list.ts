@@ -10,12 +10,27 @@ export const tokenList: TokenList = {
   },
   tokens: [
     {
-      address: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
-      chainId: 1,
+      address: '0x4200000000000000000000000000000000000023',
+      chainId: 168587773,
       name: 'Wrapped Ether',
       symbol: 'WETH',
       logoURI:
         'https://raw.githubusercontent.com/Uniswap/assets/master/blockchains/ethereum/assets/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2/logo.png',
+      decimals: 18,
+    },
+    {
+      address: '0x94322500dFfA19b2b6d1b918b66a2FD838568305',
+      chainId: 168587773,
+      name: 'FBB Test Token',
+      symbol: 'FBB',
+      decimals: 18,
+    },
+    {
+      address: '0x4200000000000000000000000000000000000022', //'0x4300000000000000000000000000000000000003',
+      chainId: 168587773,
+      name: 'USDB Coin',
+      symbol: 'USDB',
+      logoURI: 'https://assets.coingecko.com/coins/images/6319/small/USD_Coin_icon.png?1547042389',
       decimals: 18,
     },
     {
