@@ -1,0 +1,5 @@
+sources:
+  - name: outrun
+    handler:
+      graphql:
+        endpoint: https://api.studio.thegraph.com/query/68891/outrun/0.0.2
