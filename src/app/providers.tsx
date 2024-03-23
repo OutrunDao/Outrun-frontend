@@ -5,6 +5,7 @@ import { customTheme } from './theme'
 
 customTheme.config.useSystemColorMode = true;
 
+
 export function Providers({ children }: { children: React.ReactNode }) {
-  return <ChakraProvider theme={customTheme}>{children}</ChakraProvider>;
+  return <ChakraProvider toastOptions={{ defaultOptions: { position: 'top' } }} theme={customTheme}>{children}</ChakraProvider>;
 }
