@@ -1,0 +1,20 @@
+query PairCreateds {
+  pairCreateds(first: 10) {
+    id
+    token0
+    token1
+    pair
+  }
+}
+
+query UserLiquidities($user: Bytes) {
+  liquidityHoldings(first: 20, where: { user: $user }) {
+    id
+    pair
+    user
+    amount0
+    amount1
+    token0
+    token1
+  }
+}

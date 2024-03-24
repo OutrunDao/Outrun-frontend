@@ -12,6 +12,8 @@ import {
   InputGroup,
   VStack,
   Center,
+  Card,
+  CardBody,
 } from '@chakra-ui/react';
 import { PiSwimmingPoolDuotone } from 'react-icons/pi';
 import TokenSelect from '@/components/TokenSelect';
@@ -26,12 +28,23 @@ import { useAccount, useChainId } from 'wagmi';
 import useToken from '@/hook/useToken';
 import { useLiquidity } from './useContract';
 import { V2_ROUTER_ADDRESSES } from '@/packages/swap-core';
-import { formatUnits, getAddress } from 'viem';
+import { Address, formatUnits, getAddress } from 'viem';
+import { execute, UserLiquiditiesDocument, LiquidityHolding } from '@/subgraph';
+import { useQuery } from '@tanstack/react-query';
+import TokenSymbol, { TokenBalance } from './TokenSymbol';
 const PoolIndex = () => {
   const [pairs, setPairs] = useState<Array<TokenInfo | undefined>>([tokenList.tokens[0]]);
   const [pairsInput, setPairsInput] = useState<Array<string>>(['', '']);
   const [pair, setPair] = useState<any>();
   const account = useAccount();
+  const { data: userLiquidites } = useQuery({
+    queryKey: ['userLiquidites', account.address],
+    queryFn: async (): Promise<LiquidityHolding[]> => {
+      return execute(UserLiquiditiesDocument, { user: account.address }).then(
+        (res: { data: { liquidityHoldings: LiquidityHolding[] } }) => res.data.liquidityHoldings
+      );
+    },
+  });
   const {
     balance: balanceOfToken0,
     allowance: allowanceA,
@@ -91,6 +104,7 @@ const PoolIndex = () => {
       return approveB(getAddress(V2_ROUTER_ADDRESSES[chainId]), pairsInput[1]);
     }
   }
+  console.log(userLiquidites);
 
   return (
     <>
@@ -108,6 +122,7 @@ const PoolIndex = () => {
         <Heading as="h3" size="lg" fontWeight={''}>
           POOL
         </Heading>
+
         <VStack mt={'2.5rem'} spacing={4} paddingX={'2rem'} fontSize={16}>
           <InputGroup>
             <Text color={'#3aaa7a'} ml={4} mt={'6px'}>
@@ -176,6 +191,19 @@ const PoolIndex = () => {
         <Center marginTop="60px">
           <Icon color="#666" boxSize={16} as={PiSwimmingPoolDuotone}></Icon>
         </Center>
+        {userLiquidites?.map((liquidity) => (
+          <Card key={liquidity.pair} marginTop="20px">
+            <CardBody>
+              <Text color="#666" fontSize="16px">
+                <TokenSymbol address={liquidity.pair}></TokenSymbol> /{' '}
+                <TokenSymbol address={liquidity.token1}></TokenSymbol>
+              </Text>
+              <Text color="#666" fontSize="16px">
+                <TokenBalance address={liquidity.pair} account={account.address!}></TokenBalance>
+              </Text>
+            </CardBody>
+          </Card>
+        ))}
         <Text align="center" color="#999" fontSize="16px" marginTop="12px">
           Your have no active liquidity positions.
         </Text>
