@@ -12,6 +12,8 @@ import {
   InputGroup,
   VStack,
   Center,
+  Card,
+  CardBody,
 } from '@chakra-ui/react';
 import { PiSwimmingPoolDuotone } from 'react-icons/pi';
 import TokenSelect from '@/components/TokenSelect';
@@ -26,9 +28,10 @@ import { useAccount, useChainId } from 'wagmi';
 import useToken from '@/hook/useToken';
 import { useLiquidity } from './useContract';
 import { V2_ROUTER_ADDRESSES } from '@/packages/swap-core';
-import { formatUnits, getAddress } from 'viem';
+import { Address, formatUnits, getAddress } from 'viem';
 import { execute, UserLiquiditiesDocument, LiquidityHolding } from '@/subgraph';
 import { useQuery } from '@tanstack/react-query';
+import TokenSymbol, { TokenBalance } from './TokenSymbol';
 const PoolIndex = () => {
   const [pairs, setPairs] = useState<Array<TokenInfo | undefined>>([tokenList.tokens[0]]);
   const [pairsInput, setPairsInput] = useState<Array<string>>(['', '']);
@@ -188,6 +191,19 @@ const PoolIndex = () => {
         <Center marginTop="60px">
           <Icon color="#666" boxSize={16} as={PiSwimmingPoolDuotone}></Icon>
         </Center>
+        {userLiquidites?.map((liquidity) => (
+          <Card key={liquidity.pair} marginTop="20px">
+            <CardBody>
+              <Text color="#666" fontSize="16px">
+                <TokenSymbol address={liquidity.pair}></TokenSymbol> /{' '}
+                <TokenSymbol address={liquidity.token1}></TokenSymbol>
+              </Text>
+              <Text color="#666" fontSize="16px">
+                <TokenBalance address={liquidity.pair} account={account.address!}></TokenBalance>
+              </Text>
+            </CardBody>
+          </Card>
+        ))}
         <Text align="center" color="#999" fontSize="16px" marginTop="12px">
           Your have no active liquidity positions.
         </Text>

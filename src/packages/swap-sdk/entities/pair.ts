@@ -54,7 +54,7 @@ export class Pair {
       tokenAmounts[0].currency.chainId,
       Pair.getAddress(tokenAmounts[0].currency, tokenAmounts[1].currency),
       18,
-      'Outswap V1',
+      `${tokenAmounts[0].currency.symbol + '/' + tokenAmounts[1].currency.symbol}`, //'Outswap V1',
       'OUT-V1'
     );
     this.tokenAmounts = tokenAmounts as [CurrencyAmount<Token>, CurrencyAmount<Token>];

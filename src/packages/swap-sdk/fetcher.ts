@@ -15,7 +15,7 @@ let TOKEN_DECIMALS_CACHE: { [chainId: number]: { [address: string]: number } } =
 const blastSepoliaClient = createPublicClient({ chain: blastSepolia, transport: http() });
 const blastClient = createPublicClient({ chain: blast, transport: http() });
 
-const getDefaultClient = (chainId: ChainId): PublicClient => {
+export const getDefaultClient = (chainId: ChainId): PublicClient => {
   switch (chainId) {
     case ChainId.BLAST_SEPOLIA:
       return blastSepoliaClient;
@@ -47,7 +47,7 @@ export abstract class Fetcher {
     chainId: ChainId,
     address: Address,
     publicClient: any = getDefaultClient(chainId),
-    symbol: string,
+    symbol?: string,
     name?: string
   ): Promise<Token> {
     const erc20 = getContract({
@@ -68,6 +68,9 @@ export abstract class Fetcher {
             };
             return decimals;
           });
+    if (!symbol) {
+      symbol = await erc20.read.symbol();
+    }
     return new Token(chainId, address, parsedDecimals, symbol, name);
   }
 

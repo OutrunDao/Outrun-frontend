@@ -2,7 +2,7 @@ import { useWriteContract, useChainId, useConfig } from 'wagmi';
 
 import { V2_ROUTER_ADDRESSES } from '@/packages/swap-core';
 import { getAddress, Address, parseUnits } from 'viem';
-import { routerAbi } from './abi';
+import { routerAbi } from './routerAbi';
 import { TokenInfo } from '@uniswap/token-lists';
 import Big from 'big.js';
 import { useEffect, useState } from 'react';

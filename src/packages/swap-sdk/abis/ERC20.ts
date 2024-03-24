@@ -9,6 +9,15 @@ export const erc20ABI = [
     type: 'function',
   },
   {
+    type: 'function',
+    constant: true,
+    name: 'symbol',
+    inputs: [],
+    outputs: [{ name: '', type: 'string', internalType: 'string' }],
+    stateMutability: 'view',
+    payable: false,
+  },
+  {
     constant: true,
     inputs: [{ name: '', type: 'address' }],
     name: 'balanceOf',

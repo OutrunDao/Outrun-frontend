@@ -4,6 +4,8 @@ import { BaseCurrency } from './baseCurrency';
 import { Currency } from './currency';
 import { BigintIsh } from '../constants';
 import JSBI from 'jsbi';
+import { PublicClient, getContract, Address, formatUnits } from 'viem';
+
 /**
  * Represents an ERC20 token with a unique address and some metadata.
  */
@@ -89,5 +91,26 @@ export class Token extends BaseCurrency {
    */
   public get wrapped(): Token {
     return this;
+  }
+
+  /**
+   * Return the blance of address of this token
+   */
+  public async fetchBalanceOf(account: Address, publicClient: PublicClient): Promise<string> {
+    const erc20 = getContract({
+      abi: [
+        {
+          constant: true,
+          inputs: [{ name: '_owner', type: 'address' }],
+          name: 'balanceOf',
+          outputs: [{ name: 'balance', type: 'uint256' }],
+          type: 'function',
+        },
+      ],
+      address: this.address as `0x${string}`,
+      client: publicClient,
+    });
+    const result = (await erc20.read.balanceOf([account])) as bigint;
+    return formatUnits(result, this.decimals);
   }
 }
