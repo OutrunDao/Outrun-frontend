@@ -43,6 +43,8 @@ type LiquidityHolding {
   id: String!
   pair: Bytes!
   user: Bytes!
+  token0: Bytes!
+  token1: Bytes!
   amount0: BigInt!
   amount1: BigInt!
 }
@@ -88,6 +90,26 @@ input LiquidityHolding_filter {
   user_not_in: [Bytes!]
   user_contains: Bytes
   user_not_contains: Bytes
+  token0: Bytes
+  token0_not: Bytes
+  token0_gt: Bytes
+  token0_lt: Bytes
+  token0_gte: Bytes
+  token0_lte: Bytes
+  token0_in: [Bytes!]
+  token0_not_in: [Bytes!]
+  token0_contains: Bytes
+  token0_not_contains: Bytes
+  token1: Bytes
+  token1_not: Bytes
+  token1_gt: Bytes
+  token1_lt: Bytes
+  token1_gte: Bytes
+  token1_lte: Bytes
+  token1_in: [Bytes!]
+  token1_not_in: [Bytes!]
+  token1_contains: Bytes
+  token1_not_contains: Bytes
   amount0: BigInt
   amount0_not: BigInt
   amount0_gt: BigInt
@@ -114,6 +136,8 @@ enum LiquidityHolding_orderBy {
   id
   pair
   user
+  token0
+  token1
   amount0
   amount1
 }
@@ -129,10 +153,6 @@ type PairCreated {
   token0: Bytes!
   token1: Bytes!
   pair: Bytes!
-  param3: BigInt!
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
 }
 
 input PairCreated_filter {
@@ -176,40 +196,6 @@ input PairCreated_filter {
   pair_not_in: [Bytes!]
   pair_contains: Bytes
   pair_not_contains: Bytes
-  param3: BigInt
-  param3_not: BigInt
-  param3_gt: BigInt
-  param3_lt: BigInt
-  param3_gte: BigInt
-  param3_lte: BigInt
-  param3_in: [BigInt!]
-  param3_not_in: [BigInt!]
-  blockNumber: BigInt
-  blockNumber_not: BigInt
-  blockNumber_gt: BigInt
-  blockNumber_lt: BigInt
-  blockNumber_gte: BigInt
-  blockNumber_lte: BigInt
-  blockNumber_in: [BigInt!]
-  blockNumber_not_in: [BigInt!]
-  blockTimestamp: BigInt
-  blockTimestamp_not: BigInt
-  blockTimestamp_gt: BigInt
-  blockTimestamp_lt: BigInt
-  blockTimestamp_gte: BigInt
-  blockTimestamp_lte: BigInt
-  blockTimestamp_in: [BigInt!]
-  blockTimestamp_not_in: [BigInt!]
-  transactionHash: Bytes
-  transactionHash_not: Bytes
-  transactionHash_gt: Bytes
-  transactionHash_lt: Bytes
-  transactionHash_gte: Bytes
-  transactionHash_lte: Bytes
-  transactionHash_in: [Bytes!]
-  transactionHash_not_in: [Bytes!]
-  transactionHash_contains: Bytes
-  transactionHash_not_contains: Bytes
   """Filter for the block changed event."""
   _change_block: BlockChangedFilter
   and: [PairCreated_filter]
@@ -221,10 +207,6 @@ enum PairCreated_orderBy {
   token0
   token1
   pair
-  param3
-  blockNumber
-  blockTimestamp
-  transactionHash
 }
 
 type Query {

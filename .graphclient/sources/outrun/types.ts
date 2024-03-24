@@ -40,6 +40,8 @@ export type LiquidityHolding = {
   id: Scalars['String'];
   pair: Scalars['Bytes'];
   user: Scalars['Bytes'];
+  token0: Scalars['Bytes'];
+  token1: Scalars['Bytes'];
   amount0: Scalars['BigInt'];
   amount1: Scalars['BigInt'];
 };
@@ -85,6 +87,26 @@ export type LiquidityHolding_filter = {
   user_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
   user_contains?: InputMaybe<Scalars['Bytes']>;
   user_not_contains?: InputMaybe<Scalars['Bytes']>;
+  token0?: InputMaybe<Scalars['Bytes']>;
+  token0_not?: InputMaybe<Scalars['Bytes']>;
+  token0_gt?: InputMaybe<Scalars['Bytes']>;
+  token0_lt?: InputMaybe<Scalars['Bytes']>;
+  token0_gte?: InputMaybe<Scalars['Bytes']>;
+  token0_lte?: InputMaybe<Scalars['Bytes']>;
+  token0_in?: InputMaybe<Array<Scalars['Bytes']>>;
+  token0_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
+  token0_contains?: InputMaybe<Scalars['Bytes']>;
+  token0_not_contains?: InputMaybe<Scalars['Bytes']>;
+  token1?: InputMaybe<Scalars['Bytes']>;
+  token1_not?: InputMaybe<Scalars['Bytes']>;
+  token1_gt?: InputMaybe<Scalars['Bytes']>;
+  token1_lt?: InputMaybe<Scalars['Bytes']>;
+  token1_gte?: InputMaybe<Scalars['Bytes']>;
+  token1_lte?: InputMaybe<Scalars['Bytes']>;
+  token1_in?: InputMaybe<Array<Scalars['Bytes']>>;
+  token1_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
+  token1_contains?: InputMaybe<Scalars['Bytes']>;
+  token1_not_contains?: InputMaybe<Scalars['Bytes']>;
   amount0?: InputMaybe<Scalars['BigInt']>;
   amount0_not?: InputMaybe<Scalars['BigInt']>;
   amount0_gt?: InputMaybe<Scalars['BigInt']>;
@@ -111,6 +133,8 @@ export type LiquidityHolding_orderBy =
   | 'id'
   | 'pair'
   | 'user'
+  | 'token0'
+  | 'token1'
   | 'amount0'
   | 'amount1';
 
@@ -124,10 +148,6 @@ export type PairCreated = {
   token0: Scalars['Bytes'];
   token1: Scalars['Bytes'];
   pair: Scalars['Bytes'];
-  param3: Scalars['BigInt'];
-  blockNumber: Scalars['BigInt'];
-  blockTimestamp: Scalars['BigInt'];
-  transactionHash: Scalars['Bytes'];
 };
 
 export type PairCreated_filter = {
@@ -171,40 +191,6 @@ export type PairCreated_filter = {
   pair_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
   pair_contains?: InputMaybe<Scalars['Bytes']>;
   pair_not_contains?: InputMaybe<Scalars['Bytes']>;
-  param3?: InputMaybe<Scalars['BigInt']>;
-  param3_not?: InputMaybe<Scalars['BigInt']>;
-  param3_gt?: InputMaybe<Scalars['BigInt']>;
-  param3_lt?: InputMaybe<Scalars['BigInt']>;
-  param3_gte?: InputMaybe<Scalars['BigInt']>;
-  param3_lte?: InputMaybe<Scalars['BigInt']>;
-  param3_in?: InputMaybe<Array<Scalars['BigInt']>>;
-  param3_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
-  blockNumber?: InputMaybe<Scalars['BigInt']>;
-  blockNumber_not?: InputMaybe<Scalars['BigInt']>;
-  blockNumber_gt?: InputMaybe<Scalars['BigInt']>;
-  blockNumber_lt?: InputMaybe<Scalars['BigInt']>;
-  blockNumber_gte?: InputMaybe<Scalars['BigInt']>;
-  blockNumber_lte?: InputMaybe<Scalars['BigInt']>;
-  blockNumber_in?: InputMaybe<Array<Scalars['BigInt']>>;
-  blockNumber_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
-  blockTimestamp?: InputMaybe<Scalars['BigInt']>;
-  blockTimestamp_not?: InputMaybe<Scalars['BigInt']>;
-  blockTimestamp_gt?: InputMaybe<Scalars['BigInt']>;
-  blockTimestamp_lt?: InputMaybe<Scalars['BigInt']>;
-  blockTimestamp_gte?: InputMaybe<Scalars['BigInt']>;
-  blockTimestamp_lte?: InputMaybe<Scalars['BigInt']>;
-  blockTimestamp_in?: InputMaybe<Array<Scalars['BigInt']>>;
-  blockTimestamp_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
-  transactionHash?: InputMaybe<Scalars['Bytes']>;
-  transactionHash_not?: InputMaybe<Scalars['Bytes']>;
-  transactionHash_gt?: InputMaybe<Scalars['Bytes']>;
-  transactionHash_lt?: InputMaybe<Scalars['Bytes']>;
-  transactionHash_gte?: InputMaybe<Scalars['Bytes']>;
-  transactionHash_lte?: InputMaybe<Scalars['Bytes']>;
-  transactionHash_in?: InputMaybe<Array<Scalars['Bytes']>>;
-  transactionHash_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
-  transactionHash_contains?: InputMaybe<Scalars['Bytes']>;
-  transactionHash_not_contains?: InputMaybe<Scalars['Bytes']>;
   /** Filter for the block changed event. */
   _change_block?: InputMaybe<BlockChangedFilter>;
   and?: InputMaybe<Array<InputMaybe<PairCreated_filter>>>;
@@ -215,11 +201,7 @@ export type PairCreated_orderBy =
   | 'id'
   | 'token0'
   | 'token1'
-  | 'pair'
-  | 'param3'
-  | 'blockNumber'
-  | 'blockTimestamp'
-  | 'transactionHash';
+  | 'pair';
 
 export type Query = {
   pairCreated?: Maybe<PairCreated>;

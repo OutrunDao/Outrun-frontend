@@ -1,5 +1,8 @@
 // @ts-nocheck
 import { GraphQLResolveInfo, SelectionSetNode, FieldNode, GraphQLScalarType, GraphQLScalarTypeConfig } from 'graphql';
+import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
+import { gql } from '@graphql-mesh/utils';
+
 import type { GetMeshOptions } from '@graphql-mesh/runtime';
 import type { YamlConfig } from '@graphql-mesh/types';
 import { PubSub } from '@graphql-mesh/utils';
@@ -11,6 +14,7 @@ import { MeshResolvedSource } from '@graphql-mesh/runtime';
 import { MeshTransform, MeshPlugin } from '@graphql-mesh/types';
 import GraphqlHandler from "@graphql-mesh/graphql"
 import BareMerger from "@graphql-mesh/merger-bare";
+import { printWithCache } from '@graphql-mesh/utils';
 import { createMeshHTTPHandler, MeshHTTPHandler } from '@graphql-mesh/http';
 import { getMesh, ExecuteMeshFn, SubscribeMeshFn, MeshContext as BaseMeshContext, MeshInstance } from '@graphql-mesh/runtime';
 import { MeshStore, FsStoreStorageAdapter } from '@graphql-mesh/store';
@@ -58,6 +62,8 @@ export type LiquidityHolding = {
   id: Scalars['String'];
   pair: Scalars['Bytes'];
   user: Scalars['Bytes'];
+  token0: Scalars['Bytes'];
+  token1: Scalars['Bytes'];
   amount0: Scalars['BigInt'];
   amount1: Scalars['BigInt'];
 };
@@ -103,6 +109,26 @@ export type LiquidityHolding_filter = {
   user_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
   user_contains?: InputMaybe<Scalars['Bytes']>;
   user_not_contains?: InputMaybe<Scalars['Bytes']>;
+  token0?: InputMaybe<Scalars['Bytes']>;
+  token0_not?: InputMaybe<Scalars['Bytes']>;
+  token0_gt?: InputMaybe<Scalars['Bytes']>;
+  token0_lt?: InputMaybe<Scalars['Bytes']>;
+  token0_gte?: InputMaybe<Scalars['Bytes']>;
+  token0_lte?: InputMaybe<Scalars['Bytes']>;
+  token0_in?: InputMaybe<Array<Scalars['Bytes']>>;
+  token0_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
+  token0_contains?: InputMaybe<Scalars['Bytes']>;
+  token0_not_contains?: InputMaybe<Scalars['Bytes']>;
+  token1?: InputMaybe<Scalars['Bytes']>;
+  token1_not?: InputMaybe<Scalars['Bytes']>;
+  token1_gt?: InputMaybe<Scalars['Bytes']>;
+  token1_lt?: InputMaybe<Scalars['Bytes']>;
+  token1_gte?: InputMaybe<Scalars['Bytes']>;
+  token1_lte?: InputMaybe<Scalars['Bytes']>;
+  token1_in?: InputMaybe<Array<Scalars['Bytes']>>;
+  token1_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
+  token1_contains?: InputMaybe<Scalars['Bytes']>;
+  token1_not_contains?: InputMaybe<Scalars['Bytes']>;
   amount0?: InputMaybe<Scalars['BigInt']>;
   amount0_not?: InputMaybe<Scalars['BigInt']>;
   amount0_gt?: InputMaybe<Scalars['BigInt']>;
@@ -129,6 +155,8 @@ export type LiquidityHolding_orderBy =
   | 'id'
   | 'pair'
   | 'user'
+  | 'token0'
+  | 'token1'
   | 'amount0'
   | 'amount1';
 
@@ -142,10 +170,6 @@ export type PairCreated = {
   token0: Scalars['Bytes'];
   token1: Scalars['Bytes'];
   pair: Scalars['Bytes'];
-  param3: Scalars['BigInt'];
-  blockNumber: Scalars['BigInt'];
-  blockTimestamp: Scalars['BigInt'];
-  transactionHash: Scalars['Bytes'];
 };
 
 export type PairCreated_filter = {
@@ -189,40 +213,6 @@ export type PairCreated_filter = {
   pair_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
   pair_contains?: InputMaybe<Scalars['Bytes']>;
   pair_not_contains?: InputMaybe<Scalars['Bytes']>;
-  param3?: InputMaybe<Scalars['BigInt']>;
-  param3_not?: InputMaybe<Scalars['BigInt']>;
-  param3_gt?: InputMaybe<Scalars['BigInt']>;
-  param3_lt?: InputMaybe<Scalars['BigInt']>;
-  param3_gte?: InputMaybe<Scalars['BigInt']>;
-  param3_lte?: InputMaybe<Scalars['BigInt']>;
-  param3_in?: InputMaybe<Array<Scalars['BigInt']>>;
-  param3_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
-  blockNumber?: InputMaybe<Scalars['BigInt']>;
-  blockNumber_not?: InputMaybe<Scalars['BigInt']>;
-  blockNumber_gt?: InputMaybe<Scalars['BigInt']>;
-  blockNumber_lt?: InputMaybe<Scalars['BigInt']>;
-  blockNumber_gte?: InputMaybe<Scalars['BigInt']>;
-  blockNumber_lte?: InputMaybe<Scalars['BigInt']>;
-  blockNumber_in?: InputMaybe<Array<Scalars['BigInt']>>;
-  blockNumber_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
-  blockTimestamp?: InputMaybe<Scalars['BigInt']>;
-  blockTimestamp_not?: InputMaybe<Scalars['BigInt']>;
-  blockTimestamp_gt?: InputMaybe<Scalars['BigInt']>;
-  blockTimestamp_lt?: InputMaybe<Scalars['BigInt']>;
-  blockTimestamp_gte?: InputMaybe<Scalars['BigInt']>;
-  blockTimestamp_lte?: InputMaybe<Scalars['BigInt']>;
-  blockTimestamp_in?: InputMaybe<Array<Scalars['BigInt']>>;
-  blockTimestamp_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
-  transactionHash?: InputMaybe<Scalars['Bytes']>;
-  transactionHash_not?: InputMaybe<Scalars['Bytes']>;
-  transactionHash_gt?: InputMaybe<Scalars['Bytes']>;
-  transactionHash_lt?: InputMaybe<Scalars['Bytes']>;
-  transactionHash_gte?: InputMaybe<Scalars['Bytes']>;
-  transactionHash_lte?: InputMaybe<Scalars['Bytes']>;
-  transactionHash_in?: InputMaybe<Array<Scalars['Bytes']>>;
-  transactionHash_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
-  transactionHash_contains?: InputMaybe<Scalars['Bytes']>;
-  transactionHash_not_contains?: InputMaybe<Scalars['Bytes']>;
   /** Filter for the block changed event. */
   _change_block?: InputMaybe<BlockChangedFilter>;
   and?: InputMaybe<Array<InputMaybe<PairCreated_filter>>>;
@@ -233,11 +223,7 @@ export type PairCreated_orderBy =
   | 'id'
   | 'token0'
   | 'token1'
-  | 'pair'
-  | 'param3'
-  | 'blockNumber'
-  | 'blockTimestamp'
-  | 'transactionHash';
+  | 'pair';
 
 export type Query = {
   pairCreated?: Maybe<PairCreated>;
@@ -543,6 +529,8 @@ export type LiquidityHoldingResolvers<ContextType = MeshContext, ParentType exte
   id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   pair?: Resolver<ResolversTypes['Bytes'], ParentType, ContextType>;
   user?: Resolver<ResolversTypes['Bytes'], ParentType, ContextType>;
+  token0?: Resolver<ResolversTypes['Bytes'], ParentType, ContextType>;
+  token1?: Resolver<ResolversTypes['Bytes'], ParentType, ContextType>;
   amount0?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
   amount1?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -553,10 +541,6 @@ export type PairCreatedResolvers<ContextType = MeshContext, ParentType extends R
   token0?: Resolver<ResolversTypes['Bytes'], ParentType, ContextType>;
   token1?: Resolver<ResolversTypes['Bytes'], ParentType, ContextType>;
   pair?: Resolver<ResolversTypes['Bytes'], ParentType, ContextType>;
-  param3?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
-  blockNumber?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
-  blockTimestamp?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
-  transactionHash?: Resolver<ResolversTypes['Bytes'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -656,7 +640,7 @@ const outrunTransforms = [];
 const additionalTypeDefs = [] as any[];
 const outrunHandler = new GraphqlHandler({
               name: "outrun",
-              config: {"endpoint":"https://api.studio.thegraph.com/query/68891/outrun/0.0.2"},
+              config: {"endpoint":"https://api.studio.thegraph.com/query/68891/outrun/0.0.3"},
               baseDir,
               cache,
               pubsub,
@@ -689,7 +673,19 @@ const merger = new(BareMerger as any)({
     additionalEnvelopPlugins,
     get documents() {
       return [
-      
+      {
+        document: PairCreatedsDocument,
+        get rawSDL() {
+          return printWithCache(PairCreatedsDocument);
+        },
+        location: 'PairCreatedsDocument.graphql'
+      },{
+        document: UserLiquiditiesDocument,
+        get rawSDL() {
+          return printWithCache(UserLiquiditiesDocument);
+        },
+        location: 'UserLiquiditiesDocument.graphql'
+      }
     ];
     },
     fetchFn,
@@ -723,3 +719,58 @@ export function getBuiltGraphClient(): Promise<MeshInstance> {
 export const execute: ExecuteMeshFn = (...args) => getBuiltGraphClient().then(({ execute }) => execute(...args));
 
 export const subscribe: SubscribeMeshFn = (...args) => getBuiltGraphClient().then(({ subscribe }) => subscribe(...args));
+export function getBuiltGraphSDK<TGlobalContext = any, TOperationContext = any>(globalContext?: TGlobalContext) {
+  const sdkRequester$ = getBuiltGraphClient().then(({ sdkRequesterFactory }) => sdkRequesterFactory(globalContext));
+  return getSdk<TOperationContext, TGlobalContext>((...args) => sdkRequester$.then(sdkRequester => sdkRequester(...args)));
+}
+export type PairCreatedsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type PairCreatedsQuery = { pairCreateds: Array<Pick<PairCreated, 'id' | 'token0' | 'token1' | 'pair'>> };
+
+export type UserLiquiditiesQueryVariables = Exact<{
+  user?: InputMaybe<Scalars['Bytes']>;
+}>;
+
+
+export type UserLiquiditiesQuery = { liquidityHoldings: Array<Pick<LiquidityHolding, 'id' | 'pair' | 'user' | 'amount0' | 'amount1' | 'token0' | 'token1'>> };
+
+
+export const PairCreatedsDocument = gql`
+    query PairCreateds {
+  pairCreateds(first: 10) {
+    id
+    token0
+    token1
+    pair
+  }
+}
+    ` as unknown as DocumentNode<PairCreatedsQuery, PairCreatedsQueryVariables>;
+export const UserLiquiditiesDocument = gql`
+    query UserLiquidities($user: Bytes) {
+  liquidityHoldings(first: 20, where: {user: $user}) {
+    id
+    pair
+    user
+    amount0
+    amount1
+    token0
+    token1
+  }
+}
+    ` as unknown as DocumentNode<UserLiquiditiesQuery, UserLiquiditiesQueryVariables>;
+
+
+
+export type Requester<C = {}, E = unknown> = <R, V>(doc: DocumentNode, vars?: V, options?: C) => Promise<R> | AsyncIterable<R>
+export function getSdk<C, E>(requester: Requester<C, E>) {
+  return {
+    PairCreateds(variables?: PairCreatedsQueryVariables, options?: C): Promise<PairCreatedsQuery> {
+      return requester<PairCreatedsQuery, PairCreatedsQueryVariables>(PairCreatedsDocument, variables, options) as Promise<PairCreatedsQuery>;
+    },
+    UserLiquidities(variables?: UserLiquiditiesQueryVariables, options?: C): Promise<UserLiquiditiesQuery> {
+      return requester<UserLiquiditiesQuery, UserLiquiditiesQueryVariables>(UserLiquiditiesDocument, variables, options) as Promise<UserLiquiditiesQuery>;
+    }
+  };
+}
+export type Sdk = ReturnType<typeof getSdk>;
