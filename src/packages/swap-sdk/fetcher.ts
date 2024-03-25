@@ -1,5 +1,4 @@
 import { createPublicClient, PublicClient, http, getContract, Address } from 'viem';
-import { blast, blastSepolia } from 'viem/chains';
 import { CurrencyAmount, Token } from '@/packages/swap-core';
 import { ChainId } from '@/packages/swap-core/chains';
 import invariant from 'tiny-invariant';
@@ -12,19 +11,19 @@ let TOKEN_DECIMALS_CACHE: { [chainId: number]: { [address: string]: number } } =
   [ChainId.BLAST]: {},
 };
 
-const blastSepoliaClient = createPublicClient({ chain: blastSepolia, transport: http() });
-const blastClient = createPublicClient({ chain: blast, transport: http() });
+// const blastSepoliaClient = createPublicClient({ chain: blastSepolia, transport: http() });
+// const blastClient = createPublicClient({ chain: blast, transport: http() });
 
-export const getDefaultClient = (chainId: ChainId): PublicClient => {
-  switch (chainId) {
-    case ChainId.BLAST_SEPOLIA:
-      return blastSepoliaClient;
-    case ChainId.BLAST:
-      return blastClient;
-    default:
-      return blastClient;
-  }
-};
+// export const getDefaultClient = (chainId: ChainId): PublicClient => {
+//   switch (chainId) {
+//     case ChainId.BLAST_SEPOLIA:
+//       return blastSepoliaClient;
+//     case ChainId.BLAST:
+//       return blastClient;
+//     default:
+//       return blastClient;
+//   }
+// };
 
 /**
  * Contains methods for constructing instances of pairs and tokens from on-chain data.
@@ -46,7 +45,7 @@ export abstract class Fetcher {
   public static async fetchTokenData(
     chainId: ChainId,
     address: Address,
-    publicClient: any = getDefaultClient(chainId),
+    publicClient: PublicClient,
     symbol?: string,
     name?: string
   ): Promise<Token> {
@@ -58,7 +57,7 @@ export abstract class Fetcher {
     const parsedDecimals =
       typeof TOKEN_DECIMALS_CACHE?.[chainId]?.[address] === 'number'
         ? TOKEN_DECIMALS_CACHE[chainId][address]
-        : await erc20.read.decimals().then((decimals): number => {
+        : await erc20.read.decimals([]).then((decimals): number => {
             TOKEN_DECIMALS_CACHE = {
               ...TOKEN_DECIMALS_CACHE,
               [chainId]: {
@@ -68,10 +67,11 @@ export abstract class Fetcher {
             };
             return decimals;
           });
+    let _symbol = '';
     if (!symbol) {
-      symbol = await erc20.read.symbol();
+      _symbol = (await erc20.read.symbol().catch(() => address)) as string;
     }
-    return new Token(chainId, address, parsedDecimals, symbol, name);
+    return new Token(chainId, address, parsedDecimals, symbol || _symbol, name);
   }
 
   /**
@@ -80,11 +80,7 @@ export abstract class Fetcher {
    * @param tokenB second token
    * @param provider the provider to use to fetch the data
    */
-  public static async fetchPairData(
-    tokenA: Token,
-    tokenB: Token,
-    publicClient: any = getDefaultClient(tokenA.chainId)
-  ): Promise<Pair> {
+  public static async fetchPairData(tokenA: Token, tokenB: Token, publicClient: PublicClient): Promise<Pair> {
     invariant(tokenA.chainId === tokenB.chainId, 'CHAIN_ID');
     const address = Pair.getAddress(tokenA, tokenB) as Address;
     const pairContract = getContract({
