@@ -7,7 +7,7 @@ import { LocalTokenSymbol } from '@/types/index.d';
 import { useBalance, useAccount, useAccountEffect, type UseBalanceParameters, type UseAccountEffectParameters } from 'wagmi'
 
 interface IProps {
-  coinSymbol: LocalTokenSymbol
+  selectedToken: LocalTokenSymbol
   balance: string,
   account: `0x${string}` | undefined,
   isConnected: boolean,
@@ -15,10 +15,12 @@ interface IProps {
 }
 
 const BalanceCoin = (props: IProps) => {
-  const { isConnected, account, coinSymbol } = props  
+  const { isConnected, account, selectedToken } = props  
   let balance = '0'
   let pending = false
-  if (coinSymbol === LocalTokenSymbol.ETH) {
+  console.log('selectedToken', selectedToken);
+  
+  if (selectedToken === LocalTokenSymbol.ETH) {
     let { data, error, isPending } = useBalance({
       address: account,
     })
@@ -28,24 +30,26 @@ const BalanceCoin = (props: IProps) => {
     }
   } else {
     let { data, error, isPending } = useReadContract({
-      address: LocalTokenAddress[coinSymbol],
-      abi: TokenABIMap[coinSymbol],
+      address: LocalTokenAddress[selectedToken],
+      abi: TokenABIMap[selectedToken],
       functionName: 'balanceOf',
       args: [account],
     })
+    debugger
     pending = isPending  
-      console.log('data', data);
-      
-    if (!error && data) {
-      balance = formatEther(data) || '0'
+    
+    if (error) {
+      console.error('read balance error', error);
+    }
+    console.log('data', data);
+    if (data) {
+      balance = formatEther(data) || '0' 
     }
 
   }
-
-  console.log('balance', balance);
-
+  
   if (pending) {
-    return <Box>loading...</Box>
+    return <Flex justifyContent="flex-end" marginTop="12px">loading...</Flex>
   }
 
   return (

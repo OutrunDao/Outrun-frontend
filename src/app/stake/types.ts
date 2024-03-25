@@ -19,26 +19,35 @@ export const tabList = [
   { key: TabType.Mint, label: TabType.Mint },
   { key: TabType.Stake, label: TabType.Stake },
 ];
-
-// Mint的交易对
-export const MintPairs = [
-  [LocalTokenSymbol.ETH, LocalTokenSymbol.RETH],
-  [LocalTokenSymbol.USDB, LocalTokenSymbol.RUSD],
-];
-
-// stake的交易对
-export const StakePairs = [
-  [LocalTokenSymbol.RETH, LocalTokenSymbol.PETH],
-  [LocalTokenSymbol.RUSD, LocalTokenSymbol.PUSD],
-  [LocalTokenSymbol.REY, LocalTokenSymbol.RUY],
-];
+export type SwitchState = 0 | 1;
 
 export const PairSelectList = {
-  [TabType.Mint]: MintPairs,
-  [TabType.Stake]: StakePairs,
+  [TabType.Mint]: {
+    0: [LocalTokenSymbol.ETH, LocalTokenSymbol.USDB],
+    1: [LocalTokenSymbol.RETH, LocalTokenSymbol.RUSD],
+  },
+  [TabType.Stake]: {
+    0: [LocalTokenSymbol.RETH, LocalTokenSymbol.RUSD, LocalTokenSymbol.REY],
+    1: [LocalTokenSymbol.PETH, LocalTokenSymbol.PUSD, LocalTokenSymbol.RUY],
+  },
 };
 
-export interface IIswitch {
-  [TabType.Mint]: 0 | 1;
-  [TabType.Stake]: 0 | 1;
-}
+export const TokenPairMap = {
+  [TabType.Mint]: {
+    [LocalTokenSymbol.ETH]: LocalTokenSymbol.RETH,
+    [LocalTokenSymbol.USDB]: LocalTokenSymbol.RUSD,
+    [LocalTokenSymbol.RETH]: LocalTokenSymbol.ETH,
+    [LocalTokenSymbol.RUSD]: LocalTokenSymbol.USDB,
+  },
+  [TabType.Stake]: {
+    [LocalTokenSymbol.RETH]: LocalTokenSymbol.PETH,
+    [LocalTokenSymbol.RUSD]: LocalTokenSymbol.PUSD,
+    [LocalTokenSymbol.REY]: LocalTokenSymbol.RUY,
+    [LocalTokenSymbol.PETH]: LocalTokenSymbol.RETH,
+    [LocalTokenSymbol.PUSD]: LocalTokenSymbol.RUSD,
+    [LocalTokenSymbol.RUY]: LocalTokenSymbol.REY,
+  },
+};
+
+export type TokenMint = keyof (typeof TokenPairMap)[TabType.Mint];
+export type TokenStake = keyof (typeof TokenPairMap)[TabType.Stake];
