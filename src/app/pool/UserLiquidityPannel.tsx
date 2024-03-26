@@ -19,8 +19,6 @@ function LiquidityRatio({ liquidityToken, userAddress }: { liquidityToken: Token
     const fetchTotalSupply = async () => {
       const totalSupply = await liquidityToken.totalSupply(publicClient!);
       const balance = await liquidityToken.balanceOf(userAddress, publicClient!);
-      console.log(totalSupply.toString(), balance.toString());
-
       setTotalSupply(totalSupply);
       setBalance(balance);
     };
@@ -58,8 +56,6 @@ export default function UserLiquiditesPannel() {
     };
     fetchPairs()
       .then((pairs) => {
-        console.log(pairs);
-
         setPairs(pairs);
       })
       .catch((e) => {
@@ -72,7 +68,7 @@ export default function UserLiquiditesPannel() {
 
   return (
     <Container>
-      {pairs ? (
+      {pairs && pairs.length ? (
         pairs.map((pair, index) => (
           <Card key={index} marginTop="20px">
             <CardBody>
