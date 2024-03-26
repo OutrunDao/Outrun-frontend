@@ -13,64 +13,44 @@ import {
   RadioGroup,
   Stack,
   Text,
+  useToast,
   VStack,
 } from '@chakra-ui/react';
-import TokenSelect from '@/components/TokenSelect';
-import { tokenList } from '@/tokens/list';
+import TokenSelect, { getToken } from '@/components/TokenSelect';
 import { useEffect, useMemo, useState } from 'react';
 import { TokenInfo } from '@uniswap/token-lists';
 import { ArrowDownIcon } from '@chakra-ui/icons';
 import { TradeSettingsModal } from './TradeSettingsModal';
 import { Fetcher } from '@/packages/swap-sdk/fetcher';
-import { Pair } from '@/packages/swap-sdk';
-import { all } from 'radash';
-import { Trade } from '@/packages/swap-sdk';
-import { toToken, toCurrencyAmount } from './fns';
-import { Router as SwapRouter } from '@/packages/swap-sdk/router';
-async function makePairs(tokenA: TokenInfo, tokenB: TokenInfo): Promise<Pair[]> {
-  let pairTable = [[tokenA, tokenB]];
-  let pairs: Pair[] = await all(
-    pairTable.map(([_tokenA, _tokenB]) => Fetcher.fetchPairData(toToken(_tokenA), toToken(_tokenB)))
-  );
-  return pairs;
-}
+import { useAccount, useChainId, usePublicClient, useWalletClient } from 'wagmi';
+import { V2_ROUTER_ADDRESSES } from '@/packages/swap-core';
+import { Address, formatUnits, getAddress, parseUnits } from 'viem';
+import { useSwap } from '@/hook/useSwap';
+
+const defaultSymbol = 'WETH';
 
 export default function Swap() {
-  const [pairs, setPairs] = useState<Array<TokenInfo | undefined>>([tokenList.tokens[0]]);
-  const [pairsInput, setPairsInput] = useState<Array<string>>(['', '']);
-  const onSelctToken = (token: TokenInfo, index: number) => {
-    let nextIndex = (index + 1) % 2;
-    pairs[index] = token;
-    if (pairs[index] && pairs[index]!.address === (pairs[nextIndex] && pairs[nextIndex]!.address))
-      pairs[(index + 1) % 2] = undefined;
-    setPairs([...pairs]);
-  };
-  const onReverse = () => {
-    setPairs([pairs[1], pairs[0]]);
-    setPairsInput([pairsInput[1], pairsInput[0]]);
-  };
-  const onPairsInput = (value: string, index: number) => {
-    setPairsInput((pairsInput) => {
-      pairsInput[index] = value;
-      return [...pairsInput];
-    });
-  };
+  const chainId = useChainId();
+  const account = useAccount();
+  const publicClient = usePublicClient();
+  const toast = useToast();
+  const { data: walletClient } = useWalletClient();
+  const {
+    swapData,
+    loading,
+    setToken0,
+    setToken1,
+    setLoading,
+    token0AmountInputHandler,
+    token1AmountInputHandler,
+    approve,
+  } = useSwap();
 
-  useEffect(() => {
-    if (pairs[0] && pairs[1]) {
-      makePairs(pairs[0], pairs[1])
-        .then((routePairs) => {
-          return Trade.bestTradeExactIn(
-            routePairs,
-            toCurrencyAmount(pairs[0]!, pairsInput[0]),
-            toToken(pairs[1]!)
-          );
-        })
-        .then((bestRoutes) => {
-          console.log(bestRoutes);
-        });
-    }
-  }, [pairs, pairsInput]);
+  const onReverse = () => {
+    if (!swapData.token0 || !swapData.token1) return;
+    setToken0(swapData.token1);
+    setToken1(swapData.token0);
+  };
 
   function swap() {
     // SwapRouter.swapCallParameters(bestRoutes, tradeOptions);
@@ -105,14 +85,19 @@ export default function Swap() {
             placeholder="Intput token amount"
             ml={4}
             mr={6}
-            value={pairsInput[0]}
-            onChange={(e) => onPairsInput(e.target.value, 0)}
+            value={swapData.token0AmountInput}
+            onChange={(e) => token0AmountInputHandler(e.target.value)}
           />
-          <TokenSelect selectedToken={pairs[0]} onSelect={(token) => onSelctToken(token, 0)} />
+          <TokenSelect
+            defaultSymbol={defaultSymbol}
+            token={swapData.token0}
+            chainId={chainId}
+            onSelect={(token) => setToken0(token)}
+          />
           <br />
         </InputGroup>
         <Container textAlign={'right'} pr={0}>
-          <Text fontSize={'xs'}>Balance: 12</Text>
+          <Text fontSize={'xs'}>Balance: {swapData.token0Balance.toFixed(6)}</Text>
         </Container>
         <Container>
           <IconButton
@@ -132,18 +117,48 @@ export default function Swap() {
             placeholder="Output token amount"
             ml={4}
             mr={6}
-            value={pairsInput[1]}
-            onChange={(e) => onPairsInput(e.target.value, 1)}
+            value={swapData.token1AmountInput}
+            onChange={(e) => token1AmountInputHandler(e.target.value)}
           />
-          <TokenSelect selectedToken={pairs[1]} onSelect={(token) => onSelctToken(token, 1)} />
+          <TokenSelect chainId={chainId} token={swapData.token1} onSelect={(token) => setToken1(token)} />
         </InputGroup>
         <Container textAlign={'right'} pr={0}>
-          <Text fontSize={'xs'}>1WETH = 1222 bb</Text>
+          <Text fontSize={'xs'}>Balance: {swapData.token1Balance.toFixed(6)}</Text>
+        </Container>
+        <Container textAlign={'right'} pr={0}>
+          {swapData.pair ? (
+            <Text fontSize={'xs'}>
+              1{swapData.pair.token1.symbol} = {swapData.pair.token1Price.toFixed(6)}{' '}
+              {swapData.pair.token0.symbol}
+              <br />1{swapData.pair.token0.symbol} = {swapData.pair.token0Price.toFixed(6)}{' '}
+              {swapData.pair.token1.symbol}
+            </Text>
+          ) : null}
         </Container>
 
-        <Button width={'100%'} mt={4} size="lg" variant="custom" onClick={swap}>
-          swap token
-        </Button>
+        {swapData.token1 &&
+        swapData.token0AmountInput &&
+        swapData.token1AmountInput &&
+        swapData.token0 &&
+        (swapData.tokenAllowance[0].lessThan(swapData.token0AmountInput) ||
+          swapData.tokenAllowance[1].lessThan(swapData.token1AmountInput)) ? (
+          <Button width={'100%'} mt={4} size="lg" variant="custom" onClick={approve} isLoading={loading}>
+            Set Approve{' '}
+            {swapData.tokenAllowance[0].lessThan(swapData.token0AmountInput || 0)
+              ? swapData.token0.symbol
+              : swapData.token1.symbol}
+          </Button>
+        ) : (swapData.token0AmountInput && swapData.token0Balance.lt(swapData.token0AmountInput)) ||
+          (swapData.token1AmountInput && swapData.token1Balance.lt(swapData.token1AmountInput)) ? (
+          <Button width={'100%'} mt={4} size="lg" variant="custom">
+            {' '}
+            insufficient token{' '}
+          </Button>
+        ) : (
+          <Button width={'100%'} mt={4} size="lg" variant="custom" onClick={swap} isLoading={loading}>
+            swap
+          </Button>
+        )}
       </VStack>
     </Container>
   );

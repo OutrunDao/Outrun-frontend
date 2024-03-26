@@ -118,7 +118,7 @@ export class Token extends BaseCurrency {
   /**
    * Return the allowance of address of this token
    */
-  public async allowance(owner: Address, spender: Address, publicClient: PublicClient): Promise<bigint> {
+  public async allowance(owner: Address, spender: Address, publicClient: PublicClient): Promise<Decimal> {
     const erc20 = getContract({
       abi: [
         {
@@ -136,7 +136,7 @@ export class Token extends BaseCurrency {
       client: publicClient,
     });
     const result = (await erc20.read.allowance([owner, spender])) as bigint;
-    return result; //formatUnits(result, this.decimals);
+    return new Decimal(formatUnits(result, this.decimals));
   }
 
   /**
