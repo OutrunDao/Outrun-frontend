@@ -1,5 +1,5 @@
-import { parseEther } from 'viem'
-import { useWriteContract } from 'wagmi'
+import { formatEther, parseEther } from 'viem'
+import { useWriteContract, useReadContract, useTransactionConfirmations } from 'wagmi'
 import { Text, Button, Flex, useToast } from '@chakra-ui/react'
 import { LocalTokenAddress, ContractAddressMap } from '@/contants/address'
 import { TokenABIMap } from '@/ABI'
@@ -26,8 +26,10 @@ const StakeButton = (props: IProps) => {
   
   const toast = useToast()
   const { inputValue, currentTabType, selectedToken, account, switchState } = props
-  const { writeContract } = useWriteContract()
+  const { writeContract, writeContractAsync } = useWriteContract()
   
+  if (!account) return <></>
+
   const RETH = LocalTokenSymbol.RETH
   const ETH = LocalTokenSymbol.ETH
   const RUSD = LocalTokenSymbol.RUSD
@@ -36,13 +38,31 @@ const StakeButton = (props: IProps) => {
   
   const RUSDAddr = LocalTokenAddress[RUSD]
   const MintABI = TokenABIMap[LocalTokenSymbol.RETH]
+
+  interface IResult {
+    data: bigint | undefined
+  }
+  const { data: rETHAllowance = 0n}: IResult = useReadContract({
+    address: LocalTokenAddress[RETH],
+    abi: TokenABIMap[RETH],
+    functionName: 'allowance',
+    args: [account, ContractAddressMap[ContractAddrKey.RETHStakeManager]]
+  })
+
+  console.log('rETHAllowance', rETHAllowance);
   
+    
   const onHandleButton = async () => {
     if (currentTabType === TabType.Mint) {
       onHandleMint()
     } else {
+      const val = parseEther(inputValue)
       await onHandleApprove()
-      // onHandleStake()
+      if (val <= rETHAllowance) {
+        onHandleStake()
+      } else {
+        onHandleApprove()
+      }
     }
   }
 
@@ -60,8 +80,6 @@ const StakeButton = (props: IProps) => {
       value: isMint && isRETHMint ? parseEther(inputValue) : 0n,
       args: isMint && isRETHMint ? [] : [parseEther(inputValue)]
     }
-    
-    if (!account) return;
     
     toast({
       status: 'loading',
@@ -95,48 +113,32 @@ const StakeButton = (props: IProps) => {
   }
   
   const onHandleApprove = async () => {
-    writeContract({
+    return writeContractAsync({
       abi: TokenABIMap[LocalTokenSymbol.RETH],
       address: RETHAddr,
       account,
-      args: [ContractAddressMap[ContractAddrKey.RETHStakeManager], parseEther('10')],
+      args: [ContractAddressMap[ContractAddrKey.RETHStakeManager], parseEther(inputValue)],
       functionName: 'approve',
-    }, {
-      onError: (error) => {
-        console.log('onHandleApprove error', error)
-      },
-      onSuccess: (data) => {
-        console.log('onSuccess data', data)
-        setTimeout(async () => {
-          onHandleStake()
-        }, 10000)
-      }
     })
   }
 
   const onHandleStake = () => {
     const keyReth = ContractAddrKey.RETHStakeManager
     const keyRusd = ContractAddrKey.RUSDStakeManager
-    const keyPeth = LocalTokenSymbol.PETH
-    const keyRey = LocalTokenSymbol.REY
     const RETHStakeManageAddr = ContractAddressMap[keyReth]
     const RUSDStakeManageAddr = ContractAddressMap[keyRusd]
-    const PETHAddr = LocalTokenAddress[keyPeth]
-    const REYAddr = LocalTokenAddress[keyRey]
     const isStake = switchState === 0 
     const functionName = isStake ? 'stake' : 'unstake'
     const isRETHStake = selectedToken === RETH || selectedToken === PETH
     const address = isRETHStake ? RETHStakeManageAddr : RUSDStakeManageAddr
     const ABI = isRETHStake ? TokenABIMap[keyReth] : TokenABIMap[RUSD]
    
-    if (!account) return;
-
     const writeContractParams = {
       abi: ABI,
       address,
       account,
       functionName,
-      args: [100000000000000000, 30, account, PETHAddr, REYAddr]
+      args: [parseEther(inputValue), 365, account, account, account]
     }
 
     writeContract(writeContractParams, {

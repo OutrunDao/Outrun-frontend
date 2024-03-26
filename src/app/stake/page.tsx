@@ -7,6 +7,8 @@ import { tabList, TabType, SwitchState, PairSelectList, TokenPairMap, TokenMint,
 import { LocalTokenSymbol } from '@/types/index.d'
 import { ArrowDownIcon } from '@chakra-ui/icons'
 
+import { useTokenBalance } from './stake-utils'
+
 import PriceCoin from './components/PriceCoin'
 import BalanceCoin from './components/BalanceCoin'
 import StakeButton from './components/StakeButton'
@@ -59,7 +61,10 @@ export default function Stake () {
     setSelectedToken(currTokenPairMap[selectedToken])
   }
 
+  const tokenBalance = useTokenBalance(selectedToken)
 
+  console.log('tokenBalance', tokenBalance);
+  
 
   return(
     <Container className="stack" color="#fff" fontSize="14px" marginTop="100px">
@@ -84,9 +89,8 @@ export default function Stake () {
                 currentTabType={currentTabType}></InputSelect>
               
               <BalanceCoin
-                account={address}
                 isConnected={isConnected}
-                balance={balance}
+                tokenBalance={tokenBalance}
                 selectedToken={selectedToken}
                 setMintValue={(value) => setInputValue(value)} ></BalanceCoin>
             </Box>

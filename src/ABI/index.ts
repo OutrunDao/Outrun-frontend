@@ -6,5 +6,7 @@ import RETHStakeManager from './RETHStakeManager';
 export const TokenABIMap: Record<LocalTokenSymbol | ContractAddrKey, any> = {
   [LocalTokenSymbol.RETH]: RETHABI,
   [LocalTokenSymbol.PETH]: RETHABI,
+  [LocalTokenSymbol.REY]: RETHABI,
+  [LocalTokenSymbol.RUY]: RETHABI,
   [ContractAddrKey.RETHStakeManager]: RETHStakeManager,
 };
