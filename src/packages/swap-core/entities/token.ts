@@ -4,7 +4,8 @@ import { BaseCurrency } from './baseCurrency';
 import { Currency } from './currency';
 import { BigintIsh } from '../constants';
 import JSBI from 'jsbi';
-import { PublicClient, getContract, Address, formatUnits } from 'viem';
+import { PublicClient, getContract, Address, formatUnits, WalletClient } from 'viem';
+import Decimal from 'decimal.js-light';
 
 /**
  * Represents an ERC20 token with a unique address and some metadata.
@@ -96,21 +97,91 @@ export class Token extends BaseCurrency {
   /**
    * Return the blance of address of this token
    */
-  public async fetchBalanceOf(account: Address, publicClient: PublicClient): Promise<string> {
+  public async balanceOf(account: Address, publicClient: PublicClient): Promise<Decimal> {
     const erc20 = getContract({
       abi: [
         {
-          constant: true,
-          inputs: [{ name: '_owner', type: 'address' }],
-          name: 'balanceOf',
-          outputs: [{ name: 'balance', type: 'uint256' }],
           type: 'function',
+          name: 'balanceOf',
+          inputs: [{ name: 'account', type: 'address', internalType: 'address' }],
+          outputs: [{ name: '', type: 'uint256', internalType: 'uint256' }],
+          stateMutability: 'view',
         },
       ],
       address: this.address as `0x${string}`,
       client: publicClient,
     });
     const result = (await erc20.read.balanceOf([account])) as bigint;
-    return formatUnits(result, this.decimals);
+    return new Decimal(formatUnits(result, this.decimals));
+  }
+
+  /**
+   * Return the allowance of address of this token
+   */
+  public async allowance(owner: Address, spender: Address, publicClient: PublicClient): Promise<bigint> {
+    const erc20 = getContract({
+      abi: [
+        {
+          type: 'function',
+          name: 'allowance',
+          inputs: [
+            { name: 'owner', type: 'address', internalType: 'address' },
+            { name: 'spender', type: 'address', internalType: 'address' },
+          ],
+          outputs: [{ name: '', type: 'uint256', internalType: 'uint256' }],
+          stateMutability: 'view',
+        },
+      ],
+      address: this.address as `0x${string}`,
+      client: publicClient,
+    });
+    const result = (await erc20.read.allowance([owner, spender])) as bigint;
+    return result; //formatUnits(result, this.decimals);
+  }
+
+  /**
+   * totalSupply of this token
+   */
+
+  public async totalSupply(publicClient: PublicClient): Promise<Decimal> {
+    const erc20 = getContract({
+      abi: [
+        {
+          type: 'function',
+          name: 'totalSupply',
+          inputs: [],
+          outputs: [{ name: '', type: 'uint256', internalType: 'uint256' }],
+          stateMutability: 'view',
+        },
+      ],
+      address: this.address as `0x${string}`,
+      client: publicClient,
+    });
+    let result = (await erc20.read.totalSupply()) as bigint;
+    return new Decimal(formatUnits(result, this.decimals));
+  }
+  /**
+   * Approve the spender to spend the value of this token
+   */
+  public async approve(spender: Address, value: bigint, walletClient: WalletClient): Promise<string> {
+    const erc20 = getContract({
+      abi: [
+        {
+          type: 'function',
+          name: 'approve',
+          inputs: [
+            { name: 'spender', type: 'address', internalType: 'address' },
+            { name: 'value', type: 'uint256', internalType: 'uint256' },
+          ],
+          outputs: [{ name: '', type: 'bool', internalType: 'bool' }],
+          stateMutability: 'nonpayable',
+        },
+      ],
+      address: this.address as `0x${string}`,
+      client: {
+        wallet: walletClient,
+      },
+    });
+    return await erc20.write.approve([spender, value]);
   }
 }

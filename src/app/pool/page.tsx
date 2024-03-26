@@ -14,100 +14,182 @@ import {
   Center,
   Card,
   CardBody,
+  useToast,
 } from '@chakra-ui/react';
-import { PiSwimmingPoolDuotone } from 'react-icons/pi';
-import TokenSelect from '@/components/TokenSelect';
+import TokenSelect, { getToken } from '@/components/TokenSelect';
 import { ArrowDownIcon } from '@chakra-ui/icons';
-// import { useGetPair } from '@/hook/contracts/useSwapFactory';
-import { useState, useEffect } from 'react';
-import { tokenList } from '@/tokens/list';
-import { TokenInfo } from '@uniswap/token-lists';
+import { useState, useEffect, use } from 'react';
 import { Fetcher } from '@/packages/swap-sdk/fetcher';
-import { toToken } from '../swap/fns';
-import { useAccount, useChainId } from 'wagmi';
-import useToken from '@/hook/useToken';
-import { useLiquidity } from './useContract';
+import { useAccount, useChainId, usePublicClient, useWalletClient } from 'wagmi';
 import { V2_ROUTER_ADDRESSES } from '@/packages/swap-core';
-import { Address, formatUnits, getAddress } from 'viem';
-import { execute, UserLiquiditiesDocument, LiquidityHolding } from '@/subgraph';
-import { useQuery } from '@tanstack/react-query';
-import TokenSymbol, { TokenBalance } from './TokenSymbol';
-const PoolIndex = () => {
-  const [pairs, setPairs] = useState<Array<TokenInfo | undefined>>([tokenList.tokens[0]]);
-  const [pairsInput, setPairsInput] = useState<Array<string>>(['', '']);
-  const [pair, setPair] = useState<any>();
-  const account = useAccount();
-  const { data: userLiquidites } = useQuery({
-    queryKey: ['userLiquidites', account.address],
-    queryFn: async (): Promise<LiquidityHolding[]> => {
-      return execute(UserLiquiditiesDocument, { user: account.address }).then(
-        (res: { data: { liquidityHoldings: LiquidityHolding[] } }) => res.data.liquidityHoldings
-      );
-    },
-  });
-  const {
-    balance: balanceOfToken0,
-    allowance: allowanceA,
-    fetchBalance: fetchBalanceA,
-    fetchAllowance: fetchAllowanceA,
-    approve: approveA,
-  } = useToken(pairs[0]);
-  const {
-    balance: balanceOfToken1,
-    allowance: allowanceB,
-    fetchBalance: fetchBalanceB,
-    fetchAllowance: fetchAllowanceB,
-    approve: approveB,
-  } = useToken(pairs[1]);
-  const { addLiquidity } = useLiquidity(pairs[0], pairs[1], pairsInput[0], pairsInput[1], account.address);
-  const chainId = useChainId();
-  const onSelctToken = (token: TokenInfo, index: number) => {
-    let nextIndex = (index + 1) % 2;
-    pairs[index] = token;
-    if (pairs[index] && pairs[index]!.address === (pairs[nextIndex] && pairs[nextIndex]!.address))
-      pairs[(index + 1) % 2] = undefined;
-    setPairs([...pairs]);
-  };
+import { Address, formatUnits, getAddress, parseUnits } from 'viem';
 
-  const onPairsInput = (value: string, index: number) => {
-    setPairsInput((pairsInput) => {
-      pairsInput[index] = value;
-      return [...pairsInput];
-    });
-  };
+import { Token } from '@/packages/swap-core';
+import { Pair } from '@/packages/swap-sdk';
+import { retry, set } from 'radash';
+import { getRouterContract } from './getContract';
+import UserLiquiditesPannel from './UserLiquidityPannel';
+
+const defaultSymbol = 'WETH';
+
+const PoolIndex = () => {
+  const chainId = useChainId();
+  const account = useAccount();
+  const publicClient = usePublicClient();
+  const { data: walletClient } = useWalletClient();
+  const [token0, setToken0] = useState<Token>(getToken(defaultSymbol, chainId)!);
+  const [token1, setToken1] = useState<Token>();
+  const [token0Balance, setToken0Balance] = useState<string>('0');
+  const [token1Balance, setToken1Balance] = useState<string>('0');
+  const [token0AmountInput, setToken0AmountInput] = useState<string>('');
+  const [token1AmountInput, setToken1AmountInput] = useState<string>('');
+  const [tokenAllowance, setTokenAllowance] = useState<bigint[]>([0n, 0n]);
+  const [pair, setPair] = useState<Pair>();
+  const [loading, setLoading] = useState<boolean>(false);
+  const toast = useToast();
 
   useEffect(() => {
-    // console.log('pairs', pairs);
-    if (pairs[0] && pairs[1]) {
-      Fetcher.fetchPairData(toToken(pairs[0]), toToken(pairs[1])).then((pair) => {
-        console.log('pair', pair.token0Price.toFixed(6));
-        setPair(pair);
-        // pair.token0Price
-      });
-      fetchBalanceA(account.address!);
-      fetchBalanceB(account.address!);
-      fetchAllowanceA(account.address!, getAddress(V2_ROUTER_ADDRESSES[chainId]));
-      fetchAllowanceB(account.address!, getAddress(V2_ROUTER_ADDRESSES[chainId]));
+    const fetchBalance = async () => {
+      const balance0 =
+        !account.address || !token0
+          ? '0'
+          : (await token0.balanceOf(account.address, publicClient!)).toSignificantDigits(6, 1).toString();
+      const balance1 =
+        !account.address || !token1
+          ? '0'
+          : (await token1.balanceOf(account.address, publicClient!)).toSignificantDigits(6, 1).toString();
+      setToken0Balance(balance0);
+      setToken1Balance(balance1);
+    };
+    fetchBalance();
+  }, [token0, token1, account.address]);
+  useEffect(() => {
+    const fetchPair = async () => {
+      const pair = await retry({ times: 2, delay: 3000 }, () =>
+        Fetcher.fetchPairData(token0, token1!, publicClient!)
+      ).catch((e) => undefined);
+      setPair(pair);
+    };
+    const fetchAllowance = async () => {
+      if (!account.address || !token0 || !token1) return;
+      const allowance0 = await token0.allowance(
+        account.address,
+        getAddress(V2_ROUTER_ADDRESSES[chainId]),
+        publicClient!
+      );
+      const allowance1 = await token1.allowance(
+        account.address,
+        getAddress(V2_ROUTER_ADDRESSES[chainId]),
+        publicClient!
+      );
+      setTokenAllowance([allowance0, allowance1]);
+    };
+    if (!token0 || !token1) {
+      setPair(undefined);
+      setTokenAllowance([0n, 0n]);
+    } else {
+      fetchPair();
+      fetchAllowance();
     }
-  }, [pairs]);
+  }, [token0, token1]);
 
-  function _addLiquidity() {
+  async function _addLiquidity() {
     // console.log('add liquidity', tokenA, tokenB, pair);
-    addLiquidity();
+    // addLiquidity();
+    if (!token0 || !token1 || !account.address || !walletClient) return;
+    setLoading(true);
+    try {
+      const tx = await getRouterContract(walletClient!).write.addLiquidity([
+        token0.address,
+        token1.address,
+        parseUnits(token0AmountInput, token0.decimals),
+        parseUnits(token1AmountInput, token1.decimals),
+        parseUnits((+token0AmountInput * 0.05).toString(), token0.decimals),
+        parseUnits((+token1AmountInput * 0.05).toString(), token1.decimals),
+        account.address,
+        Math.floor(Date.now() / 1000) + 60 * 10,
+      ]);
+      toast({
+        title: 'transaction success',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+      const data = await publicClient!.waitForTransactionReceipt({
+        hash: tx as Address,
+      });
+      toast({
+        title: data.status === 'success' ? 'Add liquidity success' : 'Add liquidity failed',
+        status: data.status === 'success' ? 'success' : 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (e) {
+      toast({
+        title: 'Add liquidity failed',
+        description: e.message,
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+    setLoading(false);
   }
 
-  function _Approve() {
-    if (formatUnits(allowanceA, 18) < pairsInput[0]) {
-      return approveA(getAddress(V2_ROUTER_ADDRESSES[chainId]), pairsInput[0]);
+  async function _Approve() {
+    let tokenForApprove =
+      formatUnits(tokenAllowance[0], token0.decimals) < token0AmountInput ? token0 : token1!;
+    setLoading(true);
+    try {
+      const tx = await tokenForApprove.approve(
+        getAddress(V2_ROUTER_ADDRESSES[chainId]),
+        parseUnits(
+          tokenForApprove.equals(token0) ? token0AmountInput : token1AmountInput,
+          tokenForApprove.decimals
+        ),
+        walletClient!
+      );
+      await publicClient!.waitForTransactionReceipt({
+        hash: tx as Address,
+      });
+      toast({
+        title: 'Approve success',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (e) {
+      toast({
+        title: 'Approve failed',
+        description: e.message,
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
     }
-    if (formatUnits(allowanceB, 18) < pairsInput[1]) {
-      return approveB(getAddress(V2_ROUTER_ADDRESSES[chainId]), pairsInput[1]);
-    }
+    setLoading(false);
   }
-  console.log(userLiquidites);
+
+  async function token0AmountInputHandler(value: string) {
+    setToken0AmountInput(value);
+    if (!pair || !token0) return;
+    if (!value || isNaN(Number(value)) || value == '0') return;
+    const price = pair.priceOf(token0);
+
+    setToken1AmountInput((+price.toSignificant(6) * +value).toFixed(6));
+  }
+  async function token1AmountInputHandler(value: string) {
+    setToken1AmountInput(value);
+    if (!pair || !token1) return;
+    if (!value || isNaN(Number(value)) || value == '0') return;
+
+    const price = pair.priceOf(token1);
+    setToken0AmountInput((+price.toSignificant(6) * +value).toFixed(6));
+  }
 
   return (
     <>
+      <UserLiquiditesPannel />
       <Container
         w={'480px'}
         borderStyle={'solid'}
@@ -134,16 +216,14 @@ const PoolIndex = () => {
               placeholder="Intput token amount"
               ml={4}
               mr={6}
-              value={pairsInput[0]}
-              onChange={(e) => onPairsInput(e.target.value, 0)}
+              value={token0AmountInput}
+              onChange={(e) => token0AmountInputHandler(e.target.value)}
             />
-            <TokenSelect selectedToken={pairs[0]} onSelect={(token) => onSelctToken(token, 0)} />
+            <TokenSelect defaultSymbol="WETH" chainId={chainId} onSelect={(token) => setToken0(token)} />
             <br />
           </InputGroup>
           <Container textAlign={'right'} pr={0}>
-            <Text fontSize={'xs'}>
-              Balance: {balanceOfToken0} {allowanceA.toString()}
-            </Text>
+            <Text fontSize={'xs'}>Balance: {token0Balance}</Text>
           </Container>
           <Container>
             <IconButton icon={<ArrowDownIcon />} colorScheme="teal" aria-label="ArrowDown" />
@@ -158,55 +238,46 @@ const PoolIndex = () => {
               placeholder="Output token amount"
               ml={4}
               mr={6}
-              value={pairsInput[1]}
-              onChange={(e) => onPairsInput(e.target.value, 1)}
+              value={token1AmountInput}
+              onChange={(e) => token1AmountInputHandler(e.target.value)}
             />
-            <TokenSelect selectedToken={pairs[1]} onSelect={(token) => onSelctToken(token, 1)} />
+            <TokenSelect chainId={chainId} onSelect={(token) => setToken1(token)} />
           </InputGroup>
           <Container textAlign={'right'} pr={0}>
-            <Text fontSize={'xs'}>
-              Balance: {balanceOfToken1} {allowanceB.toString()}
-            </Text>
+            <Text fontSize={'xs'}>Balance: {token1Balance}</Text>
           </Container>
           <Container textAlign={'right'} pr={0}>
             {pair ? (
               <Text fontSize={'xs'}>
-                1{pairs[0]?.symbol} = {pair.token0Price.toFixed(6)} {pairs[1]?.symbol}
+                1{pair.token1.symbol} = {pair.token1Price.toFixed(6)} {pair.token0.symbol}
+                <br />1{pair.token0.symbol} = {pair.token0Price.toFixed(6)} {pair.token1.symbol}
               </Text>
             ) : null}
           </Container>
 
-          {formatUnits(allowanceA, 18) >= pairsInput[0] && formatUnits(allowanceB, 18) >= pairsInput[1] ? (
-            <Button width={'100%'} mt={4} size="lg" variant="custom" onClick={_addLiquidity}>
-              add liquidity
+          {token1 &&
+          token0 &&
+          (+formatUnits(tokenAllowance[0], token0.decimals) < +token0AmountInput ||
+            +formatUnits(tokenAllowance[1], token1.decimals) < +token1AmountInput) ? (
+            <Button width={'100%'} mt={4} size="lg" variant="custom" onClick={_Approve} isLoading={loading}>
+              Set Approve{' '}
+              {formatUnits(tokenAllowance[0], token0.decimals) < token0AmountInput
+                ? token0.symbol
+                : token1.symbol}
             </Button>
           ) : (
-            <Button width={'100%'} mt={4} size="lg" variant="custom" onClick={_Approve}>
-              Set Approve
+            <Button
+              width={'100%'}
+              mt={4}
+              size="lg"
+              variant="custom"
+              onClick={_addLiquidity}
+              isLoading={loading}
+            >
+              add liquidity
             </Button>
           )}
         </VStack>
-      </Container>
-      <Container>
-        <Center marginTop="60px">
-          <Icon color="#666" boxSize={16} as={PiSwimmingPoolDuotone}></Icon>
-        </Center>
-        {userLiquidites?.map((liquidity) => (
-          <Card key={liquidity.pair} marginTop="20px">
-            <CardBody>
-              <Text color="#666" fontSize="16px">
-                <TokenSymbol address={liquidity.pair}></TokenSymbol> /{' '}
-                <TokenSymbol address={liquidity.token1}></TokenSymbol>
-              </Text>
-              <Text color="#666" fontSize="16px">
-                <TokenBalance address={liquidity.pair} account={account.address!}></TokenBalance>
-              </Text>
-            </CardBody>
-          </Card>
-        ))}
-        <Text align="center" color="#999" fontSize="16px" marginTop="12px">
-          Your have no active liquidity positions.
-        </Text>
       </Container>
     </>
   );

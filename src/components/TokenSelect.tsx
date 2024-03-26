@@ -18,15 +18,39 @@ import { tokenList } from '@/tokens/list';
 import { ChevronDownIcon } from '@chakra-ui/icons';
 import { useState } from 'react';
 import { TokenInfo } from '@uniswap/token-lists';
+import { Token } from '@/packages/swap-core';
+
+function getTokenRaw(symbol: string | undefined, chainId: number): TokenInfo | undefined {
+  if (!chainId || !symbol) {
+    return undefined;
+  }
+  return tokenList.tokens.find((token) => token.symbol === symbol && token.chainId === chainId);
+}
+
+export function getToken(symbol: string, chainId: number): Token | undefined {
+  const token = getTokenRaw(symbol, chainId);
+  if (!token) {
+    return undefined;
+  }
+  return new Token(token.chainId, token.address, token.decimals, token.symbol, token.name);
+}
 
 export default function TokenSelect({
   onSelect,
-  selectedToken,
+  defaultSymbol,
+  chainId,
 }: {
-  onSelect: (token: TokenInfo) => void;
-  selectedToken?: TokenInfo;
+  onSelect: (token: Token) => void;
+  defaultSymbol?: string;
+  chainId: number;
 }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const [tokenInfo, setTokenInfo] = useState<TokenInfo | undefined>(getTokenRaw(defaultSymbol, chainId));
+  function handleSelect(token: TokenInfo) {
+    setTokenInfo(token);
+    onSelect(new Token(token.chainId, token.address, token.decimals, token.symbol, token.name));
+    onClose();
+  }
   return (
     <>
       <Button
@@ -38,18 +62,13 @@ export default function TokenSelect({
         color={'#fff'}
         px={'10px'}
         leftIcon={
-          selectedToken && (
-            <Image
-              src={selectedToken.logoURI}
-              width={'20px'}
-              height={'20px'}
-              alt={selectedToken.symbol}
-            ></Image>
+          tokenInfo && (
+            <Image src={tokenInfo.logoURI} width={'20px'} height={'20px'} alt={tokenInfo.symbol}></Image>
           )
         }
         rightIcon={<ChevronDownIcon />}
       >
-        {selectedToken ? selectedToken.symbol : 'Select Token'}
+        {tokenInfo ? tokenInfo.symbol : 'Select Token'}
       </Button>
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
@@ -71,10 +90,7 @@ export default function TokenSelect({
                     w={'100%'}
                     leftIcon={<Image src={token.logoURI} width={'20px'} height={'20px'} alt={token.symbol} />}
                     key={token.address}
-                    onClick={() => {
-                      onSelect(token);
-                      onClose();
-                    }}
+                    onClick={() => handleSelect(token)}
                   >
                     {token.symbol}
                   </Button>
