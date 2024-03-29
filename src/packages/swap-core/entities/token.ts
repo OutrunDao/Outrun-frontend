@@ -6,6 +6,7 @@ import { BigintIsh } from '../constants';
 import JSBI from 'jsbi';
 import { PublicClient, getContract, Address, formatUnits, WalletClient } from 'viem';
 import Decimal from 'decimal.js-light';
+import { getBalance } from 'viem/actions';
 
 /**
  * Represents an ERC20 token with a unique address and some metadata.

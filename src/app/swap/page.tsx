@@ -23,9 +23,9 @@ import { ArrowDownIcon } from '@chakra-ui/icons';
 import { TradeSettingsModal } from './TradeSettingsModal';
 import { Fetcher } from '@/packages/swap-sdk/fetcher';
 import { useAccount, useChainId, usePublicClient, useWalletClient } from 'wagmi';
-import { V2_ROUTER_ADDRESSES } from '@/packages/swap-core';
 import { Address, formatUnits, getAddress, parseUnits } from 'viem';
 import { useSwap } from '@/hook/useSwap';
+import { Trade } from '@/packages/swap-sdk';
 
 const defaultSymbol = 'WETH';
 
@@ -44,7 +44,7 @@ export default function Swap() {
     token0AmountInputHandler,
     token1AmountInputHandler,
     approve,
-  } = useSwap();
+  } = useSwap(true);
 
   const onReverse = () => {
     if (!swapData.token0 || !swapData.token1) return;
@@ -52,9 +52,7 @@ export default function Swap() {
     setToken1(swapData.token0);
   };
 
-  function swap() {
-    // SwapRouter.swapCallParameters(bestRoutes, tradeOptions);
-  }
+  async function swap() {}
 
   return (
     <Container
