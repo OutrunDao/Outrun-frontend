@@ -16,7 +16,7 @@ import {
 } from '@chakra-ui/react';
 import { tokenList } from '@/tokens/list';
 import { ChevronDownIcon } from '@chakra-ui/icons';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { TokenInfo } from '@uniswap/token-lists';
 import { Token } from '@/packages/swap-core';
 
@@ -38,19 +38,26 @@ export function getToken(symbol: string, chainId: number): Token | undefined {
 export default function TokenSelect({
   onSelect,
   defaultSymbol,
+  token,
   chainId,
 }: {
   onSelect: (token: Token) => void;
   defaultSymbol?: string;
+  token?: Token;
   chainId: number;
 }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [tokenInfo, setTokenInfo] = useState<TokenInfo | undefined>(getTokenRaw(defaultSymbol, chainId));
-  function handleSelect(token: TokenInfo) {
-    setTokenInfo(token);
-    onSelect(new Token(token.chainId, token.address, token.decimals, token.symbol, token.name));
+  function handleSelect(_token: TokenInfo) {
+    setTokenInfo(_token);
+    onSelect(new Token(_token.chainId, _token.address, _token.decimals, _token.symbol, _token.name));
     onClose();
   }
+  useEffect(() => {
+    if (token) {
+      setTokenInfo(getTokenRaw(token.symbol, chainId));
+    }
+  }, [token]);
   return (
     <>
       <Button
