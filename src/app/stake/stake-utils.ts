@@ -19,6 +19,8 @@ export const useTokenBalance = (token: LocalTokenSymbol): string => {
       balance = formatEther(data.value).slice(0, 6) || '0';
     }
   } else {
+    console.log('token', token);
+
     let { data, error } = useReadContract({
       address: LocalTokenAddress[token],
       abi: TokenABIMap[token],

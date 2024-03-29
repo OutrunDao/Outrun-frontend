@@ -1,5 +1,5 @@
 import { formatEther, parseEther } from 'viem'
-import { useWriteContract, useReadContract, useTransactionConfirmations } from 'wagmi'
+import { useWatchContractEvent, useWriteContract, useReadContract } from 'wagmi'
 import { Text, Button, Flex, useToast } from '@chakra-ui/react'
 import { LocalTokenAddress, ContractAddressMap } from '@/contants/address'
 import { TokenABIMap } from '@/ABI'
@@ -7,6 +7,7 @@ import { ContractAddrKey, LocalTokenSymbol } from '@/types/index.d';
 import { TabType, MintType, StakeType } from '../types'
 
 interface IProps {
+  tokenBalance: string,
   currentTabType: TabType,
   switchState: 0 | 1,
   isConnected: boolean,
@@ -18,6 +19,8 @@ interface IProps {
 const variants = ['solid', 'subtle', 'left-accent', 'top-accent']
 
 const StakeButton = (props: IProps) => {
+  console.log('isConnected', props.isConnected);
+  
   if (!props.isConnected) {
     return <Flex justifyContent='center' alignItems="center" marginTop="22px">
       <w3m-button />
@@ -25,7 +28,7 @@ const StakeButton = (props: IProps) => {
   }
   
   const toast = useToast()
-  const { inputValue, currentTabType, selectedToken, account, switchState } = props
+  const { inputValue, currentTabType, selectedToken, account, switchState, tokenBalance } = props
   const { writeContract, writeContractAsync } = useWriteContract()
   
   if (!account) return <></>
@@ -47,10 +50,7 @@ const StakeButton = (props: IProps) => {
     abi: TokenABIMap[RETH],
     functionName: 'allowance',
     args: [account, ContractAddressMap[ContractAddrKey.RETHStakeManager]]
-  })
-
-  console.log('rETHAllowance', rETHAllowance);
-  
+  })  
     
   const onHandleButton = async () => {
     if (currentTabType === TabType.Mint) {
@@ -58,11 +58,11 @@ const StakeButton = (props: IProps) => {
     } else {
       const val = parseEther(inputValue)
       await onHandleApprove()
-      if (val <= rETHAllowance) {
-        onHandleStake()
-      } else {
-        onHandleApprove()
-      }
+      // if (val <= rETHAllowance) {
+      //   onHandleStake()
+      // } else {
+      //   onHandleApprove()
+      // }
     }
   }
 
@@ -151,6 +151,18 @@ const StakeButton = (props: IProps) => {
     })
     
   }
+
+  console.log('rETHAllowance', rETHAllowance);
+  
+
+  useWatchContractEvent({
+    abi: TokenABIMap[LocalTokenSymbol.RETH],
+    address: RETHAddr,
+    eventName: 'Approve',
+    onLogs(logs) {
+      console.log('New logs!', logs)
+    },
+  })
 
   return (
     <Button

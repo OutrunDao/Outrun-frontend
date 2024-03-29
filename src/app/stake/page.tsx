@@ -1,7 +1,7 @@
 "use client"
 import { Tabs, Flex, TabList, Tab, Box, Text, Container, localStorageManager } from '@chakra-ui/react'
 import { useEffect, useState } from 'react'
-import { useBalance, useAccount } from 'wagmi'
+import { useBalance, useAccount, useSwitchAccount, useWalletClient } from 'wagmi'
 import { formatUnits, formatEther } from 'viem'
 import { tabList, TabType, SwitchState, PairSelectList, TokenPairMap, TokenMint, TokenStake } from './types'
 import { LocalTokenSymbol } from '@/types/index.d'
@@ -20,16 +20,9 @@ export default function Stake () {
   const [switchState, setSwitchState] = useState<SwitchState>(0)
   const [selectedToken, setSelectedToken] = useState<LocalTokenSymbol>(LocalTokenSymbol.ETH)
   const [currList, setCurrList] = useState<Array<LocalTokenSymbol>>(PairSelectList[TabType.Mint][0]) 
-  const [currIndex, setCurrIndex] = useState<number>(0) 
   const currTokenPairMap = TokenPairMap[currentTabType]
-  const { address, isConnected} = useAccount()
-  let balance = "0"
-  const value = useBalance({ address }).data?.value
-
-  if (value) {
-    balance = formatEther(value)
-    balance = parseFloat(balance).toFixed(4)
-  }
+  const { address, isConnected, status} = useAccount()
+    
   // // 切换 Tab
   // useEffect(() => {
     
@@ -63,8 +56,7 @@ export default function Stake () {
 
   const tokenBalance = useTokenBalance(selectedToken)
 
-  console.log('tokenBalance', tokenBalance);
-  
+  console.log('current token: ', selectedToken, ', Balance: ', tokenBalance);
 
   return(
     <Container className="stack" color="#fff" fontSize="14px" marginTop="100px">
@@ -118,6 +110,7 @@ export default function Stake () {
             </Box>
             
             <StakeButton 
+              tokenBalance={tokenBalance}
               switchState={switchState}
               selectedToken={selectedToken}
               account={address}
