@@ -113,7 +113,7 @@ const PoolIndex = () => {
         duration: 3000,
         isClosable: true,
       });
-    } catch (e) {
+    } catch (e: any) {
       toast({
         title: 'Add liquidity failed',
         description: e.message,

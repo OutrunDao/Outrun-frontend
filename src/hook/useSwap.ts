@@ -125,7 +125,7 @@ export function useSwap(isSwap: boolean = false) {
         isClosable: true,
       });
       fetchAllowance();
-    } catch (e) {
+    } catch (e: any) {
       toast({
         title: 'Approve failed',
         description: e.message,
