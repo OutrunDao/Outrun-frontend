@@ -26,7 +26,10 @@ import { useAccount, useChainId, usePublicClient, useWalletClient } from 'wagmi'
 import { Address, formatUnits, getAddress, parseUnits } from 'viem';
 import { useSwap } from '@/hook/useSwap';
 import { Trade } from '@/packages/swap-sdk';
-
+import tokenSwitch, { CurrencyPairType } from '../pool/tokenSwitch';
+import { getRouterContract } from '../pool/getContract';
+import { Percent, Token } from '@/packages/swap-core';
+import { Router as SwapRouter } from '@/packages/swap-sdk';
 const defaultSymbol = 'WETH';
 
 export default function Swap() {
@@ -52,7 +55,43 @@ export default function Swap() {
     setToken1(swapData.token0);
   };
 
-  async function swap() {}
+  async function swap() {
+    if (!swapData.token0 || !swapData.token1 || !account.address || !walletClient) return;
+    setLoading(true);
+    const { methodName, args, value } = SwapRouter.swapCallParameters(swapData.tradeRoute!, {
+      allowedSlippage: new Percent(5, 100),
+      deadline: Math.floor(new Date().getTime() / 1000) + 5 * 60,
+      recipient: account.address,
+    });
+    try {
+      const tx = await getRouterContract(walletClient!).write[methodName](args, { value, account });
+      toast({
+        title: 'transaction success',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+      const data = await publicClient!.waitForTransactionReceipt({
+        hash: tx as Address,
+        confirmations: 1,
+      });
+      toast({
+        title: data.status === 'success' ? 'Add liquidity success' : 'Add liquidity failed',
+        status: data.status === 'success' ? 'success' : 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (e) {
+      toast({
+        title: 'Add liquidity failed',
+        description: e.message,
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+    setLoading(false);
+  }
 
   return (
     <Container

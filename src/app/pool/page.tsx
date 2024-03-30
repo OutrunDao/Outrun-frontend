@@ -25,12 +25,8 @@ import { getRouterContract } from './getContract';
 import UserLiquiditesPannel from './UserLiquidityPannel';
 import { useSwap } from '@/hook/useSwap';
 import { Currency, Token } from '@/packages/swap-core';
-
+import tokenSwitch, { CurrencyPairType } from './tokenSwitch';
 const defaultSymbol = 'WETH';
-
-function isNative(token0: Currency, token1: Currency) {
-  return token0;
-}
 
 const PoolIndex = () => {
   const chainId = useChainId();
@@ -60,6 +56,7 @@ const PoolIndex = () => {
       (+swapData.token0AmountInput! * slippage).toString(),
       swapData.token0.decimals
     );
+    // 计算最小输出逻辑应该不对,待改
     let token1AmountMin = parseUnits(
       (+swapData.token1AmountInput! * slippage).toString(),
       swapData.token1.decimals
@@ -77,39 +74,25 @@ const PoolIndex = () => {
       deadline,
     ];
     let config;
-    if (
-      (swapData.token0.isNative && swapData.token1.symbol === 'USDB') ||
-      (swapData.token0.symbol === 'USDB' && swapData.token1.isNative)
-    ) {
+    const [type, tokenA, tokenB, tokenAInput, tokenBInput, tokenAMin, tokenBMin] = tokenSwitch(
+      swapData.token0,
+      swapData.token1,
+      token0Input,
+      token1Input,
+      token0AmountMin,
+      token1AmountMin
+    );
+    if (type === CurrencyPairType.EthAndUsdb) {
       execution = 'addLiquidityETHAndUSDB';
-      args = swapData.token0.isNative
-        ? [token1Input, token0AmountMin, token1AmountMin, to, deadline]
-        : [token0Input, token1AmountMin, token0AmountMin, to, deadline];
-      config = { value: swapData.token0.isNative ? token0Input : token1Input, account };
-    } else if (swapData.token0.isNative || swapData.token1.isNative) {
+      args = [tokenBInput, tokenAMin, tokenBMin, to, deadline];
+      config = { value: tokenAInput, account };
+    } else if (type === CurrencyPairType.EthAndToken) {
       execution = 'addLiquidityETH';
-      let token = (swapData.token0.isNative ? swapData.token1 : swapData.token0) as Token;
-      args = [
-        token.address,
-        token.equals(swapData.token0) ? token0Input : token1Input,
-        token.equals(swapData.token0) ? token0AmountMin : token1AmountMin,
-        token.equals(swapData.token0) ? token1AmountMin : token0AmountMin,
-        to,
-        deadline,
-      ];
-      config = { value: token.equals(swapData.token0) ? token1Input : token0Input, account };
-    } else if (swapData.token0.symbol === 'USDB' || swapData.token1.symbol === 'USDB') {
-      // todo 不用名称判断
+      args = [(tokenB as Token).address, tokenBInput, tokenAMin, tokenBMin, to, deadline];
+      config = { value: tokenAInput, account };
+    } else if (type === CurrencyPairType.UsdbAndToken) {
       execution = 'addLiquidityUSDB';
-      let [usdbToken, token] =
-        swapData.token0.symbol === 'USDB'
-          ? [swapData.token0, swapData.token1]
-          : [swapData.token1, swapData.token0];
-      let [amountTokenDesired, amountUSDBDesired, amountTokenMin, amountUSDBMin] =
-        swapData.token0.symbol === 'USDB'
-          ? [token0Input, token1Input, token0AmountMin, token1AmountMin]
-          : [token1Input, token0Input, token1AmountMin, token0AmountMin];
-      args = [token.address, amountTokenDesired, amountUSDBDesired, amountTokenMin, amountUSDBMin];
+      args = [(tokenB as Token).address, tokenBInput, tokenAInput, tokenBMin, tokenAMin];
     }
 
     try {
@@ -122,6 +105,7 @@ const PoolIndex = () => {
       });
       const data = await publicClient!.waitForTransactionReceipt({
         hash: tx as Address,
+        confirmations: 1,
       });
       toast({
         title: data.status === 'success' ? 'Add liquidity success' : 'Add liquidity failed',

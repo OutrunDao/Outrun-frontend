@@ -10,10 +10,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { useToast } from '@chakra-ui/react';
 import Decimal from 'decimal.js-light';
 import { CurrencyAmount, Percent, V2_ROUTER_ADDRESSES } from '@/packages/swap-core';
-
+import { TradeType } from '@/packages/swap-core';
 const defaultSymbol = 'WETH';
 
-async function middlePairs() {}
+async function middlePairs() { }
 
 function tokenConvert(token: Currency): Token {
   return token.isNative ? Native.onChain(token.chainId).wrapped : (token as Token);
@@ -53,6 +53,7 @@ export function useSwap(isSwap: boolean = false) {
   const [tokenAllowance, setTokenAllowance] = useState<Decimal[]>([new Decimal(0), new Decimal(0)]);
   const [pair, setPair] = useState<Pair>();
   const [loading, setLoading] = useState<boolean>(false);
+  const [tradeRoute, setTradeRoute] = useState<Trade<Currency, Currency, TradeType>>()
   const toast = useToast();
 
   const fetchAllowance = async () => {
@@ -60,13 +61,13 @@ export function useSwap(isSwap: boolean = false) {
     const allowance0 = token0.isNative
       ? new Decimal(9999999)
       : await (token0 as Token)
-          .allowance(account.address, getAddress(V2_ROUTER_ADDRESSES[chainId]), publicClient!)
-          .catch(() => new Decimal(0));
+        .allowance(account.address, getAddress(V2_ROUTER_ADDRESSES[chainId]), publicClient!)
+        .catch(() => new Decimal(0));
     const allowance1 = token1.isNative
       ? new Decimal(9999999)
       : await (token1 as Token)
-          .allowance(account.address, getAddress(V2_ROUTER_ADDRESSES[chainId]), publicClient!)
-          .catch(() => new Decimal(0));
+        .allowance(account.address, getAddress(V2_ROUTER_ADDRESSES[chainId]), publicClient!)
+        .catch(() => new Decimal(0));
     setTokenAllowance([allowance0, allowance1]);
   };
   const fetchPair = async () => {
@@ -154,6 +155,7 @@ export function useSwap(isSwap: boolean = false) {
       if (!trade) return;
       // setToken1AmountInput(trade.outputAmount.toSignificant(6));
       setToken1AmountInput(trade.minimumAmountOut(new Percent(5, 100)).toSignificant(6));
+      setTradeRoute(trade)
     }
   }
   async function token1AmountInputHandler(value: string) {
@@ -173,6 +175,7 @@ export function useSwap(isSwap: boolean = false) {
       token1AmountInput,
       tokenAllowance,
       pair,
+      tradeRoute
     },
     loading,
     setLoading,

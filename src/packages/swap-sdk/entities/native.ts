@@ -1,5 +1,5 @@
 import invariant from 'tiny-invariant';
-import { Currency, Token, NativeCurrency, WETH9 } from '@/packages/swap-core';
+import { Currency, Token, NativeCurrency, RETH } from '@/packages/swap-core';
 // import { WNATIVE, NATIVE } from '../constants'
 import { Address, PublicClient, formatEther } from 'viem';
 import { getBalance } from 'viem/actions';
@@ -37,7 +37,7 @@ export class Native extends NativeCurrency {
   }
 
   public get wrapped(): Token {
-    return WETH9[this.chainId];
+    return RETH[this.chainId];
   }
 
   private static cache: { [chainId: number]: Native } = {};
