@@ -1,10 +1,12 @@
 import { formatEther, parseEther } from 'viem'
-import { useWatchContractEvent, useWriteContract, useReadContract } from 'wagmi'
-import { Text, Button, Flex, useToast } from '@chakra-ui/react'
+import { useWatchContractEvent, useWriteContract, useReadContract, useTransactionReceipt } from 'wagmi'
+import { Text, Button, Flex, useToast, Box } from '@chakra-ui/react'
 import { LocalTokenAddress, ContractAddressMap } from '@/contants/address'
 import { TokenABIMap } from '@/ABI'
 import { ContractAddrKey, LocalTokenSymbol } from '@/types/index.d';
 import { TabType, MintType, StakeType } from '../types'
+import { useState } from 'react'
+import { getABIByToken } from '../stake-utils'
 
 interface IProps {
   tokenBalance: string,
@@ -19,8 +21,6 @@ interface IProps {
 const variants = ['solid', 'subtle', 'left-accent', 'top-accent']
 
 const StakeButton = (props: IProps) => {
-  console.log('isConnected', props.isConnected);
-  
   if (!props.isConnected) {
     return <Flex justifyContent='center' alignItems="center" marginTop="22px">
       <w3m-button />
@@ -31,39 +31,45 @@ const StakeButton = (props: IProps) => {
   const { inputValue, currentTabType, selectedToken, account, switchState, tokenBalance } = props
   const { writeContract, writeContractAsync } = useWriteContract()
   
-  if (!account) return <></>
+  if (!account) return;
 
   const RETH = LocalTokenSymbol.RETH
   const ETH = LocalTokenSymbol.ETH
   const RUSD = LocalTokenSymbol.RUSD
   const PETH = LocalTokenSymbol.PETH
-  const RETHAddr = LocalTokenAddress[RETH]
   
+  const RETHAddr = LocalTokenAddress[RETH]  
   const RUSDAddr = LocalTokenAddress[RUSD]
   const MintABI = TokenABIMap[LocalTokenSymbol.RETH]
 
-  interface IResult {
-    data: bigint | undefined
-  }
-  const { data: rETHAllowance = 0n}: IResult = useReadContract({
-    address: LocalTokenAddress[RETH],
-    abi: TokenABIMap[RETH],
-    functionName: 'allowance',
-    args: [account, ContractAddressMap[ContractAddrKey.RETHStakeManager]]
-  })  
+  const [approveHash, setApproveHash] = useState<`0x${string}` | undefined>()
+  const approveData = useTransactionReceipt({
+    hash: approveHash
+  })
+  const isApproving = approveHash && approveData?.status === 'pending' ? true : false
     
   const onHandleButton = async () => {
     if (currentTabType === TabType.Mint) {
       onHandleMint()
     } else {
-      const val = parseEther(inputValue)
-      await onHandleApprove()
-      // if (val <= rETHAllowance) {
-      //   onHandleStake()
-      // } else {
-      //   onHandleApprove()
-      // }
+      if (approveData.data?.status === 'success' && approveHash) {
+        onHandleStake()
+      } else {
+        const val = parseEther(inputValue)
+        const approveResult = await onHandleApprove()
+        setApproveHash(approveResult)
+      }
     }
+  }
+
+  const onHandleApprove = async () => {
+    return writeContractAsync({
+      abi: TokenABIMap[LocalTokenSymbol.RETH],
+      address: RETHAddr,
+      account,
+      args: [ContractAddressMap[ContractAddrKey.RETHStakeManager], parseEther(inputValue)],
+      functionName: 'approve',
+    })
   }
 
   const onHandleMint = () => {
@@ -71,6 +77,9 @@ const StakeButton = (props: IProps) => {
     const functionName = isMint ? 'deposit' : 'withdraw'
     const isRETHMint = selectedToken === RETH || selectedToken === ETH
     const address = isRETHMint ? RETHAddr : RUSDAddr
+
+    console.log('functionName', functionName);
+    
 
     const writeContractParams = {
       abi: MintABI,
@@ -111,18 +120,10 @@ const StakeButton = (props: IProps) => {
 
     console.log('writeContractParams', writeContractParams);
   }
-  
-  const onHandleApprove = async () => {
-    return writeContractAsync({
-      abi: TokenABIMap[LocalTokenSymbol.RETH],
-      address: RETHAddr,
-      account,
-      args: [ContractAddressMap[ContractAddrKey.RETHStakeManager], parseEther(inputValue)],
-      functionName: 'approve',
-    })
-  }
 
   const onHandleStake = () => {
+    if (data.status === 'pending' || !approveHash) return
+
     const keyReth = ContractAddrKey.RETHStakeManager
     const keyRusd = ContractAddrKey.RUSDStakeManager
     const RETHStakeManageAddr = ContractAddressMap[keyReth]
@@ -147,22 +148,13 @@ const StakeButton = (props: IProps) => {
       },
       onSuccess: (data) => {
         console.log('onSuccess', writeContractParams);
+      },
+      onSettled: () => {
+        setApproveHash(undefined)
       }
     })
     
   }
-
-  console.log('rETHAllowance', rETHAllowance);
-  
-
-  useWatchContractEvent({
-    abi: TokenABIMap[LocalTokenSymbol.RETH],
-    address: RETHAddr,
-    eventName: 'Approve',
-    onLogs(logs) {
-      console.log('New logs!', logs)
-    },
-  })
 
   return (
     <Button
@@ -179,10 +171,18 @@ const StakeButton = (props: IProps) => {
           <Text>
             { props.switchState === 0 ? MintType.Mint : MintType.Redeem }
           </Text> 
-        : 
-          <Text>
-            { props.switchState === 0 ? StakeType.Stake : StakeType.Unstake }
-          </Text> 
+        :
+        <Box>
+          {
+            isApproving 
+            ?
+              <Text>Approving...</Text>
+            : 
+              <Text>
+                { props.switchState === 0 ? StakeType.Stake : StakeType.Unstake }
+              </Text> 
+          }
+        </Box>
       }
     </Button>
   )

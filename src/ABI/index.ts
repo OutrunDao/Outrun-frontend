@@ -8,5 +8,6 @@ export const TokenABIMap: Record<LocalTokenSymbol | ContractAddrKey, any> = {
   [LocalTokenSymbol.PETH]: RETHABI,
   [LocalTokenSymbol.REY]: RETHABI,
   [LocalTokenSymbol.RUY]: RETHABI,
+  [LocalTokenSymbol.RUSD]: RETHABI,
   [ContractAddrKey.RETHStakeManager]: RETHStakeManager,
 };
