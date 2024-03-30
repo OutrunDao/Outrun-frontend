@@ -26,10 +26,12 @@ function getTokenRaw(symbol: string | undefined, chainId: number): TokenInfo | u
   if (!chainId || !symbol) {
     return undefined;
   }
+  if (symbol === 'ETH') return undefined;
   return tokenList.tokens.find((token) => token.symbol === symbol && token.chainId === chainId);
 }
 
-export function getToken(symbol: string, chainId: number): Token | undefined {
+export function getToken(symbol: string, chainId: number): Token | Native | undefined {
+  if (symbol === 'ETH') return Native.onChain(chainId);
   const token = getTokenRaw(symbol, chainId);
   if (!token) {
     return undefined;
@@ -45,12 +47,12 @@ export default function TokenSelect({
 }: {
   onSelect: (token: Token | Native) => void;
   defaultSymbol?: string;
-  token?: Token;
+  token?: Token | Native;
   chainId: number;
 }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [tokenInfo, setTokenInfo] = useState<TokenInfo | undefined>(getTokenRaw(defaultSymbol, chainId));
-  const [isNative, setIsNative] = useState(false);
+  const [isNative, setIsNative] = useState(defaultSymbol === 'ETH');
   function handleSelect(_token: TokenInfo) {
     setTokenInfo(_token);
     setIsNative(false);

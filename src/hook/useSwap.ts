@@ -11,7 +11,7 @@ import { useToast } from '@chakra-ui/react';
 import Decimal from 'decimal.js-light';
 import { CurrencyAmount, Percent, V2_ROUTER_ADDRESSES } from '@/packages/swap-core';
 import { TradeType } from '@/packages/swap-core';
-const defaultSymbol = 'WETH';
+const defaultSymbol = 'ETH';
 
 async function middlePairs() { }
 
@@ -139,7 +139,7 @@ export function useSwap(isSwap: boolean = false) {
 
   async function token0AmountInputHandler(value: string) {
     setToken0AmountInput(value);
-    if (!pair || !token0 || isNaN(+value)) return;
+    if (!pair || !token0 || !token1 || isNaN(+value)) return;
     if (!isSwap) {
       const price = pair.priceOf(tokenConvert(token0));
       setToken1AmountInput((+price.toSignificant(6) * +value).toFixed(6));
@@ -147,10 +147,10 @@ export function useSwap(isSwap: boolean = false) {
       const [trade] = Trade.bestTradeExactIn(
         [pair],
         CurrencyAmount.fromRawAmount(
-          pair.token0,
+          token0,
           new Decimal(value).times(10 ** pair.token0.decimals).toString()
         ),
-        pair.token1
+        token1!
       );
       if (!trade) return;
       // setToken1AmountInput(trade.outputAmount.toSignificant(6));

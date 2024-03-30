@@ -30,7 +30,7 @@ import tokenSwitch, { CurrencyPairType } from '../pool/tokenSwitch';
 import { getRouterContract } from '../pool/getContract';
 import { Percent, Token } from '@/packages/swap-core';
 import { Router as SwapRouter } from '@/packages/swap-sdk';
-const defaultSymbol = 'WETH';
+const defaultSymbol = 'ETH';
 
 export default function Swap() {
   const chainId = useChainId();
