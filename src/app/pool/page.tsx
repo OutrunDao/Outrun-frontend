@@ -24,7 +24,8 @@ import { Address, formatUnits, getAddress, parseUnits } from 'viem';
 import { getRouterContract } from './getContract';
 import UserLiquiditesPannel from './UserLiquidityPannel';
 import { useSwap } from '@/hook/useSwap';
-
+import { Currency, Token } from '@/packages/swap-core';
+import tokenSwitch, { CurrencyPairType } from './tokenSwitch';
 const defaultSymbol = 'WETH';
 
 const PoolIndex = () => {
@@ -42,23 +43,60 @@ const PoolIndex = () => {
     token0AmountInputHandler,
     token1AmountInputHandler,
     approve,
-  } = useSwap();
+  } = useSwap(false);
 
   async function _addLiquidity() {
     if (!swapData.token0 || !swapData.token1 || !account.address || !walletClient) return;
     setLoading(true);
     const slippage = 0.05;
+    let execution = 'addLiquidity';
+    let token0Input = parseUnits(swapData.token0AmountInput!, swapData.token0.decimals);
+    let token1Input = parseUnits(swapData.token1AmountInput!, swapData.token1.decimals);
+    let token0AmountMin = parseUnits(
+      (+swapData.token0AmountInput! * slippage).toString(),
+      swapData.token0.decimals
+    );
+    // 计算最小输出逻辑应该不对,待改
+    let token1AmountMin = parseUnits(
+      (+swapData.token1AmountInput! * slippage).toString(),
+      swapData.token1.decimals
+    );
+    let deadline = Math.floor(Date.now() / 1000) + 60 * 10;
+    let to = account.address;
+    let args: (string | number | bigint)[] = [
+      (swapData.token0 as Token).address,
+      (swapData.token1 as Token).address,
+      token0Input,
+      token1Input,
+      token0AmountMin,
+      token1AmountMin,
+      to,
+      deadline,
+    ];
+    let config;
+    const [type, tokenA, tokenB, tokenAInput, tokenBInput, tokenAMin, tokenBMin] = tokenSwitch(
+      swapData.token0,
+      swapData.token1,
+      token0Input,
+      token1Input,
+      token0AmountMin,
+      token1AmountMin
+    );
+    if (type === CurrencyPairType.EthAndUsdb) {
+      execution = 'addLiquidityETHAndUSDB';
+      args = [tokenBInput, tokenAMin, tokenBMin, to, deadline];
+      config = { value: tokenAInput, account };
+    } else if (type === CurrencyPairType.EthAndToken) {
+      execution = 'addLiquidityETH';
+      args = [(tokenB as Token).address, tokenBInput, tokenAMin, tokenBMin, to, deadline];
+      config = { value: tokenAInput, account };
+    } else if (type === CurrencyPairType.UsdbAndToken) {
+      execution = 'addLiquidityUSDB';
+      args = [(tokenB as Token).address, tokenBInput, tokenAInput, tokenBMin, tokenAMin];
+    }
+
     try {
-      const tx = await getRouterContract(walletClient!).write.addLiquidity([
-        swapData.token0.address,
-        swapData.token1.address,
-        parseUnits(swapData.token0AmountInput!, swapData.token0.decimals),
-        parseUnits(swapData.token1AmountInput!, swapData.token1.decimals),
-        parseUnits((+swapData.token0AmountInput! * slippage).toString(), swapData.token0.decimals),
-        parseUnits((+swapData.token1AmountInput! * slippage).toString(), swapData.token1.decimals),
-        account.address,
-        Math.floor(Date.now() / 1000) + 60 * 10,
-      ]);
+      const tx = await getRouterContract(walletClient!).write[execution](args, config);
       toast({
         title: 'transaction success',
         status: 'success',
@@ -67,6 +105,7 @@ const PoolIndex = () => {
       });
       const data = await publicClient!.waitForTransactionReceipt({
         hash: tx as Address,
+        confirmations: 1,
       });
       toast({
         title: data.status === 'success' ? 'Add liquidity success' : 'Add liquidity failed',
@@ -74,7 +113,7 @@ const PoolIndex = () => {
         duration: 3000,
         isClosable: true,
       });
-    } catch (e) {
+    } catch (e: any) {
       toast({
         title: 'Add liquidity failed',
         description: e.message,

@@ -23,11 +23,14 @@ import { ArrowDownIcon } from '@chakra-ui/icons';
 import { TradeSettingsModal } from './TradeSettingsModal';
 import { Fetcher } from '@/packages/swap-sdk/fetcher';
 import { useAccount, useChainId, usePublicClient, useWalletClient } from 'wagmi';
-import { V2_ROUTER_ADDRESSES } from '@/packages/swap-core';
 import { Address, formatUnits, getAddress, parseUnits } from 'viem';
 import { useSwap } from '@/hook/useSwap';
-
-const defaultSymbol = 'WETH';
+import { Trade } from '@/packages/swap-sdk';
+import tokenSwitch, { CurrencyPairType } from '../pool/tokenSwitch';
+import { getRouterContract } from '../pool/getContract';
+import { Percent, Token } from '@/packages/swap-core';
+import { Router as SwapRouter } from '@/packages/swap-sdk';
+const defaultSymbol = 'ETH';
 
 export default function Swap() {
   const chainId = useChainId();
@@ -44,7 +47,7 @@ export default function Swap() {
     token0AmountInputHandler,
     token1AmountInputHandler,
     approve,
-  } = useSwap();
+  } = useSwap(true);
 
   const onReverse = () => {
     if (!swapData.token0 || !swapData.token1) return;
@@ -52,8 +55,42 @@ export default function Swap() {
     setToken1(swapData.token0);
   };
 
-  function swap() {
-    // SwapRouter.swapCallParameters(bestRoutes, tradeOptions);
+  async function swap() {
+    if (!swapData.token0 || !swapData.token1 || !account.address || !walletClient) return;
+    setLoading(true);
+    const { methodName, args, value } = SwapRouter.swapCallParameters(swapData.tradeRoute!, {
+      allowedSlippage: new Percent(5, 100),
+      deadline: Math.floor(new Date().getTime() / 1000) + 5 * 60,
+      recipient: account.address,
+    });
+    try {
+      const tx = await getRouterContract(walletClient!).write[methodName](args, { value, account });
+      toast({
+        title: 'transaction success',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+      const data = await publicClient!.waitForTransactionReceipt({
+        hash: tx as Address,
+        confirmations: 1,
+      });
+      toast({
+        title: data.status === 'success' ? 'Add liquidity success' : 'Add liquidity failed',
+        status: data.status === 'success' ? 'success' : 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (e: any) {
+      toast({
+        title: 'Add liquidity failed',
+        description: e.message,
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+    setLoading(false);
   }
 
   return (

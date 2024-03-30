@@ -1,15 +1,16 @@
-import { Container, Center, Icon, Card, CardBody, Text } from '@chakra-ui/react';
-import { useAccount, useChainId, usePublicClient } from 'wagmi';
+import { Container, Center, Button, Icon, Card, CardBody, Text, useToast } from '@chakra-ui/react';
+import { useAccount, useChainId, usePublicClient, useWalletClient } from 'wagmi';
 import { execute, UserLiquiditiesDocument, LiquidityHolding } from '@/subgraph';
 import { useQuery } from '@tanstack/react-query';
 import { Pair } from '@/packages/swap-sdk';
 import { use, useEffect, useState } from 'react';
 import { Fetcher } from '@/packages/swap-sdk/fetcher';
 import { map, sleep } from 'radash';
-import { Address, ContractFunctionExecutionError } from 'viem';
-import { Token } from '@/packages/swap-core';
+import { Address, ContractFunctionExecutionError, getAddress, parseUnits } from 'viem';
+import { Token, V2_ROUTER_ADDRESSES } from '@/packages/swap-core';
 import Decimal from 'decimal.js-light';
-
+import { getRouterContract } from './getContract';
+import { waitForTransactionReceipt } from 'viem/actions';
 function LiquidityRatio({ liquidityToken, userAddress }: { liquidityToken: Token; userAddress: Address }) {
   const publicClient = usePublicClient();
   const [totalSupply, setTotalSupply] = useState<Decimal>(new Decimal(0));
@@ -19,6 +20,7 @@ function LiquidityRatio({ liquidityToken, userAddress }: { liquidityToken: Token
     const fetchTotalSupply = async () => {
       const totalSupply = await liquidityToken.totalSupply(publicClient!);
       const balance = await liquidityToken.balanceOf(userAddress, publicClient!);
+      // console.log(totalSupply.toString(), balance.toString());
       setTotalSupply(totalSupply);
       setBalance(balance);
     };
@@ -34,6 +36,8 @@ function LiquidityRatio({ liquidityToken, userAddress }: { liquidityToken: Token
 export default function UserLiquiditesPannel() {
   const chainId = useChainId();
   const account = useAccount();
+  const { data: walletClient } = useWalletClient();
+  const toast = useToast();
   const publicClient = usePublicClient();
   const [pairs, setPairs] = useState<Array<Pair>>([]);
   const { data: userLiquidites } = useQuery({
@@ -66,6 +70,34 @@ export default function UserLiquiditesPannel() {
       });
   }, [userLiquidites]);
 
+  async function removeLiquidity(pair: Pair) {
+    const router = getRouterContract(walletClient!);
+    const liquidityTokenBalance = await pair.liquidityToken.balanceOf(account.address!, publicClient!);
+    const deadline = Math.floor(new Date().getTime() / 1000) + 10 * 60;
+    await pair.liquidityToken.approve(
+      getAddress(V2_ROUTER_ADDRESSES[chainId]),
+      parseUnits(liquidityTokenBalance.toString(), 18),
+      walletClient!
+    );
+    const tx = await router.write.removeLiquidity([
+      pair.token0.address,
+      pair.token1.address,
+      parseUnits(liquidityTokenBalance.toString(), 18),
+      0,
+      0,
+      account.address,
+      deadline,
+    ]);
+    toast({
+      status: 'success',
+      title: 'add transaction success',
+    });
+    const data = await waitForTransactionReceipt(publicClient!, {
+      hash: tx,
+    });
+    console.log(data);
+  }
+
   return (
     <Container>
       {pairs && pairs.length ? (
@@ -82,6 +114,7 @@ export default function UserLiquiditesPannel() {
                 your share:{' '}
                 <LiquidityRatio liquidityToken={pair.liquidityToken} userAddress={account.address!} />
               </Text>
+              <Button onClick={() => removeLiquidity(pair)}>移除流动性</Button>
             </CardBody>
           </Card>
         ))

@@ -42,6 +42,7 @@ export type Scalars = {
   BigInt: any;
   Bytes: any;
   Int8: any;
+  Timestamp: any;
 };
 
 export type Aggregation_interval =
@@ -465,6 +466,7 @@ export type ResolversTypes = ResolversObject<{
   Query: ResolverTypeWrapper<{}>;
   String: ResolverTypeWrapper<Scalars['String']>;
   Subscription: ResolverTypeWrapper<{}>;
+  Timestamp: ResolverTypeWrapper<Scalars['Timestamp']>;
   _Block_: ResolverTypeWrapper<_Block_>;
   _Meta_: ResolverTypeWrapper<_Meta_>;
   _SubgraphErrorPolicy_: _SubgraphErrorPolicy_;
@@ -489,6 +491,7 @@ export type ResolversParentTypes = ResolversObject<{
   Query: {};
   String: Scalars['String'];
   Subscription: {};
+  Timestamp: Scalars['Timestamp'];
   _Block_: _Block_;
   _Meta_: _Meta_;
 }>;
@@ -560,6 +563,10 @@ export type SubscriptionResolvers<ContextType = MeshContext, ParentType extends 
   _meta?: SubscriptionResolver<Maybe<ResolversTypes['_Meta_']>, "_meta", ParentType, ContextType, Partial<Subscription_metaArgs>>;
 }>;
 
+export interface TimestampScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Timestamp'], any> {
+  name: 'Timestamp';
+}
+
 export type _Block_Resolvers<ContextType = MeshContext, ParentType extends ResolversParentTypes['_Block_'] = ResolversParentTypes['_Block_']> = ResolversObject<{
   hash?: Resolver<Maybe<ResolversTypes['Bytes']>, ParentType, ContextType>;
   number?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
@@ -584,6 +591,7 @@ export type Resolvers<ContextType = MeshContext> = ResolversObject<{
   PairCreated?: PairCreatedResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   Subscription?: SubscriptionResolvers<ContextType>;
+  Timestamp?: GraphQLScalarType;
   _Block_?: _Block_Resolvers<ContextType>;
   _Meta_?: _Meta_Resolvers<ContextType>;
 }>;
@@ -640,7 +648,7 @@ const outrunTransforms = [];
 const additionalTypeDefs = [] as any[];
 const outrunHandler = new GraphqlHandler({
               name: "outrun",
-              config: {"endpoint":"https://api.studio.thegraph.com/query/68891/outrun/0.0.3"},
+              config: {"endpoint":"https://api.studio.thegraph.com/query/68891/outrun/0.0.4"},
               baseDir,
               cache,
               pubsub,

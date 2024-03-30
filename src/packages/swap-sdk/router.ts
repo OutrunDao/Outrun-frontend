@@ -8,6 +8,8 @@ import {
 } from '@/packages/swap-core';
 import { Trade } from './entities';
 import invariant from 'tiny-invariant';
+import { USDB } from '@/packages/swap-core'
+
 
 /**
  * Options for producing the arguments to send call to the router.
@@ -73,7 +75,7 @@ export abstract class Router {
   /**
    * Cannot be constructed.
    */
-  private constructor() {}
+  private constructor() { }
   /**
    * Produces the on-chain method name to call and the hex encoded parameters to pass as arguments for a given trade.
    * @param trade to produce call parameters for
@@ -106,16 +108,44 @@ export abstract class Router {
     switch (trade.tradeType) {
       case TradeType.EXACT_INPUT:
         if (etherIn) {
-          methodName = useFeeOnTransfer
-            ? 'swapExactETHForTokensSupportingFeeOnTransferTokens'
-            : 'swapExactETHForTokens';
+          if (trade.outputAmount.currency.equals(USDB[trade.outputAmount.currency.chainId])) {
+            methodName = useFeeOnTransfer
+              ? 'swapExactETHForUSDBSupportingFeeOnTransferTokens'
+              : 'swapExactETHForUSDB';
+          } else {
+            methodName = useFeeOnTransfer
+              ? 'swapExactETHForTokensSupportingFeeOnTransferTokens'
+              : 'swapExactETHForTokens';
+          }
+
           // (uint amountOutMin, address[] calldata path, address to, uint deadline)
           args = [amountOut, path, to, deadline];
           value = amountIn;
         } else if (etherOut) {
+          if (trade.inputAmount.currency.equals(USDB[trade.inputAmount.currency.chainId])) {
+            methodName = useFeeOnTransfer
+              ? 'swapExactUSDBForETHSupportingFeeOnTransferTokens'
+              : 'swapExactUSDBForETH';
+          } else {
+            methodName = useFeeOnTransfer
+              ? 'swapExactTokensForETHSupportingFeeOnTransferTokens'
+              : 'swapExactTokensForETH';
+          }
+
+          // (uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
+          args = [amountIn, amountOut, path, to, deadline];
+          value = ZERO_HEX;
+        } else if (trade.inputAmount.currency.equals(USDB[trade.inputAmount.currency.chainId])) {
           methodName = useFeeOnTransfer
-            ? 'swapExactTokensForETHSupportingFeeOnTransferTokens'
-            : 'swapExactTokensForETH';
+            ? 'swapExactUSDBForTokensSupportingFeeOnTransferTokens'
+            : 'swapExactUSDBForTokens';
+          // (uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
+          args = [amountIn, amountOut, path, to, deadline];
+          value = ZERO_HEX;
+        } else if (trade.outputAmount.currency.equals(USDB[trade.outputAmount.currency.chainId])) {
+          methodName = useFeeOnTransfer
+            ? 'swapExactTokensForUSDBSupportingFeeOnTransferTokens'
+            : 'swapExactTokensForUSDB';
           // (uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
           args = [amountIn, amountOut, path, to, deadline];
           value = ZERO_HEX;
@@ -131,12 +161,31 @@ export abstract class Router {
       case TradeType.EXACT_OUTPUT:
         invariant(!useFeeOnTransfer, 'EXACT_OUT_FOT');
         if (etherIn) {
-          methodName = 'swapETHForExactTokens';
+          if (trade.outputAmount.currency.equals(USDB[trade.outputAmount.currency.chainId])) {
+            methodName = 'swapETHForExactUSDB'
+          } else {
+            methodName = 'swapETHForExactTokens';
+          }
           // (uint amountOut, address[] calldata path, address to, uint deadline)
           args = [amountOut, path, to, deadline];
           value = amountIn;
         } else if (etherOut) {
-          methodName = 'swapTokensForExactETH';
+          if (trade.inputAmount.currency.equals(USDB[trade.inputAmount.currency.chainId])) {
+            methodName = 'swapUSDBForExactETH'
+          } else {
+
+            methodName = 'swapTokensForExactETH';
+          }
+          // (uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
+          args = [amountOut, amountIn, path, to, deadline];
+          value = ZERO_HEX;
+        } else if (trade.inputAmount.currency.equals(USDB[trade.inputAmount.currency.chainId])) {
+          methodName = 'swapUSDBForExactTokens';
+          // (uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
+          args = [amountOut, amountIn, path, to, deadline];
+          value = ZERO_HEX;
+        } else if (trade.outputAmount.currency.equals(USDB[trade.outputAmount.currency.chainId])) {
+          methodName = 'swapTokensForExactUSDB';
           // (uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
           args = [amountOut, amountIn, path, to, deadline];
           value = ZERO_HEX;
