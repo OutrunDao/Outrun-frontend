@@ -12,7 +12,6 @@ const PriceCoin = (props: IProps): ReactElement => {
 
   const getPrice = (selectedTokenPair: LocalTokenSymbol) => {
     console.log('selectedTokenPair', selectedTokenPair);
-    
     return 0;
   }
 

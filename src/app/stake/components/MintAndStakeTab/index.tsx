@@ -6,15 +6,13 @@ import { LocalTokenSymbol } from "@/types"
 
 interface IProps {
   currentTabType: TabType,
-  switchState: 0 | 1,
-  selectedToken: LocalTokenSymbol
 }
 
 const HandleButton =(props: IProps) => {
-  const { currentTabType, switchState, selectedToken }  = props
+  const { currentTabType }  = props
 
   if (currentTabType === TabType.Mint) {
-    return <MintAndRedeem selectedToken={selectedToken} switchState={switchState}></MintAndRedeem>
+    return <MintAndRedeem></MintAndRedeem>
   }
 
   return <StakeAndUnstake></StakeAndUnstake>
