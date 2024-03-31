@@ -32,7 +32,7 @@ export abstract class Fetcher {
   /**
    * Cannot be constructed.
    */
-  private constructor() {}
+  private constructor() { }
 
   /**
    * Fetch information for a given token on the given chain, using the given viem provider.
@@ -58,15 +58,17 @@ export abstract class Fetcher {
       typeof TOKEN_DECIMALS_CACHE?.[chainId]?.[address] === 'number'
         ? TOKEN_DECIMALS_CACHE[chainId][address]
         : await erc20.read.decimals([]).then((decimals): number => {
-            TOKEN_DECIMALS_CACHE = {
-              ...TOKEN_DECIMALS_CACHE,
-              [chainId]: {
-                ...TOKEN_DECIMALS_CACHE?.[chainId],
-                [address]: decimals,
-              },
-            };
-            return decimals;
-          });
+          // @ts-ignore
+          TOKEN_DECIMALS_CACHE = {
+            ...TOKEN_DECIMALS_CACHE,
+            [chainId]: {
+              ...TOKEN_DECIMALS_CACHE?.[chainId],
+              [address]: decimals,
+            },
+          };
+          // @ts-ignore
+          return decimals;
+        });
     let _symbol = '';
     if (!symbol) {
       _symbol = (await erc20.read.symbol().catch(() => address)) as string;

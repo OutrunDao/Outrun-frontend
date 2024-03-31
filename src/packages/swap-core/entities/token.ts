@@ -4,7 +4,7 @@ import { BaseCurrency } from './baseCurrency';
 import { Currency } from './currency';
 import { BigintIsh } from '../constants';
 import JSBI from 'jsbi';
-import { PublicClient, getContract, Address, formatUnits, WalletClient } from 'viem';
+import { PublicClient, getContract, Address, formatUnits, WalletClient, getAddress } from 'viem';
 import Decimal from 'decimal.js-light';
 import { getBalance } from 'viem/actions';
 
@@ -183,6 +183,7 @@ export class Token extends BaseCurrency {
         wallet: walletClient,
       },
     });
+    // @ts-ignore
     return await erc20.write.approve([spender, value]);
   }
 }

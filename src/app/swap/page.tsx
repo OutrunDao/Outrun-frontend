@@ -17,16 +17,11 @@ import {
   VStack,
 } from '@chakra-ui/react';
 import TokenSelect, { getToken } from '@/components/TokenSelect';
-import { useEffect, useMemo, useState } from 'react';
-import { TokenInfo } from '@uniswap/token-lists';
 import { ArrowDownIcon } from '@chakra-ui/icons';
 import { TradeSettingsModal } from './TradeSettingsModal';
-import { Fetcher } from '@/packages/swap-sdk/fetcher';
 import { useAccount, useChainId, usePublicClient, useWalletClient } from 'wagmi';
 import { Address, formatUnits, getAddress, parseUnits } from 'viem';
 import { useSwap } from '@/hook/useSwap';
-import { Trade } from '@/packages/swap-sdk';
-import tokenSwitch, { CurrencyPairType } from '../pool/tokenSwitch';
 import { getRouterContract } from '../pool/getContract';
 import { Percent, Token } from '@/packages/swap-core';
 import { Router as SwapRouter } from '@/packages/swap-sdk';
@@ -76,14 +71,14 @@ export default function Swap() {
         confirmations: 1,
       });
       toast({
-        title: data.status === 'success' ? 'Add liquidity success' : 'Add liquidity failed',
+        title: data.status === 'success' ? 'swap success' : 'swap failed',
         status: data.status === 'success' ? 'success' : 'error',
         duration: 3000,
         isClosable: true,
       });
     } catch (e: any) {
       toast({
-        title: 'Add liquidity failed',
+        title: 'swap failed',
         description: e.message,
         status: 'error',
         duration: 3000,
