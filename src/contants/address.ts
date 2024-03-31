@@ -13,6 +13,7 @@ export const ContractAddressMap: AddrMap = {
 };
 
 export const LocalTokenAddress: Record<LocalTokenSymbol, `0x${string}`> = {
+  [LocalTokenSymbol.ETH]: '0xdaC9Ed63dada8A7005ce2c69F8FF8bF6C272a3D0',
   [LocalTokenSymbol.RETH]: '0xdaC9Ed63dada8A7005ce2c69F8FF8bF6C272a3D0',
   [LocalTokenSymbol.PETH]: '0x71e6A18c57F8794134A8e7088A61bBec22Cf1777',
   [LocalTokenSymbol.REY]: '0xB3E81F1552d6be2410DDe248192bf40b8037d89c',

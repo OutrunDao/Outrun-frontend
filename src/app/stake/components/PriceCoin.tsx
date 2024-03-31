@@ -8,9 +8,11 @@ interface IProps {
 
 const PriceCoin = (props: IProps): ReactElement => {
   const { selectedTokenPair } = props
-  const [price, setPrice] = useState<string>(0)
+  const [price, setPrice] = useState<string>('0')
 
-  const getPrice = (selectedTokenPair) => {
+  const getPrice = (selectedTokenPair: LocalTokenSymbol) => {
+    console.log('selectedTokenPair', selectedTokenPair);
+    
     return 0;
   }
 

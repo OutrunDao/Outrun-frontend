@@ -1,9 +1,9 @@
 import { LocalTokenSymbol, ContractAddrKey } from '@/types/index.d';
-import { add } from '@/contants/address';
 import RETHABI from './RETH';
 import RETHStakeManager from './RETHStakeManager';
 
-export const TokenABIMap: Record<LocalTokenSymbol | ContractAddrKey, any> = {
+export const TokenABIMap = {
+  [LocalTokenSymbol.ETH]: RETHABI,
   [LocalTokenSymbol.RETH]: RETHABI,
   [LocalTokenSymbol.PETH]: RETHABI,
   [LocalTokenSymbol.REY]: RETHABI,

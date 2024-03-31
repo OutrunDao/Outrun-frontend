@@ -1,33 +1,28 @@
 "use client"
-import { Tabs, Flex, TabList, Tab, Box, Text, Container, localStorageManager } from '@chakra-ui/react'
+import { Tabs, Flex, TabList, Tab, Box, Text, Container } from '@chakra-ui/react'
 import { useEffect, useState } from 'react'
-import { useBalance, useAccount, useSwitchAccount, useWalletClient } from 'wagmi'
-import { formatUnits, formatEther } from 'viem'
-import { tabList, TabType, SwitchState, PairSelectList, TokenPairMap, TokenMint, TokenStake } from './types'
+import { observer } from "mobx-react-lite"
+import { useAccount } from 'wagmi'
+import { tabList, TabType, SwitchState, PairSelectList, TokenPairMap } from './types'
 import { LocalTokenSymbol } from '@/types/index.d'
 import { ArrowDownIcon } from '@chakra-ui/icons'
 
-import { useTokenBalance } from './stake-utils'
-
 import PriceCoin from './components/PriceCoin'
-import BalanceCoin from './components/BalanceCoin'
-import StakeButton from './components/StakeButton'
+import BalanceCoin from './components/Balance'
+// import StakeButton from './components/StakeButton'
 import InputSelect from './components/InputSelect'
+import MintAndStakeTab from './components/MintAndStakeTab'
 
-export default function Stake () {
+import store from '@/app/stake/StakeStore'
+
+const  Stake = () => {
   const [currentTabType, setTabId] = useState<TabType>(TabType.Mint)
   const [inputValue, setInputValue] = useState<string>("0")
   const [switchState, setSwitchState] = useState<SwitchState>(0)
   const [selectedToken, setSelectedToken] = useState<LocalTokenSymbol>(LocalTokenSymbol.ETH)
   const [currList, setCurrList] = useState<Array<LocalTokenSymbol>>(PairSelectList[TabType.Mint][0]) 
-  const currTokenPairMap = TokenPairMap[currentTabType]
   const { address, isConnected, status} = useAccount()
     
-  // // 切换 Tab
-  // useEffect(() => {
-    
-  // }, [currentTabType])
-  
   const setNewList = (newState: SwitchState) => {
     const newList = PairSelectList[currentTabType][newState]
     setCurrList(newList)
@@ -45,18 +40,18 @@ export default function Stake () {
     }
   }, [currentTabType])
 
- 
+
+  type CurrTokenPair = typeof TokenPairMap[TabType]
+  const currTokenPairMap: CurrTokenPair = TokenPairMap[currentTabType]
 
   const onSwitch =() => {
     const newState = switchState === 0 ? 1 : 0
     setSwitchState(newState)
     setNewList(newState)
-    setSelectedToken(currTokenPairMap[selectedToken])
+    if (currentTabType === TabType.Mint) {   
+      setSelectedToken(currTokenPairMap[selectedToken as keyof CurrTokenPair])
+    }
   }
-
-  const tokenBalance = useTokenBalance(selectedToken)
-
-  console.log('current token: ', selectedToken, ', Balance: ', tokenBalance);
 
   return(
     <Container className="stack" color="#fff" fontSize="14px" marginTop="100px">
@@ -76,13 +71,15 @@ export default function Stake () {
                 selectedToken={selectedToken}
                 currList={currList}
                 inputValue={inputValue}
-                onChangeInput={(value) => setInputValue(value)}
+                onChangeInput={(value) => {
+                  store.inputValue = value
+                  setInputValue(value)
+                }}
                 onChangeSelect={(value) => setSelectedToken(value)}
                 currentTabType={currentTabType}></InputSelect>
               
               <BalanceCoin
                 isConnected={isConnected}
-                tokenBalance={tokenBalance}
                 selectedToken={selectedToken}
                 setMintValue={(value) => setInputValue(value)} ></BalanceCoin>
             </Box>
@@ -92,7 +89,7 @@ export default function Stake () {
             </Flex>
             
             {/* 带价格的 coin */}
-            <PriceCoin selectedTokenPair={currTokenPairMap[selectedToken]}></PriceCoin>
+            <PriceCoin selectedTokenPair={currTokenPairMap[selectedToken as keyof CurrTokenPair]}></PriceCoin>
 
             <Box marginTop="32px" padding="16px" backgroundColor="rgb(52 30 56 / 50%)" borderRadius="12px">
               <Flex justifyContent="space-between" marginTop="12px">
@@ -108,15 +105,18 @@ export default function Stake () {
                 <Text color="rgb(170, 170, 191)">1.00 ETH = 1.00 RETH</Text>
               </Flex>
             </Box>
-            
-            <StakeButton 
-              tokenBalance={tokenBalance}
-              switchState={switchState}
-              selectedToken={selectedToken}
-              account={address}
-              inputValue={inputValue}
-              isConnected={isConnected} 
-              currentTabType={currentTabType}></StakeButton>
+            {
+              isConnected 
+              ? <MintAndStakeTab
+                  currentTabType={currentTabType}
+                  switchState={switchState}
+                  selectedToken={selectedToken}
+                 /> 
+              : 
+                <Flex justifyContent='center' alignItems="center" marginTop="22px">
+                  <w3m-button />
+                </Flex>
+            }
           </Container>
         </Tabs>
       </Box>
@@ -124,3 +124,5 @@ export default function Stake () {
     </Container>
   ) 
 }
+
+export default observer(Stake);
