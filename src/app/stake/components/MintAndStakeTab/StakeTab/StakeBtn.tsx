@@ -1,6 +1,6 @@
 import { observer } from "mobx-react-lite"
 import { useAccount, useWriteContract, useTransactionReceipt } from 'wagmi';
-import {Button} from '@chakra-ui/react'
+import { Button, useToast } from '@chakra-ui/react'
 import store from '@/app/stake/StakeStore'
 import RETHStakeManager from '@/ABI/RETHStakeManager'
 import { ContractAddressMap, LocalTokenAddress } from "@/contants/address"
@@ -44,6 +44,7 @@ const StakeBtn = () => {
   const { writeContract, writeContractAsync } = useWriteContract()
   const [approveHash, setApproveHash] = useState<`0x${string}`>()
   const [confirmLoading, setConfirmLoading] = useState<boolean>(false)
+  const toast = useToast()
 
   const onHandleApprove = async () => {
     try {
@@ -80,9 +81,17 @@ const StakeBtn = () => {
     writeContract(params, {
       onError: (error) => {
         console.error('onStake error', error);
+        toast({
+          title: 'Stake Failed',
+          status: "error"
+        })
       },
       onSuccess: (data) => {
         console.log('onStake error', data);
+        toast({
+          title: 'Stake Successful',
+          status: "success"
+        })
       },
       onSettled: () => {
         store.isLoadingBtn = false
