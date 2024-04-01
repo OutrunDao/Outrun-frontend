@@ -11,11 +11,13 @@ import { useToast } from '@chakra-ui/react';
 import Decimal from 'decimal.js-light';
 import { CurrencyAmount, Percent, V2_ROUTER_ADDRESSES } from '@/packages/swap-core';
 import { TradeType } from '@/packages/swap-core';
+import { USDB, RUSD } from '@/packages/swap-core';
 const defaultSymbol = 'ETH';
 
 async function middlePairs() { }
 
 function tokenConvert(token: Currency): Token {
+  if (token.equals(USDB[token.chainId])) return RUSD[token.chainId]
   return token.isNative ? Native.onChain(token.chainId).wrapped : (token as Token);
 }
 
@@ -48,8 +50,8 @@ export function useSwap(isSwap: boolean = false) {
   const [token1, setToken1] = useState<Currency>();
   const [token0Balance, setToken0Balance] = useState<Decimal>(new Decimal(0));
   const [token1Balance, setToken1Balance] = useState<Decimal>(new Decimal(0));
-  const [token0AmountInput, setToken0AmountInput] = useState<string>();
-  const [token1AmountInput, setToken1AmountInput] = useState<string>();
+  const [token0AmountInput, setToken0AmountInput] = useState<string>('');
+  const [token1AmountInput, setToken1AmountInput] = useState<string>('');
   const [tokenAllowance, setTokenAllowance] = useState<Decimal[]>([new Decimal(0), new Decimal(0)]);
   const [pair, setPair] = useState<Pair>();
   const [loading, setLoading] = useState<boolean>(false);
@@ -108,14 +110,14 @@ export function useSwap(isSwap: boolean = false) {
       if (tokenForApprove.isNative) return;
       const tx = await tokenForApprove.approve(
         getAddress(V2_ROUTER_ADDRESSES[chainId]),
-        maxUint256,
-        // parseUnits(
-        //   tokenForApprove.equals(token0) ? token0AmountInput!.toString() : token1AmountInput!.toString(),
-        //   tokenForApprove.decimals
-        // ),
+        // maxUint256,
+        parseUnits(
+          tokenForApprove.equals(token0) ? token0AmountInput!.toString() : token1AmountInput!.toString(),
+          tokenForApprove.decimals
+        ),
         walletClient!
       );
-      await publicClient!.waitForTransactionReceipt({
+      await publicClient!.getTransactionReceipt({
         hash: tx as Address,
       });
       toast({

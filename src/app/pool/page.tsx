@@ -26,6 +26,7 @@ import UserLiquiditesPannel from './UserLiquidityPannel';
 import { useSwap } from '@/hook/useSwap';
 import { Currency, Token } from '@/packages/swap-core';
 import tokenSwitch, { CurrencyPairType } from './tokenSwitch';
+import { retry } from 'radash';
 const defaultSymbol = 'WETH';
 
 const PoolIndex = () => {
@@ -82,6 +83,7 @@ const PoolIndex = () => {
       token0AmountMin,
       token1AmountMin
     );
+    // console.log(type, tokenA, tokenB, tokenAInput, tokenBInput, tokenAMin, tokenBMin);
     if (type === CurrencyPairType.EthAndUsdb) {
       execution = 'addLiquidityETHAndUSDB';
       args = [tokenBInput, tokenAMin, tokenBMin, to, deadline];
@@ -92,7 +94,7 @@ const PoolIndex = () => {
       config = { value: tokenAInput, account };
     } else if (type === CurrencyPairType.UsdbAndToken) {
       execution = 'addLiquidityUSDB';
-      args = [(tokenB as Token).address, tokenBInput, tokenAInput, tokenBMin, tokenAMin];
+      args = [(tokenB as Token).address, tokenBInput, tokenAInput, tokenBMin, tokenAMin, to, deadline];
     }
 
     try {
@@ -103,10 +105,12 @@ const PoolIndex = () => {
         duration: 3000,
         isClosable: true,
       });
-      const data = await publicClient!.waitForTransactionReceipt({
-        hash: tx as Address,
-        confirmations: 1,
+      const data = await retry({ times: 10, delay: 5000 }, async () => {
+        return await publicClient!.getTransactionReceipt({
+          hash: tx as Address,
+        });
       });
+      console.log(data);
       toast({
         title: data.status === 'success' ? 'Add liquidity success' : 'Add liquidity failed',
         status: data.status === 'success' ? 'success' : 'error',
@@ -199,6 +203,8 @@ const PoolIndex = () => {
           swapData.token0AmountInput &&
           swapData.token1AmountInput &&
           swapData.token0 &&
+          swapData.token0Balance.gte(swapData.token0AmountInput) &&
+          swapData.token1Balance.gte(swapData.token1AmountInput) &&
           (swapData.tokenAllowance[0].lessThan(swapData.token0AmountInput) ||
             swapData.tokenAllowance[1].lessThan(swapData.token1AmountInput)) ? (
             <Button width={'100%'} mt={4} size="lg" variant="custom" onClick={approve} isLoading={loading}>
