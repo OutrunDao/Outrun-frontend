@@ -42,7 +42,8 @@ const StakeBtn = () => {
   const tokenAddress = isEthHandle ? LocalTokenAddress.RETH : LocalTokenAddress.RUSD
   const account = useAccount().address;  
   const { writeContract, writeContractAsync } = useWriteContract()
-  const [approveHash, setApproveHash] = useState<`0x${string}`>('0x')
+  const [approveHash, setApproveHash] = useState<`0x${string}`>()
+  const [confirmLoading, setConfirmLoading] = useState<boolean>(false)
 
   const onHandleApprove = async () => {
     try {
@@ -55,6 +56,7 @@ const StakeBtn = () => {
         functionName: 'approve',
       })
       setApproveHash(approveHash || '0x')
+      store.isLoadingBtn = false
     } catch (error) {
       store.isLoadingBtn = false
     }
@@ -65,7 +67,8 @@ const StakeBtn = () => {
     hash: approveHash
   })
 
-  if (approveData && approveData.data?.status === 'success') {
+  const onHandleStake = async () => {
+    setConfirmLoading(true)
     const params = {
       abi: RETHStakeManager,
       address: managAddress,
@@ -73,7 +76,7 @@ const StakeBtn = () => {
       functionName: 'stake',
       args: [parseEther(store.inputValue), 365, account, account, account]
     }
-    
+
     writeContract(params, {
       onError: (error) => {
         console.error('onStake error', error);
@@ -83,12 +86,24 @@ const StakeBtn = () => {
       },
       onSettled: () => {
         store.isLoadingBtn = false
+        setConfirmLoading(false)
+        setApproveHash(undefined)
       }
-    })
+    })    
+  }
+  
+  // approving
+  if (approveHash && approveData && approveData.data?.status !== 'success') {
+    return <Button style={store.BtnStyle} isLoading loadingText='Approving'></Button>
   }
 
+  if (approveHash && approveData.data?.status === 'success') {
+    return <Button isLoading={confirmLoading} loadingText="Confirming"  style={store.BtnStyle} onClick={onHandleStake}>Confirm</Button>
+  }
+  
+  // before approve
   return (
-    <Button isLoading={store.isLoadingBtn} style={store.BtnStyle} onClick={onHandleApprove}>
+    <Button loadingText="Staking" isLoading={store.isLoadingBtn} style={store.BtnStyle} onClick={onHandleApprove}>
       Stake
     </Button>
   )

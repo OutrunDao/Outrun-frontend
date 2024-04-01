@@ -5,7 +5,7 @@ import RedeemBtn from './RedeemBtn'
 
 const MintAndRedeem = () => {
   if (store.switchState === 0) {
-    return <MintBtn selectedToken={store.selectedToken}></MintBtn>
+    return <MintBtn></MintBtn>
   }
 
   return <RedeemBtn></RedeemBtn>

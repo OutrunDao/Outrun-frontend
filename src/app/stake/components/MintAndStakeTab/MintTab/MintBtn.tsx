@@ -14,26 +14,20 @@ const depositABI = [{
   type: 'function',
 }]
 
-interface IProps {
-  selectedToken: LocalTokenSymbol,
-}
-
-const MintBtn = (props: IProps) => {
-  const { selectedToken } = props
+const MintBtn = () => {
   const { writeContract } = useWriteContract()
   const account = useAccount().address;  
 
   const onHandleMint = () => {
-    const mintToken = selectedToken === LocalTokenSymbol.ETH ? LocalTokenSymbol.RETH : LocalTokenSymbol.RUSD
+    const mintToken = store.selectedToken === LocalTokenSymbol.ETH ? LocalTokenSymbol.RETH : LocalTokenSymbol.RUSD
     const address = LocalTokenAddress[mintToken]
-
     const writeContractParams = {
       abi: depositABI,
       address,
       account,
       functionName: 'deposit',
       value: parseEther(store.inputValue),
-      args: selectedToken === LocalTokenSymbol.ETH ? [] : [parseEther(store.inputValue)]
+      args: store.selectedToken === LocalTokenSymbol.ETH ? [] : [parseEther(store.inputValue)]
     }
 
     writeContract(writeContractParams, {

@@ -38,7 +38,7 @@ const UnstakeBtn = () => {
 
   return (
     <Button isLoading={store.isLoadingBtn} style={store.BtnStyle} onClick={onHandleStake}>
-      Stake
+      Unstake
     </Button>
   )
 }
