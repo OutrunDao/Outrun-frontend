@@ -12,10 +12,16 @@ import Decimal from 'decimal.js-light';
 import { CurrencyAmount, Percent, V2_ROUTER_ADDRESSES } from '@/packages/swap-core';
 import { TradeType } from '@/packages/swap-core';
 import { USDB, RUSD } from '@/packages/swap-core';
+import JSBI from 'jsbi';
 const defaultSymbol = 'ETH';
 
-async function middlePairs() { }
-
+export enum BtnAction {
+  disable,
+  insufficient,
+  disconnect,
+  available,
+  approve
+}
 function tokenConvert(token: Currency): Token {
   if (token.equals(USDB[token.chainId])) return RUSD[token.chainId]
   return token.isNative ? Native.onChain(token.chainId).wrapped : (token as Token);
@@ -56,6 +62,7 @@ export function useSwap(isSwap: boolean = false) {
   const [pair, setPair] = useState<Pair>();
   const [loading, setLoading] = useState<boolean>(false);
   const [tradeRoute, setTradeRoute] = useState<Trade<Currency, Currency, TradeType>>()
+  const [action, setAction] = useState<BtnAction>(BtnAction.disable)
   const toast = useToast();
 
   const fetchAllowance = async () => {
@@ -103,6 +110,21 @@ export function useSwap(isSwap: boolean = false) {
     }
   }, [token0, token1]);
 
+  useEffect(() => {
+    if (!account.isConnected) return setAction(BtnAction.disconnect)
+    if (!token0 || !token1 || !token0AmountInput || !token1AmountInput) return setAction(BtnAction.disable)
+    try {
+      if (token0Balance.lt(token0AmountInput)) return setAction(BtnAction.insufficient)
+      if (token1Balance.lt(token1AmountInput)) return setAction(BtnAction.insufficient)
+    } catch (e) {
+      return setAction(BtnAction.disable)
+    }
+    if (tokenAllowance[0].lessThan(token0AmountInput || 0) || tokenAllowance[1].lessThan(token1AmountInput || 0)) {
+      return setAction(BtnAction.approve)
+    }
+    return setAction(BtnAction.available)
+  }, [account])
+
   async function approve() {
     let tokenForApprove = tokenAllowance[0].lessThan(token0AmountInput || 0) ? token0 : token1!;
     setLoading(true);
@@ -141,30 +163,53 @@ export function useSwap(isSwap: boolean = false) {
 
   async function token0AmountInputHandler(value: string) {
     setToken0AmountInput(value);
-    if (!pair || !token0 || !token1 || isNaN(+value)) return;
+    if (!pair || !token0 || isNaN(+value)) return;
     if (!isSwap) {
       const price = pair.priceOf(tokenConvert(token0));
       setToken1AmountInput((+price.toSignificant(6) * +value).toFixed(6));
     } else {
-      const [trade] = Trade.bestTradeExactIn(
+      const result = Trade.bestTradeExactIn(
         [pair],
         CurrencyAmount.fromRawAmount(
-          token0,
-          new Decimal(value).times(10 ** pair.token0.decimals).toString()
+          tokenConvert(token0),
+          JSBI.BigInt(+value * 10 ** token0.decimals)
         ),
-        token1!
+        tokenConvert(token1!)
       );
-      if (!trade) return;
-      // setToken1AmountInput(trade.outputAmount.toSignificant(6));
-      setToken1AmountInput(trade.minimumAmountOut(new Percent(5, 100)).toSignificant(6));
-      setTradeRoute(trade)
+      if (!result || !result.length) {
+        console.log('未找到兑换路径，池子余额不够或不存在');
+        return setToken1AmountInput('');
+      }      // setToken1AmountInput(trade.outputAmount.toSignificant(6));
+      setToken1AmountInput(result[0].outputAmount.toFixed(6));
+      setTradeRoute(result[0])
     }
   }
   async function token1AmountInputHandler(value: string) {
     setToken1AmountInput(value);
     if (!pair || !token1 || isNaN(+value)) return;
-    const price = pair.priceOf(tokenConvert(token1));
-    setToken0AmountInput((+price.toSignificant(6) * +value).toFixed(6));
+    if (!isSwap) {
+      const price = pair.priceOf(tokenConvert(token1));
+      setToken0AmountInput((+price.toSignificant(6) * +value).toFixed(6));
+    } else {
+
+      const result = Trade.bestTradeExactOut(
+        [pair],
+        tokenConvert(token0),
+        CurrencyAmount.fromRawAmount(
+          tokenConvert(token1),
+          JSBI.BigInt(+value * 10 ** token1.decimals)
+          // JSBI.multiply(JSBI.BigInt(value), JSBI.BigInt(10 ** token1.decimals))
+        )
+      );
+      if (!result || !result.length) {
+        console.log('未找到兑换路径，池子余额不够或不存在');
+        return setToken0AmountInput('');
+      }
+      setToken0AmountInput(result[0].inputAmount.toFixed(6));
+      // setToken1AmountInput(result[0].minimumAmountOut(new Percent(5, 100)).toSignificant(6));
+      // console.log(result[0].inputAmount, result[0].outputAmount)
+      setTradeRoute(result[0])
+    }
   }
 
   return {
@@ -177,7 +222,8 @@ export function useSwap(isSwap: boolean = false) {
       token1AmountInput,
       tokenAllowance,
       pair,
-      tradeRoute
+      tradeRoute,
+      action
     },
     loading,
     setLoading,
