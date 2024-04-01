@@ -23,7 +23,7 @@ import { Address, formatUnits, getAddress, parseUnits } from 'viem';
 
 import { getRouterContract } from './getContract';
 import UserLiquiditesPannel from './UserLiquidityPannel';
-import { useSwap } from '@/hook/useSwap';
+import { useSwap, BtnAction } from '@/hook/useSwap';
 import { Currency, Token } from '@/packages/swap-core';
 import tokenSwitch, { CurrencyPairType } from './tokenSwitch';
 import { retry } from 'radash';
@@ -47,6 +47,11 @@ const PoolIndex = () => {
   } = useSwap(false);
 
   async function _addLiquidity() {
+    toast({
+      status: 'loading',
+      title: 'addLiquidity',
+      isClosable: true,
+    });
     if (!swapData.token0 || !swapData.token1 || !account.address || !walletClient) return;
     setLoading(true);
     const slippage = 0.05;
@@ -86,15 +91,15 @@ const PoolIndex = () => {
     // console.log(type, tokenA, tokenB, tokenAInput, tokenBInput, tokenAMin, tokenBMin);
     if (type === CurrencyPairType.EthAndUsdb) {
       execution = 'addLiquidityETHAndUSDB';
-      args = [tokenBInput, tokenAMin, tokenBMin, to, deadline];
+      args = [tokenBInput!, tokenAMin!, tokenBMin!, to, deadline];
       config = { value: tokenAInput, account };
     } else if (type === CurrencyPairType.EthAndToken) {
       execution = 'addLiquidityETH';
-      args = [(tokenB as Token).address, tokenBInput, tokenAMin, tokenBMin, to, deadline];
+      args = [(tokenB as Token).address, tokenBInput!, tokenAMin!, tokenBMin!, to, deadline];
       config = { value: tokenAInput, account };
     } else if (type === CurrencyPairType.UsdbAndToken) {
       execution = 'addLiquidityUSDB';
-      args = [(tokenB as Token).address, tokenBInput, tokenAInput, tokenBMin, tokenAMin, to, deadline];
+      args = [(tokenB as Token).address, tokenBInput!, tokenAInput!, tokenBMin!, tokenAMin!, to, deadline];
     }
 
     try {
@@ -199,27 +204,22 @@ const PoolIndex = () => {
             ) : null}
           </Container>
 
-          {swapData.token1 &&
-          swapData.token0AmountInput &&
-          swapData.token1AmountInput &&
-          swapData.token0 &&
-          swapData.token0Balance.gte(swapData.token0AmountInput) &&
-          swapData.token1Balance.gte(swapData.token1AmountInput) &&
-          (swapData.tokenAllowance[0].lessThan(swapData.token0AmountInput) ||
-            swapData.tokenAllowance[1].lessThan(swapData.token1AmountInput)) ? (
+          {swapData.action === BtnAction.approve ? (
             <Button width={'100%'} mt={4} size="lg" variant="custom" onClick={approve} isLoading={loading}>
               Set Approve{' '}
               {swapData.tokenAllowance[0].lessThan(swapData.token0AmountInput || 0)
                 ? swapData.token0.symbol
-                : swapData.token1.symbol}
+                : swapData.token1!.symbol}
             </Button>
-          ) : (swapData.token0AmountInput && swapData.token0Balance.lt(swapData.token0AmountInput)) ||
-            (swapData.token1AmountInput && swapData.token1Balance.lt(swapData.token1AmountInput)) ? (
+          ) : null}
+          {swapData.action === BtnAction.insufficient ? (
             <Button width={'100%'} mt={4} size="lg" variant="custom">
               {' '}
               insufficient token{' '}
             </Button>
-          ) : (
+          ) : null}
+          {swapData.action === BtnAction.disconnect ? <w3m-button /> : null}
+          {swapData.action === BtnAction.available ? (
             <Button
               width={'100%'}
               mt={4}
@@ -228,9 +228,14 @@ const PoolIndex = () => {
               onClick={_addLiquidity}
               isLoading={loading}
             >
-              Add Liquidity
+              add liquidity
             </Button>
-          )}
+          ) : null}
+          {swapData.action === BtnAction.disable ? (
+            <Button width={'100%'} mt={4} disabled size="lg" variant="custom">
+              add liquidity
+            </Button>
+          ) : null}
         </VStack>
       </Container>
     </>

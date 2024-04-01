@@ -11,6 +11,7 @@ import { Token, V2_ROUTER_ADDRESSES } from '@/packages/swap-core';
 import Decimal from 'decimal.js-light';
 import { getRouterContract } from './getContract';
 import { waitForTransactionReceipt } from 'viem/actions';
+import tokenSwitch, { CurrencyPairType } from './tokenSwitch';
 function LiquidityRatio({ liquidityToken, userAddress }: { liquidityToken: Token; userAddress: Address }) {
   const publicClient = usePublicClient();
   const [totalSupply, setTotalSupply] = useState<Decimal>(new Decimal(0));
@@ -71,6 +72,11 @@ export default function UserLiquiditesPannel() {
   }, [userLiquidites]);
 
   async function removeLiquidity(pair: Pair) {
+    toast({
+      status: 'loading',
+      title: 'removeLiquidity',
+      isClosable: true,
+    });
     const router = getRouterContract(walletClient!);
     const liquidityTokenBalance = await pair.liquidityToken.balanceOf(account.address!, publicClient!);
     const deadline = Math.floor(new Date().getTime() / 1000) + 10 * 60;
@@ -79,15 +85,23 @@ export default function UserLiquiditesPannel() {
       parseUnits(liquidityTokenBalance.toString(), 18),
       walletClient!
     );
-    const tx = await router.write.removeLiquidity([
-      pair.token0.address,
-      pair.token1.address,
-      parseUnits(liquidityTokenBalance.toString(), 18),
-      0,
-      0,
-      account.address,
-      deadline,
-    ]);
+    const [type, tokenA, tokenB] = tokenSwitch(pair.token0, pair.token1);
+    let execute = 'removeLiquidity';
+    let liquidity = parseUnits(liquidityTokenBalance.toString(), 18);
+    let to = account.address;
+    let args = [pair.token0.address, pair.token1.address, liquidity, 0, 0, to, deadline];
+    if (type === CurrencyPairType.EthAndToken) {
+      execute = 'removeLiquidityETH';
+      args = [(tokenB as Token).address, liquidity, 0, 0, to, deadline];
+    } else if (type === CurrencyPairType.EthAndUsdb) {
+      execute = 'removeLiquidityETHAndUSDB';
+      args = [liquidity, 0, 0, to, deadline];
+    } else if (type === CurrencyPairType.UsdbAndToken) {
+      execute = 'removeLiquidityUSDB';
+      args = [(tokenB as Token).address, liquidity, 0, 0, to, deadline];
+    }
+
+    const tx = await router.write[execute](args);
     toast({
       status: 'success',
       title: 'add transaction success',

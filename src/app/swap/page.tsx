@@ -21,7 +21,7 @@ import { ArrowDownIcon } from '@chakra-ui/icons';
 import { TradeSettingsModal } from './TradeSettingsModal';
 import { useAccount, useChainId, usePublicClient, useWalletClient } from 'wagmi';
 import { Address, formatUnits, getAddress, parseUnits } from 'viem';
-import { useSwap } from '@/hook/useSwap';
+import { useSwap, BtnAction } from '@/hook/useSwap';
 import { getRouterContract } from '../pool/getContract';
 import { Percent, Token } from '@/packages/swap-core';
 import { Router as SwapRouter } from '@/packages/swap-sdk';
@@ -53,6 +53,11 @@ export default function Swap() {
   async function swap() {
     if (!swapData.token0 || !swapData.token1 || !account.address || !walletClient) return;
     setLoading(true);
+    toast({
+      status: 'loading',
+      title: 'swap',
+      isClosable: true,
+    });
     const { methodName, args, value } = SwapRouter.swapCallParameters(swapData.tradeRoute!, {
       allowedSlippage: new Percent(5, 100),
       deadline: Math.floor(new Date().getTime() / 1000) + 5 * 60,
@@ -167,30 +172,31 @@ export default function Swap() {
             </Text>
           ) : null}
         </Container>
-
-        {swapData.token1 &&
-        swapData.token0AmountInput &&
-        swapData.token1AmountInput &&
-        swapData.token0 &&
-        (swapData.tokenAllowance[0].lessThan(swapData.token0AmountInput) ||
-          swapData.tokenAllowance[1].lessThan(swapData.token1AmountInput)) ? (
+        {swapData.action === BtnAction.approve ? (
           <Button width={'100%'} mt={4} size="lg" variant="custom" onClick={approve} isLoading={loading}>
             Set Approve{' '}
             {swapData.tokenAllowance[0].lessThan(swapData.token0AmountInput || 0)
               ? swapData.token0.symbol
-              : swapData.token1.symbol}
+              : swapData.token1!.symbol}
           </Button>
-        ) : (swapData.token0AmountInput && swapData.token0Balance.lt(swapData.token0AmountInput)) ||
-          (swapData.token1AmountInput && swapData.token1Balance.lt(swapData.token1AmountInput)) ? (
+        ) : null}
+        {swapData.action === BtnAction.insufficient ? (
           <Button width={'100%'} mt={4} size="lg" variant="custom">
             {' '}
             insufficient token{' '}
           </Button>
-        ) : (
+        ) : null}
+        {swapData.action === BtnAction.disconnect ? <w3m-button /> : null}
+        {swapData.action === BtnAction.available ? (
           <Button width={'100%'} mt={4} size="lg" variant="custom" onClick={swap} isLoading={loading}>
             swap
           </Button>
-        )}
+        ) : null}
+        {swapData.action === BtnAction.disable ? (
+          <Button width={'100%'} mt={4} disabled size="lg" variant="custom">
+            swap
+          </Button>
+        ) : null}
       </VStack>
     </Container>
   );
