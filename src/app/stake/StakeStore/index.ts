@@ -16,6 +16,8 @@ class StakeStore {
   currentTabType: TabType = TabType.Stake;
   selectedToken: LocalTokenSymbol = LocalTokenSymbol.ETH;
   switchState: 0 | 1 = 0;
+  balance: string = '0';
+  isLoadingBtn = false;
 
   constructor() {
     makeAutoObservable(this);
@@ -23,6 +25,10 @@ class StakeStore {
 
   get BtnStyle() {
     return BtnStyle;
+  }
+
+  setBalance(balance: string) {
+    this.balance = balance;
   }
 }
 

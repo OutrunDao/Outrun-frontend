@@ -1,13 +1,11 @@
 import { useReadContract, useAccount, useBalance } from 'wagmi';
 import { formatEther } from 'viem';
 import { LocalTokenAddress } from '@/contants/address';
-import { TokenABIMap } from '@/ABI';
 import { Text } from '@chakra-ui/react'
 import { LocalTokenSymbol } from '@/types/index.d';
+import { observer } from "mobx-react-lite"
+import store from '@/app/stake/StakeStore'
 
-interface IProps{
-  selectedToken: LocalTokenSymbol
-}
 
 const ABI = [{
     inputs: [
@@ -30,20 +28,25 @@ const ABI = [{
   }
 ]
 
-const TokenBalance = (props: IProps) => {
-  const { selectedToken } = props
-  const account = useAccount().address || 0n;  
-
-  let { data } = useReadContract({
-    address: LocalTokenAddress[selectedToken],
+const TokenBalance = () => {
+  console.log('store.selectedToken', store.selectedToken);
+  
+  const account = useAccount().address || 0n;
+  const { data = 0n } = useReadContract({
+    address: LocalTokenAddress[store.selectedToken],
     abi: ABI,
     functionName: 'balanceOf',
     args: [account],
   });
   
   if (!data) return <Text>0</Text>
+  
+  console.log('TokenBalance', data);
+    
+  const balance = formatEther(data as bigint)
+  store.setBalance(balance)
 
-  return <Text>{formatEther(data as bigint)}</Text>
+  return <Text>{balance}</Text>
 }
 
-export default TokenBalance
+export default observer(TokenBalance)

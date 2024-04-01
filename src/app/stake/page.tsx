@@ -17,12 +17,9 @@ import store from '@/app/stake/StakeStore'
 
 const  Stake = () => {
   const [currentTabType, setTabId] = useState<TabType>(TabType.Mint)
-  const [inputValue, setInputValue] = useState<string>("0")
-  const [switchState, setSwitchState] = useState<SwitchState>(0)
-  const [selectedToken, setSelectedToken] = useState<LocalTokenSymbol>(LocalTokenSymbol.ETH)
   const [currList, setCurrList] = useState<Array<LocalTokenSymbol>>(PairSelectList[TabType.Mint][0]) 
   const { address, isConnected, status} = useAccount()
-    
+
   const setNewList = (newState: SwitchState) => {
     const newList = PairSelectList[currentTabType][newState]
     setCurrList(newList)
@@ -30,13 +27,13 @@ const  Stake = () => {
 
   // 点击切换Token交换顺序
   useEffect(() => {
-    setNewList(switchState)
+    setNewList(store.switchState)
     // 重置箭头切换
-    setSwitchState(0)
+    store.switchState = 0
     if (currentTabType === TabType.Mint) {
-      setSelectedToken(LocalTokenSymbol.ETH)
+      store.selectedToken = LocalTokenSymbol.ETH
     } else {
-      setSelectedToken(LocalTokenSymbol.RETH)
+      store.selectedToken = LocalTokenSymbol.RETH
     }
   }, [currentTabType])
 
@@ -45,12 +42,10 @@ const  Stake = () => {
   const currTokenPairMap: CurrTokenPair = TokenPairMap[currentTabType]
 
   const onSwitch =() => {
-    const newState = switchState === 0 ? 1 : 0
-    setSwitchState(newState)
+    const newState = store.switchState === 0 ? 1 : 0
+    store.switchState = newState
+    store.selectedToken = currTokenPairMap[store.selectedToken as keyof CurrTokenPair]
     setNewList(newState)
-    if (currentTabType === TabType.Mint) {   
-      setSelectedToken(currTokenPairMap[selectedToken as keyof CurrTokenPair])
-    }
   }
 
   return(
@@ -67,21 +62,8 @@ const  Stake = () => {
 
           <Container>
             <Box marginTop="32px" padding="22px" backgroundColor="#1E1E38" borderRadius="12px">
-              <InputSelect
-                selectedToken={selectedToken}
-                currList={currList}
-                inputValue={inputValue}
-                onChangeInput={(value) => {
-                  store.inputValue = value
-                  setInputValue(value)
-                }}
-                onChangeSelect={(value) => setSelectedToken(value)}
-                currentTabType={currentTabType}></InputSelect>
-              
-              <BalanceCoin
-                isConnected={isConnected}
-                selectedToken={selectedToken}
-                setMintValue={(value) => setInputValue(value)} ></BalanceCoin>
+              <InputSelect currList={currList} currentTabType={currentTabType}></InputSelect>
+              <BalanceCoin isConnected={isConnected}></BalanceCoin>
             </Box>
 
             <Flex justifyContent="center" marginTop="-12px">
@@ -89,7 +71,7 @@ const  Stake = () => {
             </Flex>
             
             {/* 带价格的 coin */}
-            <PriceCoin selectedTokenPair={currTokenPairMap[selectedToken as keyof CurrTokenPair]}></PriceCoin>
+            <PriceCoin selectedTokenPair={currTokenPairMap[store.selectedToken as keyof CurrTokenPair]}></PriceCoin>
 
             <Box marginTop="32px" padding="16px" backgroundColor="rgb(52 30 56 / 50%)" borderRadius="12px">
               <Flex justifyContent="space-between" marginTop="12px">
@@ -107,15 +89,11 @@ const  Stake = () => {
             </Box>
             {
               isConnected 
-              ? <MintAndStakeTab
-                  currentTabType={currentTabType}
-                  switchState={switchState}
-                  selectedToken={selectedToken}
-                 /> 
-              : 
-                <Flex justifyContent='center' alignItems="center" marginTop="22px">
-                  <w3m-button />
-                </Flex>
+                ? <MintAndStakeTab currentTabType={currentTabType} /> 
+                : 
+                  <Flex justifyContent='center' alignItems="center" marginTop="22px">
+                    <w3m-button />
+                  </Flex>
             }
           </Container>
         </Tabs>
