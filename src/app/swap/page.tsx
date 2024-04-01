@@ -53,6 +53,11 @@ export default function Swap() {
   async function swap() {
     if (!swapData.token0 || !swapData.token1 || !account.address || !walletClient) return;
     setLoading(true);
+    toast({
+      status: 'loading',
+      title: 'swap',
+      isClosable: true,
+    });
     const { methodName, args, value } = SwapRouter.swapCallParameters(swapData.tradeRoute!, {
       allowedSlippage: new Percent(5, 100),
       deadline: Math.floor(new Date().getTime() / 1000) + 5 * 60,

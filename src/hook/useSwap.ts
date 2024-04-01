@@ -113,6 +113,7 @@ export function useSwap(isSwap: boolean = false) {
   useEffect(() => {
     if (!account.isConnected) return setAction(BtnAction.disconnect)
     if (!token0 || !token1 || !token0AmountInput || !token1AmountInput) return setAction(BtnAction.disable)
+    if (+token0AmountInput === 0 || +token1AmountInput === 0) return setAction(BtnAction.disable)
     try {
       if (token0Balance.lt(token0AmountInput)) return setAction(BtnAction.insufficient)
       if (token1Balance.lt(token1AmountInput)) return setAction(BtnAction.insufficient)

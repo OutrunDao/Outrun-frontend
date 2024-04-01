@@ -47,6 +47,11 @@ const PoolIndex = () => {
   } = useSwap(false);
 
   async function _addLiquidity() {
+    toast({
+      status: 'loading',
+      title: 'addLiquidity',
+      isClosable: true,
+    });
     if (!swapData.token0 || !swapData.token1 || !account.address || !walletClient) return;
     setLoading(true);
     const slippage = 0.05;
@@ -86,15 +91,15 @@ const PoolIndex = () => {
     // console.log(type, tokenA, tokenB, tokenAInput, tokenBInput, tokenAMin, tokenBMin);
     if (type === CurrencyPairType.EthAndUsdb) {
       execution = 'addLiquidityETHAndUSDB';
-      args = [tokenBInput, tokenAMin, tokenBMin, to, deadline];
+      args = [tokenBInput!, tokenAMin!, tokenBMin!, to, deadline];
       config = { value: tokenAInput, account };
     } else if (type === CurrencyPairType.EthAndToken) {
       execution = 'addLiquidityETH';
-      args = [(tokenB as Token).address, tokenBInput, tokenAMin, tokenBMin, to, deadline];
+      args = [(tokenB as Token).address, tokenBInput!, tokenAMin!, tokenBMin!, to, deadline];
       config = { value: tokenAInput, account };
     } else if (type === CurrencyPairType.UsdbAndToken) {
       execution = 'addLiquidityUSDB';
-      args = [(tokenB as Token).address, tokenBInput, tokenAInput, tokenBMin, tokenAMin, to, deadline];
+      args = [(tokenB as Token).address, tokenBInput!, tokenAInput!, tokenBMin!, tokenAMin!, to, deadline];
     }
 
     try {
