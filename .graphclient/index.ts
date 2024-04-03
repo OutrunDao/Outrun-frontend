@@ -67,6 +67,8 @@ export type LiquidityHolding = {
   token1: Scalars['Bytes'];
   amount0: Scalars['BigInt'];
   amount1: Scalars['BigInt'];
+  symbol0?: Maybe<Scalars['String']>;
+  symbol1?: Maybe<Scalars['String']>;
 };
 
 export type LiquidityHolding_filter = {
@@ -146,6 +148,46 @@ export type LiquidityHolding_filter = {
   amount1_lte?: InputMaybe<Scalars['BigInt']>;
   amount1_in?: InputMaybe<Array<Scalars['BigInt']>>;
   amount1_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  symbol0?: InputMaybe<Scalars['String']>;
+  symbol0_not?: InputMaybe<Scalars['String']>;
+  symbol0_gt?: InputMaybe<Scalars['String']>;
+  symbol0_lt?: InputMaybe<Scalars['String']>;
+  symbol0_gte?: InputMaybe<Scalars['String']>;
+  symbol0_lte?: InputMaybe<Scalars['String']>;
+  symbol0_in?: InputMaybe<Array<Scalars['String']>>;
+  symbol0_not_in?: InputMaybe<Array<Scalars['String']>>;
+  symbol0_contains?: InputMaybe<Scalars['String']>;
+  symbol0_contains_nocase?: InputMaybe<Scalars['String']>;
+  symbol0_not_contains?: InputMaybe<Scalars['String']>;
+  symbol0_not_contains_nocase?: InputMaybe<Scalars['String']>;
+  symbol0_starts_with?: InputMaybe<Scalars['String']>;
+  symbol0_starts_with_nocase?: InputMaybe<Scalars['String']>;
+  symbol0_not_starts_with?: InputMaybe<Scalars['String']>;
+  symbol0_not_starts_with_nocase?: InputMaybe<Scalars['String']>;
+  symbol0_ends_with?: InputMaybe<Scalars['String']>;
+  symbol0_ends_with_nocase?: InputMaybe<Scalars['String']>;
+  symbol0_not_ends_with?: InputMaybe<Scalars['String']>;
+  symbol0_not_ends_with_nocase?: InputMaybe<Scalars['String']>;
+  symbol1?: InputMaybe<Scalars['String']>;
+  symbol1_not?: InputMaybe<Scalars['String']>;
+  symbol1_gt?: InputMaybe<Scalars['String']>;
+  symbol1_lt?: InputMaybe<Scalars['String']>;
+  symbol1_gte?: InputMaybe<Scalars['String']>;
+  symbol1_lte?: InputMaybe<Scalars['String']>;
+  symbol1_in?: InputMaybe<Array<Scalars['String']>>;
+  symbol1_not_in?: InputMaybe<Array<Scalars['String']>>;
+  symbol1_contains?: InputMaybe<Scalars['String']>;
+  symbol1_contains_nocase?: InputMaybe<Scalars['String']>;
+  symbol1_not_contains?: InputMaybe<Scalars['String']>;
+  symbol1_not_contains_nocase?: InputMaybe<Scalars['String']>;
+  symbol1_starts_with?: InputMaybe<Scalars['String']>;
+  symbol1_starts_with_nocase?: InputMaybe<Scalars['String']>;
+  symbol1_not_starts_with?: InputMaybe<Scalars['String']>;
+  symbol1_not_starts_with_nocase?: InputMaybe<Scalars['String']>;
+  symbol1_ends_with?: InputMaybe<Scalars['String']>;
+  symbol1_ends_with_nocase?: InputMaybe<Scalars['String']>;
+  symbol1_not_ends_with?: InputMaybe<Scalars['String']>;
+  symbol1_not_ends_with_nocase?: InputMaybe<Scalars['String']>;
   /** Filter for the block changed event. */
   _change_block?: InputMaybe<BlockChangedFilter>;
   and?: InputMaybe<Array<InputMaybe<LiquidityHolding_filter>>>;
@@ -159,7 +201,9 @@ export type LiquidityHolding_orderBy =
   | 'token0'
   | 'token1'
   | 'amount0'
-  | 'amount1';
+  | 'amount1'
+  | 'symbol0'
+  | 'symbol1';
 
 /** Defines the order direction, either ascending or descending */
 export type OrderDirection =
@@ -226,9 +270,145 @@ export type PairCreated_orderBy =
   | 'token1'
   | 'pair';
 
+export type PairTvl = {
+  id: Scalars['String'];
+  pair: Scalars['Bytes'];
+  reserve0: Scalars['BigInt'];
+  reserve1: Scalars['BigInt'];
+  symbol0?: Maybe<Scalars['String']>;
+  symbol1?: Maybe<Scalars['String']>;
+  token0: Scalars['Bytes'];
+  token1: Scalars['Bytes'];
+};
+
+export type PairTvl_filter = {
+  id?: InputMaybe<Scalars['String']>;
+  id_not?: InputMaybe<Scalars['String']>;
+  id_gt?: InputMaybe<Scalars['String']>;
+  id_lt?: InputMaybe<Scalars['String']>;
+  id_gte?: InputMaybe<Scalars['String']>;
+  id_lte?: InputMaybe<Scalars['String']>;
+  id_in?: InputMaybe<Array<Scalars['String']>>;
+  id_not_in?: InputMaybe<Array<Scalars['String']>>;
+  id_contains?: InputMaybe<Scalars['String']>;
+  id_contains_nocase?: InputMaybe<Scalars['String']>;
+  id_not_contains?: InputMaybe<Scalars['String']>;
+  id_not_contains_nocase?: InputMaybe<Scalars['String']>;
+  id_starts_with?: InputMaybe<Scalars['String']>;
+  id_starts_with_nocase?: InputMaybe<Scalars['String']>;
+  id_not_starts_with?: InputMaybe<Scalars['String']>;
+  id_not_starts_with_nocase?: InputMaybe<Scalars['String']>;
+  id_ends_with?: InputMaybe<Scalars['String']>;
+  id_ends_with_nocase?: InputMaybe<Scalars['String']>;
+  id_not_ends_with?: InputMaybe<Scalars['String']>;
+  id_not_ends_with_nocase?: InputMaybe<Scalars['String']>;
+  pair?: InputMaybe<Scalars['Bytes']>;
+  pair_not?: InputMaybe<Scalars['Bytes']>;
+  pair_gt?: InputMaybe<Scalars['Bytes']>;
+  pair_lt?: InputMaybe<Scalars['Bytes']>;
+  pair_gte?: InputMaybe<Scalars['Bytes']>;
+  pair_lte?: InputMaybe<Scalars['Bytes']>;
+  pair_in?: InputMaybe<Array<Scalars['Bytes']>>;
+  pair_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
+  pair_contains?: InputMaybe<Scalars['Bytes']>;
+  pair_not_contains?: InputMaybe<Scalars['Bytes']>;
+  reserve0?: InputMaybe<Scalars['BigInt']>;
+  reserve0_not?: InputMaybe<Scalars['BigInt']>;
+  reserve0_gt?: InputMaybe<Scalars['BigInt']>;
+  reserve0_lt?: InputMaybe<Scalars['BigInt']>;
+  reserve0_gte?: InputMaybe<Scalars['BigInt']>;
+  reserve0_lte?: InputMaybe<Scalars['BigInt']>;
+  reserve0_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  reserve0_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  reserve1?: InputMaybe<Scalars['BigInt']>;
+  reserve1_not?: InputMaybe<Scalars['BigInt']>;
+  reserve1_gt?: InputMaybe<Scalars['BigInt']>;
+  reserve1_lt?: InputMaybe<Scalars['BigInt']>;
+  reserve1_gte?: InputMaybe<Scalars['BigInt']>;
+  reserve1_lte?: InputMaybe<Scalars['BigInt']>;
+  reserve1_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  reserve1_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  symbol0?: InputMaybe<Scalars['String']>;
+  symbol0_not?: InputMaybe<Scalars['String']>;
+  symbol0_gt?: InputMaybe<Scalars['String']>;
+  symbol0_lt?: InputMaybe<Scalars['String']>;
+  symbol0_gte?: InputMaybe<Scalars['String']>;
+  symbol0_lte?: InputMaybe<Scalars['String']>;
+  symbol0_in?: InputMaybe<Array<Scalars['String']>>;
+  symbol0_not_in?: InputMaybe<Array<Scalars['String']>>;
+  symbol0_contains?: InputMaybe<Scalars['String']>;
+  symbol0_contains_nocase?: InputMaybe<Scalars['String']>;
+  symbol0_not_contains?: InputMaybe<Scalars['String']>;
+  symbol0_not_contains_nocase?: InputMaybe<Scalars['String']>;
+  symbol0_starts_with?: InputMaybe<Scalars['String']>;
+  symbol0_starts_with_nocase?: InputMaybe<Scalars['String']>;
+  symbol0_not_starts_with?: InputMaybe<Scalars['String']>;
+  symbol0_not_starts_with_nocase?: InputMaybe<Scalars['String']>;
+  symbol0_ends_with?: InputMaybe<Scalars['String']>;
+  symbol0_ends_with_nocase?: InputMaybe<Scalars['String']>;
+  symbol0_not_ends_with?: InputMaybe<Scalars['String']>;
+  symbol0_not_ends_with_nocase?: InputMaybe<Scalars['String']>;
+  symbol1?: InputMaybe<Scalars['String']>;
+  symbol1_not?: InputMaybe<Scalars['String']>;
+  symbol1_gt?: InputMaybe<Scalars['String']>;
+  symbol1_lt?: InputMaybe<Scalars['String']>;
+  symbol1_gte?: InputMaybe<Scalars['String']>;
+  symbol1_lte?: InputMaybe<Scalars['String']>;
+  symbol1_in?: InputMaybe<Array<Scalars['String']>>;
+  symbol1_not_in?: InputMaybe<Array<Scalars['String']>>;
+  symbol1_contains?: InputMaybe<Scalars['String']>;
+  symbol1_contains_nocase?: InputMaybe<Scalars['String']>;
+  symbol1_not_contains?: InputMaybe<Scalars['String']>;
+  symbol1_not_contains_nocase?: InputMaybe<Scalars['String']>;
+  symbol1_starts_with?: InputMaybe<Scalars['String']>;
+  symbol1_starts_with_nocase?: InputMaybe<Scalars['String']>;
+  symbol1_not_starts_with?: InputMaybe<Scalars['String']>;
+  symbol1_not_starts_with_nocase?: InputMaybe<Scalars['String']>;
+  symbol1_ends_with?: InputMaybe<Scalars['String']>;
+  symbol1_ends_with_nocase?: InputMaybe<Scalars['String']>;
+  symbol1_not_ends_with?: InputMaybe<Scalars['String']>;
+  symbol1_not_ends_with_nocase?: InputMaybe<Scalars['String']>;
+  token0?: InputMaybe<Scalars['Bytes']>;
+  token0_not?: InputMaybe<Scalars['Bytes']>;
+  token0_gt?: InputMaybe<Scalars['Bytes']>;
+  token0_lt?: InputMaybe<Scalars['Bytes']>;
+  token0_gte?: InputMaybe<Scalars['Bytes']>;
+  token0_lte?: InputMaybe<Scalars['Bytes']>;
+  token0_in?: InputMaybe<Array<Scalars['Bytes']>>;
+  token0_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
+  token0_contains?: InputMaybe<Scalars['Bytes']>;
+  token0_not_contains?: InputMaybe<Scalars['Bytes']>;
+  token1?: InputMaybe<Scalars['Bytes']>;
+  token1_not?: InputMaybe<Scalars['Bytes']>;
+  token1_gt?: InputMaybe<Scalars['Bytes']>;
+  token1_lt?: InputMaybe<Scalars['Bytes']>;
+  token1_gte?: InputMaybe<Scalars['Bytes']>;
+  token1_lte?: InputMaybe<Scalars['Bytes']>;
+  token1_in?: InputMaybe<Array<Scalars['Bytes']>>;
+  token1_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
+  token1_contains?: InputMaybe<Scalars['Bytes']>;
+  token1_not_contains?: InputMaybe<Scalars['Bytes']>;
+  /** Filter for the block changed event. */
+  _change_block?: InputMaybe<BlockChangedFilter>;
+  and?: InputMaybe<Array<InputMaybe<PairTvl_filter>>>;
+  or?: InputMaybe<Array<InputMaybe<PairTvl_filter>>>;
+};
+
+export type PairTvl_orderBy =
+  | 'id'
+  | 'pair'
+  | 'reserve0'
+  | 'reserve1'
+  | 'symbol0'
+  | 'symbol1'
+  | 'token0'
+  | 'token1';
+
 export type Query = {
   pairCreated?: Maybe<PairCreated>;
   pairCreateds: Array<PairCreated>;
+  pairTvl?: Maybe<PairTvl>;
+  pairTvls: Array<PairTvl>;
   liquidityHolding?: Maybe<LiquidityHolding>;
   liquidityHoldings: Array<LiquidityHolding>;
   /** Access to subgraph metadata */
@@ -249,6 +429,24 @@ export type QuerypairCreatedsArgs = {
   orderBy?: InputMaybe<PairCreated_orderBy>;
   orderDirection?: InputMaybe<OrderDirection>;
   where?: InputMaybe<PairCreated_filter>;
+  block?: InputMaybe<Block_height>;
+  subgraphError?: _SubgraphErrorPolicy_;
+};
+
+
+export type QuerypairTvlArgs = {
+  id: Scalars['ID'];
+  block?: InputMaybe<Block_height>;
+  subgraphError?: _SubgraphErrorPolicy_;
+};
+
+
+export type QuerypairTvlsArgs = {
+  skip?: InputMaybe<Scalars['Int']>;
+  first?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<PairTvl_orderBy>;
+  orderDirection?: InputMaybe<OrderDirection>;
+  where?: InputMaybe<PairTvl_filter>;
   block?: InputMaybe<Block_height>;
   subgraphError?: _SubgraphErrorPolicy_;
 };
@@ -279,6 +477,8 @@ export type Query_metaArgs = {
 export type Subscription = {
   pairCreated?: Maybe<PairCreated>;
   pairCreateds: Array<PairCreated>;
+  pairTvl?: Maybe<PairTvl>;
+  pairTvls: Array<PairTvl>;
   liquidityHolding?: Maybe<LiquidityHolding>;
   liquidityHoldings: Array<LiquidityHolding>;
   /** Access to subgraph metadata */
@@ -299,6 +499,24 @@ export type SubscriptionpairCreatedsArgs = {
   orderBy?: InputMaybe<PairCreated_orderBy>;
   orderDirection?: InputMaybe<OrderDirection>;
   where?: InputMaybe<PairCreated_filter>;
+  block?: InputMaybe<Block_height>;
+  subgraphError?: _SubgraphErrorPolicy_;
+};
+
+
+export type SubscriptionpairTvlArgs = {
+  id: Scalars['ID'];
+  block?: InputMaybe<Block_height>;
+  subgraphError?: _SubgraphErrorPolicy_;
+};
+
+
+export type SubscriptionpairTvlsArgs = {
+  skip?: InputMaybe<Scalars['Int']>;
+  first?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<PairTvl_orderBy>;
+  orderDirection?: InputMaybe<OrderDirection>;
+  where?: InputMaybe<PairTvl_filter>;
   block?: InputMaybe<Block_height>;
   subgraphError?: _SubgraphErrorPolicy_;
 };
@@ -463,6 +681,9 @@ export type ResolversTypes = ResolversObject<{
   PairCreated: ResolverTypeWrapper<PairCreated>;
   PairCreated_filter: PairCreated_filter;
   PairCreated_orderBy: PairCreated_orderBy;
+  PairTvl: ResolverTypeWrapper<PairTvl>;
+  PairTvl_filter: PairTvl_filter;
+  PairTvl_orderBy: PairTvl_orderBy;
   Query: ResolverTypeWrapper<{}>;
   String: ResolverTypeWrapper<Scalars['String']>;
   Subscription: ResolverTypeWrapper<{}>;
@@ -488,6 +709,8 @@ export type ResolversParentTypes = ResolversObject<{
   LiquidityHolding_filter: LiquidityHolding_filter;
   PairCreated: PairCreated;
   PairCreated_filter: PairCreated_filter;
+  PairTvl: PairTvl;
+  PairTvl_filter: PairTvl_filter;
   Query: {};
   String: Scalars['String'];
   Subscription: {};
@@ -536,6 +759,8 @@ export type LiquidityHoldingResolvers<ContextType = MeshContext, ParentType exte
   token1?: Resolver<ResolversTypes['Bytes'], ParentType, ContextType>;
   amount0?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
   amount1?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
+  symbol0?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  symbol1?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -547,9 +772,23 @@ export type PairCreatedResolvers<ContextType = MeshContext, ParentType extends R
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
+export type PairTvlResolvers<ContextType = MeshContext, ParentType extends ResolversParentTypes['PairTvl'] = ResolversParentTypes['PairTvl']> = ResolversObject<{
+  id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  pair?: Resolver<ResolversTypes['Bytes'], ParentType, ContextType>;
+  reserve0?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
+  reserve1?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
+  symbol0?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  symbol1?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  token0?: Resolver<ResolversTypes['Bytes'], ParentType, ContextType>;
+  token1?: Resolver<ResolversTypes['Bytes'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export type QueryResolvers<ContextType = MeshContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
   pairCreated?: Resolver<Maybe<ResolversTypes['PairCreated']>, ParentType, ContextType, RequireFields<QuerypairCreatedArgs, 'id' | 'subgraphError'>>;
   pairCreateds?: Resolver<Array<ResolversTypes['PairCreated']>, ParentType, ContextType, RequireFields<QuerypairCreatedsArgs, 'skip' | 'first' | 'subgraphError'>>;
+  pairTvl?: Resolver<Maybe<ResolversTypes['PairTvl']>, ParentType, ContextType, RequireFields<QuerypairTvlArgs, 'id' | 'subgraphError'>>;
+  pairTvls?: Resolver<Array<ResolversTypes['PairTvl']>, ParentType, ContextType, RequireFields<QuerypairTvlsArgs, 'skip' | 'first' | 'subgraphError'>>;
   liquidityHolding?: Resolver<Maybe<ResolversTypes['LiquidityHolding']>, ParentType, ContextType, RequireFields<QueryliquidityHoldingArgs, 'id' | 'subgraphError'>>;
   liquidityHoldings?: Resolver<Array<ResolversTypes['LiquidityHolding']>, ParentType, ContextType, RequireFields<QueryliquidityHoldingsArgs, 'skip' | 'first' | 'subgraphError'>>;
   _meta?: Resolver<Maybe<ResolversTypes['_Meta_']>, ParentType, ContextType, Partial<Query_metaArgs>>;
@@ -558,6 +797,8 @@ export type QueryResolvers<ContextType = MeshContext, ParentType extends Resolve
 export type SubscriptionResolvers<ContextType = MeshContext, ParentType extends ResolversParentTypes['Subscription'] = ResolversParentTypes['Subscription']> = ResolversObject<{
   pairCreated?: SubscriptionResolver<Maybe<ResolversTypes['PairCreated']>, "pairCreated", ParentType, ContextType, RequireFields<SubscriptionpairCreatedArgs, 'id' | 'subgraphError'>>;
   pairCreateds?: SubscriptionResolver<Array<ResolversTypes['PairCreated']>, "pairCreateds", ParentType, ContextType, RequireFields<SubscriptionpairCreatedsArgs, 'skip' | 'first' | 'subgraphError'>>;
+  pairTvl?: SubscriptionResolver<Maybe<ResolversTypes['PairTvl']>, "pairTvl", ParentType, ContextType, RequireFields<SubscriptionpairTvlArgs, 'id' | 'subgraphError'>>;
+  pairTvls?: SubscriptionResolver<Array<ResolversTypes['PairTvl']>, "pairTvls", ParentType, ContextType, RequireFields<SubscriptionpairTvlsArgs, 'skip' | 'first' | 'subgraphError'>>;
   liquidityHolding?: SubscriptionResolver<Maybe<ResolversTypes['LiquidityHolding']>, "liquidityHolding", ParentType, ContextType, RequireFields<SubscriptionliquidityHoldingArgs, 'id' | 'subgraphError'>>;
   liquidityHoldings?: SubscriptionResolver<Array<ResolversTypes['LiquidityHolding']>, "liquidityHoldings", ParentType, ContextType, RequireFields<SubscriptionliquidityHoldingsArgs, 'skip' | 'first' | 'subgraphError'>>;
   _meta?: SubscriptionResolver<Maybe<ResolversTypes['_Meta_']>, "_meta", ParentType, ContextType, Partial<Subscription_metaArgs>>;
@@ -589,6 +830,7 @@ export type Resolvers<ContextType = MeshContext> = ResolversObject<{
   Int8?: GraphQLScalarType;
   LiquidityHolding?: LiquidityHoldingResolvers<ContextType>;
   PairCreated?: PairCreatedResolvers<ContextType>;
+  PairTvl?: PairTvlResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   Subscription?: SubscriptionResolvers<ContextType>;
   Timestamp?: GraphQLScalarType;
@@ -648,7 +890,7 @@ const outrunTransforms = [];
 const additionalTypeDefs = [] as any[];
 const outrunHandler = new GraphqlHandler({
               name: "outrun",
-              config: {"endpoint":"https://api.studio.thegraph.com/query/68891/outrun/0.0.4"},
+              config: {"endpoint":"https://api.studio.thegraph.com/query/68891/outrun/0.0.89"},
               baseDir,
               cache,
               pubsub,
@@ -693,6 +935,12 @@ const merger = new(BareMerger as any)({
           return printWithCache(UserLiquiditiesDocument);
         },
         location: 'UserLiquiditiesDocument.graphql'
+      },{
+        document: PairTvlsDocument,
+        get rawSDL() {
+          return printWithCache(PairTvlsDocument);
+        },
+        location: 'PairTvlsDocument.graphql'
       }
     ];
     },
@@ -743,6 +991,11 @@ export type UserLiquiditiesQueryVariables = Exact<{
 
 export type UserLiquiditiesQuery = { liquidityHoldings: Array<Pick<LiquidityHolding, 'id' | 'pair' | 'user' | 'amount0' | 'amount1' | 'token0' | 'token1'>> };
 
+export type PairTvlsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type PairTvlsQuery = { pairTvls: Array<Pick<PairTvl, 'id' | 'pair' | 'reserve0' | 'reserve1' | 'token0' | 'token1' | 'symbol0' | 'symbol1'>> };
+
 
 export const PairCreatedsDocument = gql`
     query PairCreateds {
@@ -767,6 +1020,21 @@ export const UserLiquiditiesDocument = gql`
   }
 }
     ` as unknown as DocumentNode<UserLiquiditiesQuery, UserLiquiditiesQueryVariables>;
+export const PairTvlsDocument = gql`
+    query PairTvls {
+  pairTvls(first: 20) {
+    id
+    pair
+    reserve0
+    reserve1
+    token0
+    token1
+    symbol0
+    symbol1
+  }
+}
+    ` as unknown as DocumentNode<PairTvlsQuery, PairTvlsQueryVariables>;
+
 
 
 
@@ -778,6 +1046,9 @@ export function getSdk<C, E>(requester: Requester<C, E>) {
     },
     UserLiquidities(variables?: UserLiquiditiesQueryVariables, options?: C): Promise<UserLiquiditiesQuery> {
       return requester<UserLiquiditiesQuery, UserLiquiditiesQueryVariables>(UserLiquiditiesDocument, variables, options) as Promise<UserLiquiditiesQuery>;
+    },
+    PairTvls(variables?: PairTvlsQueryVariables, options?: C): Promise<PairTvlsQuery> {
+      return requester<PairTvlsQuery, PairTvlsQueryVariables>(PairTvlsDocument, variables, options) as Promise<PairTvlsQuery>;
     }
   };
 }
