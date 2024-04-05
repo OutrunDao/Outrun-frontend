@@ -23,6 +23,7 @@ import { Address, formatUnits, getAddress, parseUnits } from 'viem';
 
 import { getRouterContract } from './getContract';
 import UserLiquiditesPannel from './UserLiquidityPannel';
+import PoolTvlPannel from './PoolTvlPannel';
 import { useSwap, BtnAction } from '@/hook/useSwap';
 import { Currency, Token } from '@/packages/swap-core';
 import tokenSwitch, { CurrencyPairType } from './tokenSwitch';
@@ -238,6 +239,7 @@ const PoolIndex = () => {
           ) : null}
         </VStack>
       </Container>
+      <PoolTvlPannel></PoolTvlPannel>
     </>
   );
 };

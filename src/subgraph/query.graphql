@@ -18,3 +18,16 @@ query UserLiquidities($user: Bytes) {
     token1
   }
 }
+
+query PairTvls {
+  pairTvls(first: 20) {
+    id
+    pair
+    reserve0
+    reserve1
+    token0
+    token1
+    symbol0
+    symbol1
+  }
+}
