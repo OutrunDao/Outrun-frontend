@@ -7,7 +7,7 @@ const BtnStyle = {
   width: '100%',
   border: '0.5px solid rgb(252 252 3)',
   color: 'rgb(252 252 3)',
-  backgroundColor: 'rgb(52 30 z56 / 50%)',
+  backgroundColor: 'rgba(252, 252, 3, 0.1)',
   marginTop: '22px',
 };
 

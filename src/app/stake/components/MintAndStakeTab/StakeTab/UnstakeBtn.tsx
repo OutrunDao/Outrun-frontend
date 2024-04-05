@@ -7,6 +7,26 @@ import { ContractAddressMap } from "@/contants/address"
 import { ContractAddrKey } from "@/types/index.d"
 import { parseEther } from 'viem'
 
+const UnstakeABI = [{
+  inputs: [
+    {
+      internalType: 'uint256',
+      name: 'positionId',
+      type: 'uint256',
+    },
+  ],
+  name: 'unstake',
+  outputs: [
+    {
+      internalType: 'uint256',
+      name: '',
+      type: 'uint256',
+    },
+  ],
+  stateMutability: 'nonpayable',
+  type: 'function',
+}]
+
 const UnstakeBtn = () => {
   const rEthAddr = ContractAddressMap[ContractAddrKey.RETHStakeManager]
   const rUsdAddr = ContractAddressMap[ContractAddrKey.RUSDStakeManager]
@@ -14,15 +34,16 @@ const UnstakeBtn = () => {
   const account = useAccount().address;  
   const { writeContract, writeContractAsync } = useWriteContract()
 
-  const onHandleStake = () => {
+  const onHandleUnstake = () => {
     store.isLoadingBtn = true
     const params = {
-      abi: RETHStakeManager,
+      abi: UnstakeABI,
       address,
       account,
       functionName: 'unstake',
       args: [parseEther(store.inputValue), 365, account, account, account]
     }
+
     writeContract(params, {
       onError: (error) => {
         console.error('onStake error', error);
@@ -37,7 +58,7 @@ const UnstakeBtn = () => {
   }
 
   return (
-    <Button isLoading={store.isLoadingBtn} style={store.BtnStyle} onClick={onHandleStake}>
+    <Button isLoading={store.isLoadingBtn} style={store.BtnStyle} onClick={onHandleUnstake}>
       Unstake
     </Button>
   )
