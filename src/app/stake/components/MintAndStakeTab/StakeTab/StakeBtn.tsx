@@ -2,7 +2,7 @@ import { observer } from "mobx-react-lite"
 import { useAccount, useWriteContract, useTransactionReceipt } from 'wagmi';
 import { Button, useToast } from '@chakra-ui/react'
 import store from '@/app/stake/StakeStore'
-import RETHStakeManager from '@/ABI/RETHStakeManager'
+import RETHStakeManager from '@/ABI/RETHStakeManager.json'
 import { ContractAddressMap, LocalTokenAddress } from "@/contants/address"
 import { ContractAddrKey, LocalTokenSymbol } from "@/types/index.d"
 import { parseEther } from 'viem'
