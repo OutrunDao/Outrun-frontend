@@ -2,12 +2,19 @@ import { useWriteContract, useReadContract, useAccount } from 'wagmi';
 import { formatEther } from 'viem'
 import { Tag, Text, Box, Flex, useToast } from "@chakra-ui/react"
 import RETHStakeManagerABI from '@/ABI/RETHStakeManager.json'
-import { PositionResponse } from '@/ABI/RETHStakeManager'
 import { useState } from 'react';
 import { ContractAddressMap } from '@/contants/address';
 import UnstakeButton from './UnstakeButton'
 interface IProps {
   positionId: string
+}
+
+interface PositionResponse {
+  RETHAmount: string;
+  PETHAmount: string;
+  deadline: string;
+  closed: boolean;
+  owner: string;
 }
 
 const PositionItem = (props: IProps) => {

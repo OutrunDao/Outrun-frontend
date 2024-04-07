@@ -6,11 +6,8 @@ import { useAccount } from 'wagmi'
 import { tabList, TabType, SwitchState, PairSelectList, TokenPairMap } from './types'
 import { LocalTokenSymbol } from '@/types/index.d'
 import { ArrowDownIcon } from '@chakra-ui/icons'
-import { StakeRETHDocument, StakeRETHQuery, execute } from '@/subgraph'
-
 import PriceCoin from './components/PriceCoin'
 import BalanceCoin from './components/Balance'
-// import StakeButton from './components/StakeButton'
 import InputSelect from './components/InputSelect'
 import MintAndStakeTab from './components/MintAndStakeTab'
 
@@ -48,13 +45,6 @@ const  Stake = () => {
     store.selectedToken = currTokenPairMap[store.selectedToken as keyof CurrTokenPair]
     setNewList(newState)
   }
-
-  useEffect(() => {
-    console.log('address', address);
-    execute(StakeRETHDocument, { account: address }).then((result) => {
-      console.log('result', result.data.stakeRETHs);
-    })
-  }, [address])
 
   return(
     <Container className="stack" color="#fff" fontSize="14px" marginTop="100px">
