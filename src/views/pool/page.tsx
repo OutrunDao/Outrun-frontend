@@ -57,10 +57,10 @@ const PoolIndex = () => {
       <br />
       <br />
 
-      <Tabs position="relative" variant="line" colorScheme="pink">
+      <Tabs position="relative" variant="unstyled" colorScheme="pink">
         <TabList>
-          <Tab color={'#fff'}>All Pools</Tab>
-          <Tab color={'#fff'}>My Positions</Tab>
+          <Tab _selected={{ color: 'white', bg: 'gray.500' }}>All Pools</Tab>
+          <Tab _selected={{ color: 'white', bg: 'gray.500' }}>My Positions</Tab>
         </TabList>
         <TabPanels>
           <TabPanel>

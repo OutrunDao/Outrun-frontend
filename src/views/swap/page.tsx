@@ -25,7 +25,7 @@ import { ArrowDownIcon, ReactIcon, RepeatIcon } from '@chakra-ui/icons';
 import { TradeOptionsPopover } from './TradeOptionsPopover';
 import { useAccount, useChainId, usePublicClient, useWalletClient } from 'wagmi';
 import { Address, formatUnits, getAddress, parseUnits } from 'viem';
-import { useSwap, BtnAction } from '@/hook/useSwap';
+import { useSwap, BtnAction, SwapView } from '@/hook/useSwap';
 import { getRouterContract } from '@/views/pool/getContract';
 import { Percent, Token } from '@/packages/swap-core';
 import { Router as SwapRouter } from '@/packages/swap-sdk';
@@ -46,7 +46,7 @@ export default function Swap() {
     token0AmountInputHandler,
     token1AmountInputHandler,
     approve,
-  } = useSwap(true);
+  } = useSwap(SwapView.swap);
 
   const onReverse = () => {
     if (!swapData.token0 || !swapData.token1) return;
