@@ -1,22 +1,23 @@
-import { useTransactionReceipt, useWriteContract, useReadContract, useAccount, useBalance } from 'wagmi';
+import { useWriteContract, useReadContract, useAccount } from 'wagmi';
 import { formatEther } from 'viem'
-import { Button, Tag, Text, Heading, Box, Flex } from "@chakra-ui/react"
+import { Tag, Text, Box, Flex, useToast } from "@chakra-ui/react"
 import RETHStakeManagerABI from '@/ABI/RETHStakeManager.json'
-import { type RETHStakeManager, PositionResponse, UnstakeEventEmittedResponse } from '@/ABI/RETHStakeManager'
-import { useEffect, useState } from 'react';
+import { PositionResponse } from '@/ABI/RETHStakeManager'
+import { useState } from 'react';
 import { ContractAddressMap } from '@/contants/address';
 import UnstakeButton from './UnstakeButton'
-
 interface IProps {
   positionId: string
 }
 
 const PositionItem = (props: IProps) => {
   const account = useAccount().address
-  const { writeContractAsync } = useWriteContract()
+  const toast = useToast()
+  const { writeContract } = useWriteContract()
   const [unstakeLoading, setUnstakeLoading] = useState<boolean>(false)
   const [unstakeHash, setUnstakeHash] = useState<`0x${string}`>()
   const contractAddr = ContractAddressMap.RETHStakeManager
+ 
   const params = {
     abi: RETHStakeManagerABI,
     address: contractAddr,
@@ -26,8 +27,7 @@ const PositionItem = (props: IProps) => {
   }
   const { data }: { data: PositionResponse | undefined }  = useReadContract(params)
   const timeStamp = Number(data?.deadline || 0) * 1000
-  const date = new Date(timeStamp).toLocaleDateString()
-  
+  const date = new Date(timeStamp).toLocaleDateString()  
   const onUnstake = async () => {
     const writeParams = {
       abi: RETHStakeManagerABI,
@@ -41,14 +41,22 @@ const PositionItem = (props: IProps) => {
       
     setUnstakeLoading(true)
 
-    try {
-      const txHash = await writeContractAsync(writeParams)
-      setUnstakeHash(txHash)
-      setUnstakeLoading(false)
-    } catch (error) {
-      console.error('onUnstake failed: ', error);
-      setUnstakeLoading(false)
-    }
+    writeContract(writeParams, {
+      onError: (error) => {
+        console.error('onUnstake failed: ', error);
+        toast({
+          title: "Unstake failed",
+          status: "error",
+          description: error.message
+        })
+      },
+      onSuccess: (txHash) => {
+        setUnstakeHash(txHash)
+      },
+      onSettled: (data) => {
+        setUnstakeLoading(false)
+      }
+    })
   }
 
   return (

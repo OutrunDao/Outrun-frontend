@@ -50,7 +50,7 @@ export default function Position() {
       <List marginTop="32px" width="800px">
         {
           positionList.map(item => <ListItem>
-            <PositionItem positionId={item._positionId} />
+            <PositionItem key={item._positionId} positionId={item._positionId} />
           </ListItem>)
         }
       </List>
