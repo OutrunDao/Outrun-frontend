@@ -6,32 +6,22 @@ import {
   Center,
   Container,
   Flex,
-  Heading,
   HStack,
   IconButton,
   Input,
-  InputGroup,
-  InputRightElement,
-  Radio,
-  RadioGroup,
   Spacer,
-  Stack,
   Text,
   useToast,
-  VStack,
 } from '@chakra-ui/react';
 import TokenSelect, { getToken } from '@/components/TokenSelect';
-import { ArrowDownIcon, ReactIcon, RepeatIcon } from '@chakra-ui/icons';
-import { TradeOptionsPopover } from './TradeOptionsPopover';
 import { useAccount, useChainId, usePublicClient, useWalletClient } from 'wagmi';
 import { Address, formatUnits, getAddress, parseUnits } from 'viem';
-import { useSwap, BtnAction } from '@/hook/useSwap';
-import { getRouterContract } from '@/views/pool/getContract';
-import { Percent, Token } from '@/packages/swap-core';
-import { Router as SwapRouter } from '@/packages/swap-sdk';
+import { useSwap, BtnAction, SwapView } from '@/hook/useSwap';
+import { getRouterContract } from '../getContract';
+import { Percent } from '@/packages/swap-core';
 const defaultSymbol = 'ETH';
 
-export default function Swap() {
+export default function PoolCreate() {
   const chainId = useChainId();
   const account = useAccount();
   const publicClient = usePublicClient();
@@ -46,56 +36,9 @@ export default function Swap() {
     token0AmountInputHandler,
     token1AmountInputHandler,
     approve,
-  } = useSwap(true);
+  } = useSwap(SwapView.createPoll);
 
-  const onReverse = () => {
-    if (!swapData.token0 || !swapData.token1) return;
-    setToken0(swapData.token1);
-    setToken1(swapData.token0);
-  };
-
-  async function swap() {
-    if (!swapData.token0 || !swapData.token1 || !account.address || !walletClient) return;
-    setLoading(true);
-    toast({
-      status: 'loading',
-      title: 'swap',
-      isClosable: true,
-    });
-    const { methodName, args, value } = SwapRouter.swapCallParameters(swapData.tradeRoute!, {
-      allowedSlippage: new Percent(5, 100),
-      deadline: Math.floor(new Date().getTime() / 1000) + 5 * 60,
-      recipient: account.address,
-    });
-    try {
-      const tx = await getRouterContract(walletClient!).write[methodName](args, { value, account });
-      toast({
-        title: 'transaction success',
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-      });
-      const data = await publicClient!.waitForTransactionReceipt({
-        hash: tx as Address,
-        confirmations: 1,
-      });
-      toast({
-        title: data.status === 'success' ? 'swap success' : 'swap failed',
-        status: data.status === 'success' ? 'success' : 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-    } catch (e: any) {
-      toast({
-        title: 'swap failed',
-        description: e.message,
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-    }
-    setLoading(false);
-  }
+  async function createPool() {}
 
   return (
     <Container
@@ -109,13 +52,9 @@ export default function Swap() {
       p={6}
       mt="24"
     >
-      <Flex mb={'4px'}>
-        <Center>
-          <Text fontSize="md">Swap</Text>
-        </Center>
-        <Spacer></Spacer>
-        <TradeOptionsPopover></TradeOptionsPopover>
-      </Flex>
+      <Center mb={'2rem'}>
+        <Text fontSize="md">Choose tokens</Text>
+      </Center>
       <Container
         borderColor="gray.600"
         boxShadow="xs"
@@ -139,7 +78,7 @@ export default function Swap() {
               variant="main"
               size="lg"
               textAlign={'right'}
-              placeholder="Intput token amount"
+              placeholder="token amount"
               value={swapData.token0AmountInput}
               onChange={(e) => token0AmountInputHandler(e.target.value)}
             />
@@ -154,22 +93,6 @@ export default function Swap() {
           </Center>
         </Flex>
       </Container>
-      <Box position={'relative'}>
-        <IconButton
-          textAlign={'center'}
-          position={'absolute'}
-          top={'-12px'}
-          left={'48%'}
-          icon={<RepeatIcon />}
-          color="gray.500"
-          borderColor="gray.500"
-          variant={'outline'}
-          aria-label="ArrowDown"
-          onClick={onReverse}
-          bg={'#0d0703'}
-          size={'xs'}
-        />
-      </Box>
       <Container
         borderColor="gray.600"
         boxShadow="xs"
@@ -188,7 +111,7 @@ export default function Swap() {
               variant="main"
               size="lg"
               textAlign={'right'}
-              placeholder="Output token amount"
+              placeholder="token amount"
               value={swapData.token1AmountInput}
               onChange={(e) => token1AmountInputHandler(e.target.value)}
             />
@@ -213,24 +136,6 @@ export default function Swap() {
               {swapData.pair.token1.symbol}
             </>
           ) : null}
-        </Text>
-      </HStack>
-      <HStack fontSize={'small'} px="8px" py={2}>
-        <Text w="40%">Gas fee</Text>
-        <Text w="70%" textAlign={'right'}>
-          {'< '}1111 Gwei
-        </Text>
-      </HStack>
-      <HStack fontSize={'small'} px="8px" py={1} color={'green'}>
-        <Text w="40%">Minimal Receive</Text>
-        <Text w="70%" textAlign={'right'}>
-          1212112 ETH
-        </Text>
-      </HStack>
-      <HStack fontSize={'small'} px="8px" py={1} color={'green'}>
-        <Text w="40%">PriceImpact</Text>
-        <Text w="70%" textAlign={'right'}>
-          1%
         </Text>
       </HStack>
       <Box mt={'1rem'} fontSize={16}>
@@ -263,15 +168,15 @@ export default function Swap() {
             margin={0}
             colorScheme="gray"
             variant="solid"
-            onClick={swap}
+            onClick={createPool}
             isLoading={loading}
           >
-            swap
+            create pool
           </Button>
         ) : null}
         {swapData.action === BtnAction.disable ? (
           <Button width={'100%'} disabled size="lg" colorScheme="gray" variant="solid" rounded={'md'}>
-            swap
+            create pool
           </Button>
         ) : null}
       </Box>

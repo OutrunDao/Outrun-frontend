@@ -6,32 +6,26 @@ import {
   Center,
   Container,
   Flex,
-  Heading,
   HStack,
   IconButton,
   Input,
-  InputGroup,
-  InputRightElement,
-  Radio,
-  RadioGroup,
   Spacer,
-  Stack,
   Text,
   useToast,
-  VStack,
 } from '@chakra-ui/react';
 import TokenSelect, { getToken } from '@/components/TokenSelect';
-import { ArrowDownIcon, ReactIcon, RepeatIcon } from '@chakra-ui/icons';
-import { TradeOptionsPopover } from './TradeOptionsPopover';
 import { useAccount, useChainId, usePublicClient, useWalletClient } from 'wagmi';
 import { Address, formatUnits, getAddress, parseUnits } from 'viem';
-import { useSwap, BtnAction } from '@/hook/useSwap';
-import { getRouterContract } from '@/views/pool/getContract';
-import { Percent, Token } from '@/packages/swap-core';
-import { Router as SwapRouter } from '@/packages/swap-sdk';
+import { useSwap, BtnAction, SwapView } from '@/hook/useSwap';
+import { getRouterContract } from '../getContract';
+import { Percent } from '@/packages/swap-core';
+import { retry } from 'radash';
+import { Token } from '@/packages/swap-core';
+import tokenSwitch, { CurrencyPairType } from '../tokenSwitch';
+
 const defaultSymbol = 'ETH';
 
-export default function Swap() {
+export default function AddLiquidity() {
   const chainId = useChainId();
   const account = useAccount();
   const publicClient = usePublicClient();
@@ -46,48 +40,87 @@ export default function Swap() {
     token0AmountInputHandler,
     token1AmountInputHandler,
     approve,
-  } = useSwap(true);
+  } = useSwap(SwapView.addLiquidity);
 
-  const onReverse = () => {
-    if (!swapData.token0 || !swapData.token1) return;
-    setToken0(swapData.token1);
-    setToken1(swapData.token0);
-  };
-
-  async function swap() {
-    if (!swapData.token0 || !swapData.token1 || !account.address || !walletClient) return;
-    setLoading(true);
+  async function _addLiquidity() {
     toast({
       status: 'loading',
-      title: 'swap',
+      title: 'addLiquidity',
       isClosable: true,
     });
-    const { methodName, args, value } = SwapRouter.swapCallParameters(swapData.tradeRoute!, {
-      allowedSlippage: new Percent(5, 100),
-      deadline: Math.floor(new Date().getTime() / 1000) + 5 * 60,
-      recipient: account.address,
-    });
+    if (!swapData.token0 || !swapData.token1 || !account.address || !walletClient) return;
+    setLoading(true);
+    const slippage = 0.05;
+    let execution = 'addLiquidity';
+    let token0Input = parseUnits(swapData.token0AmountInput!, swapData.token0.decimals);
+    let token1Input = parseUnits(swapData.token1AmountInput!, swapData.token1.decimals);
+    let token0AmountMin = parseUnits(
+      (+swapData.token0AmountInput! * slippage).toString(),
+      swapData.token0.decimals
+    );
+    // 计算最小输出逻辑应该不对,待改
+    let token1AmountMin = parseUnits(
+      (+swapData.token1AmountInput! * slippage).toString(),
+      swapData.token1.decimals
+    );
+    let deadline = Math.floor(Date.now() / 1000) + 60 * 10;
+    let to = account.address;
+    let args: (string | number | bigint)[] = [
+      (swapData.token0 as Token).address,
+      (swapData.token1 as Token).address,
+      token0Input,
+      token1Input,
+      token0AmountMin,
+      token1AmountMin,
+      to,
+      deadline,
+    ];
+    let config;
+    const [type, tokenA, tokenB, tokenAInput, tokenBInput, tokenAMin, tokenBMin] = tokenSwitch(
+      swapData.token0,
+      swapData.token1,
+      token0Input,
+      token1Input,
+      token0AmountMin,
+      token1AmountMin
+    );
+    // console.log(type, tokenA, tokenB, tokenAInput, tokenBInput, tokenAMin, tokenBMin);
+    if (type === CurrencyPairType.EthAndUsdb) {
+      execution = 'addLiquidityETHAndUSDB';
+      args = [tokenBInput!, tokenAMin!, tokenBMin!, to, deadline];
+      config = { value: tokenAInput, account };
+    } else if (type === CurrencyPairType.EthAndToken) {
+      execution = 'addLiquidityETH';
+      args = [(tokenB as Token).address, tokenBInput!, tokenAMin!, tokenBMin!, to, deadline];
+      config = { value: tokenAInput, account };
+    } else if (type === CurrencyPairType.UsdbAndToken) {
+      execution = 'addLiquidityUSDB';
+      args = [(tokenB as Token).address, tokenBInput!, tokenAInput!, tokenBMin!, tokenAMin!, to, deadline];
+    }
+
     try {
-      const tx = await getRouterContract(walletClient!).write[methodName](args, { value, account });
+      const tx = await getRouterContract(walletClient!).write[execution](args, config);
       toast({
         title: 'transaction success',
         status: 'success',
         duration: 3000,
         isClosable: true,
       });
-      const data = await publicClient!.waitForTransactionReceipt({
-        hash: tx as Address,
-        confirmations: 1,
+      const data = await retry({ times: 10, delay: 5000 }, async () => {
+        return await publicClient!.getTransactionReceipt({
+          hash: tx as Address,
+        });
       });
+      console.log(data);
       toast({
-        title: data.status === 'success' ? 'swap success' : 'swap failed',
+        title: data.status === 'success' ? 'Add liquidity success' : 'Add liquidity failed',
         status: data.status === 'success' ? 'success' : 'error',
         duration: 3000,
         isClosable: true,
       });
     } catch (e: any) {
       toast({
-        title: 'swap failed',
+        title: 'Add liquidity failed',
         description: e.message,
         status: 'error',
         duration: 3000,
@@ -109,13 +142,9 @@ export default function Swap() {
       p={6}
       mt="24"
     >
-      <Flex mb={'4px'}>
-        <Center>
-          <Text fontSize="md">Swap</Text>
-        </Center>
-        <Spacer></Spacer>
-        <TradeOptionsPopover></TradeOptionsPopover>
-      </Flex>
+      <Center mb={'2rem'}>
+        <Text fontSize="md">Add Liquidity</Text>
+      </Center>
       <Container
         borderColor="gray.600"
         boxShadow="xs"
@@ -139,7 +168,7 @@ export default function Swap() {
               variant="main"
               size="lg"
               textAlign={'right'}
-              placeholder="Intput token amount"
+              placeholder="Input token amount"
               value={swapData.token0AmountInput}
               onChange={(e) => token0AmountInputHandler(e.target.value)}
             />
@@ -154,22 +183,6 @@ export default function Swap() {
           </Center>
         </Flex>
       </Container>
-      <Box position={'relative'}>
-        <IconButton
-          textAlign={'center'}
-          position={'absolute'}
-          top={'-12px'}
-          left={'48%'}
-          icon={<RepeatIcon />}
-          color="gray.500"
-          borderColor="gray.500"
-          variant={'outline'}
-          aria-label="ArrowDown"
-          onClick={onReverse}
-          bg={'#0d0703'}
-          size={'xs'}
-        />
-      </Box>
       <Container
         borderColor="gray.600"
         boxShadow="xs"
@@ -188,7 +201,7 @@ export default function Swap() {
               variant="main"
               size="lg"
               textAlign={'right'}
-              placeholder="Output token amount"
+              placeholder="token amount"
               value={swapData.token1AmountInput}
               onChange={(e) => token1AmountInputHandler(e.target.value)}
             />
@@ -215,34 +228,9 @@ export default function Swap() {
           ) : null}
         </Text>
       </HStack>
-      <HStack fontSize={'small'} px="8px" py={2}>
-        <Text w="40%">Gas fee</Text>
-        <Text w="70%" textAlign={'right'}>
-          {'< '}1111 Gwei
-        </Text>
-      </HStack>
-      <HStack fontSize={'small'} px="8px" py={1} color={'green'}>
-        <Text w="40%">Minimal Receive</Text>
-        <Text w="70%" textAlign={'right'}>
-          1212112 ETH
-        </Text>
-      </HStack>
-      <HStack fontSize={'small'} px="8px" py={1} color={'green'}>
-        <Text w="40%">PriceImpact</Text>
-        <Text w="70%" textAlign={'right'}>
-          1%
-        </Text>
-      </HStack>
       <Box mt={'1rem'} fontSize={16}>
         {swapData.action === BtnAction.approve ? (
-          <Button
-            width={'100%'}
-            size="lg"
-            colorScheme="gray"
-            variant="solid"
-            onClick={approve}
-            isLoading={loading}
-          >
+          <Button width={'100%'} mt={4} size="lg" variant="custom" onClick={approve} isLoading={loading}>
             Set Approve{' '}
             {swapData.tokenAllowance[0].lessThan(swapData.token0AmountInput || 0)
               ? swapData.token0.symbol
@@ -250,7 +238,7 @@ export default function Swap() {
           </Button>
         ) : null}
         {swapData.action === BtnAction.insufficient ? (
-          <Button width={'100%'} size="lg" colorScheme="gray" variant="solid">
+          <Button width={'100%'} mt={4} size="lg" variant="custom">
             {' '}
             insufficient token{' '}
           </Button>
@@ -259,19 +247,19 @@ export default function Swap() {
         {swapData.action === BtnAction.available ? (
           <Button
             width={'100%'}
+            mt={4}
             size="lg"
-            margin={0}
             colorScheme="gray"
             variant="solid"
-            onClick={swap}
+            onClick={_addLiquidity}
             isLoading={loading}
           >
-            swap
+            add liquidity
           </Button>
         ) : null}
         {swapData.action === BtnAction.disable ? (
-          <Button width={'100%'} disabled size="lg" colorScheme="gray" variant="solid" rounded={'md'}>
-            swap
+          <Button width={'100%'} mt={4} disabled size="lg" colorScheme="gray" variant="solid">
+            add liquidity
           </Button>
         ) : null}
       </Box>

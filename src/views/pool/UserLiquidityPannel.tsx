@@ -1,4 +1,21 @@
-import { Container, Center, Button, Icon, Card, CardBody, Text, useToast } from '@chakra-ui/react';
+import {
+  Container,
+  Center,
+  Button,
+  Icon,
+  Card,
+  CardBody,
+  Text,
+  useToast,
+  TableContainer,
+  Table,
+  Thead,
+  Tr,
+  Td,
+  Th,
+  Tfoot,
+  Tbody,
+} from '@chakra-ui/react';
 import { useAccount, useChainId, usePublicClient, useWalletClient } from 'wagmi';
 import { execute, UserLiquiditiesDocument, LiquidityHolding } from '@/subgraph';
 import { useQuery } from '@tanstack/react-query';
@@ -113,30 +130,48 @@ export default function UserLiquiditesPannel() {
   }
 
   return (
-    <Container>
+    <Container maxW={'container.xl'} p={0}>
       {pairs && pairs.length ? (
-        pairs.map((pair, index) => (
-          <Card key={index} marginTop="20px">
-            <CardBody>
-              <Text color="#666" fontSize="16px">
-                {pair.token0.symbol} / {pair.token1.symbol}
-              </Text>
-              <Text color="#666" fontSize="16px">
-                {pair.reserveOf(pair.token0).toExact()}/{pair.reserveOf(pair.token1).toExact()}
-              </Text>
-              <Text color="#666" fontSize="16px">
-                your share:{' '}
-                <LiquidityRatio liquidityToken={pair.liquidityToken} userAddress={account.address!} />
-              </Text>
-              <Button onClick={() => removeLiquidity(pair)}>移除流动性</Button>
-            </CardBody>
-          </Card>
-        ))
-      ) : (
+        <TableContainer>
+          <Table size="md" variant="simple" colorScheme="gray" borderStyle={'solid'} borderWidth={'0.1px'}>
+            <Thead>
+              <Tr>
+                <Th>Pool Composition</Th>
+                <Th>Token Volume</Th>
+                <Th>My Shares</Th>
+                <Th>Action</Th>
+              </Tr>
+            </Thead>
+            <Tbody>
+              {pairs && pairs.length
+                ? pairs.map((pair, index) => (
+                    <Tr key={index} marginTop="20px">
+                      <Th color="#666" fontSize="16px">
+                        {pair.token0.symbol} / {pair.token1.symbol || 'unknown token'}
+                      </Th>
+                      <Th color="#666" fontSize="16px">
+                        {pair.reserveOf(pair.token0).toExact()}/{pair.reserveOf(pair.token1).toExact()}
+                      </Th>
+                      <Th>
+                        <LiquidityRatio liquidityToken={pair.liquidityToken} userAddress={account.address!} />
+                      </Th>
+                      <Th>
+                        <Button colorScheme="gray" size={'sm'} onClick={() => removeLiquidity(pair)}>
+                          remove liquidity
+                        </Button>
+                      </Th>
+                    </Tr>
+                  ))
+                : null}
+            </Tbody>
+          </Table>
+        </TableContainer>
+      ) : null}
+      {!pairs || !pairs.length ? (
         <Text align="center" color="#999" fontSize="16px" marginTop="12px">
           Your have no active liquidity positions.
         </Text>
-      )}
+      ) : null}
     </Container>
   );
 }

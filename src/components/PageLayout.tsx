@@ -34,7 +34,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </HStack>
         </Box>
       </Flex>
-      <Container>{children}</Container>
+      <Container maxW={'container.xl'}>{children}</Container>
     </Box>
   );
 }
