@@ -82,7 +82,13 @@ export default function TokenSelect({
         px={'10px'}
         leftIcon={
           tokenInfo && tokenInfo.logoURI ? (
-            <Image src={tokenInfo.logoURI} width={'20px'} height={'20px'} alt={tokenInfo.symbol}></Image>
+            <Image
+              src={tokenInfo.logoURI}
+              width={'15px'}
+              height={'15px'}
+              alt={tokenInfo.symbol}
+              style={{ marginLeft: '6px' }}
+            ></Image>
           ) : (
             <QuestionIcon></QuestionIcon>
           )

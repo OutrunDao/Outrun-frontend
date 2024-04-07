@@ -1,5 +1,5 @@
 'use client';
-import { Box, Flex, Spacer, Text, Button, HStack, Heading, Image } from '@chakra-ui/react';
+import { Box, Flex, Spacer, Text, Button, HStack, Heading, Image, Container } from '@chakra-ui/react';
 import { Link } from '@chakra-ui/next-js';
 import { Silkscreen } from 'next/font/google';
 
@@ -7,25 +7,24 @@ const silk = Silkscreen({ subsets: ['latin'], weight: '700' });
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <Box  bgColor="rgb(29 12 23)" minHeight={'100vh'}>
-      <Flex align="center">
-        <Flex p={'24px '} align="center">
-          {/* <Box boxSize={40}><Logo width={40} height={40}></Logo></Box> */}
-          <Heading as="h1" fontSize={30} fontWeight="bold" textColor="#d3027d" style={silk.style}>
+    <Box>
+      <Flex align="center" borderColor="gray.600" borderBottomStyle={'solid'} borderBottomWidth={'0.5px'}>
+        <Flex p={'12px 24px'}>
+          <Heading as="h1" fontSize={24} fontWeight="bold" textColor="brand.500" style={silk.style}>
             Outrun
           </Heading>
         </Flex>
         <Box ml={'60px'}>
-          <HStack spacing={'40px'}>
-            <Text>
+          <HStack spacing={'40px'} fontSize={14}>
+            <Button variant="link" color="grey.600" fontSize={14} fontWeight={'normal'}>
               <Link href={'/swap'}>Swap</Link>
-            </Text>
-            <Text>
+            </Button>
+            <Button variant="link" color="grey.600" fontSize={14} fontWeight={'normal'}>
               <Link href={'/pool'}>Pool</Link>
-            </Text>
-            <Text>
+            </Button>
+            <Button variant="link" color="grey.600" fontSize={14} fontWeight={'normal'}>
               <Link href={'/stake'}>Stake</Link>
-            </Text>
+            </Button>
           </HStack>
         </Box>
         <Spacer />
@@ -35,7 +34,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </HStack>
         </Box>
       </Flex>
-      {children}
+      <Container>{children}</Container>
     </Box>
   );
 }

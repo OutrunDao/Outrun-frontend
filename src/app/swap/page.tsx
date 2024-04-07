@@ -3,22 +3,26 @@
 import {
   Box,
   Button,
+  Center,
   Container,
+  Flex,
   Heading,
+  HStack,
   IconButton,
   Input,
   InputGroup,
   InputRightElement,
   Radio,
   RadioGroup,
+  Spacer,
   Stack,
   Text,
   useToast,
   VStack,
 } from '@chakra-ui/react';
 import TokenSelect, { getToken } from '@/components/TokenSelect';
-import { ArrowDownIcon } from '@chakra-ui/icons';
-import { TradeSettingsModal } from './TradeSettingsModal';
+import { ArrowDownIcon, ReactIcon, RepeatIcon } from '@chakra-ui/icons';
+import { TradeOptionsPopover } from './TradeOptionsPopover';
 import { useAccount, useChainId, usePublicClient, useWalletClient } from 'wagmi';
 import { Address, formatUnits, getAddress, parseUnits } from 'viem';
 import { useSwap, BtnAction } from '@/hook/useSwap';
@@ -95,85 +99,150 @@ export default function Swap() {
 
   return (
     <Container
-      w={'480px'}
+      w={'420px'}
       borderStyle={'solid'}
-      borderWidth={'1px'}
+      borderWidth={'0.5px'}
       borderRadius={'md'}
-      borderColor={'#3aaa7a'}
-      textColor={'#fff'}
-      padding={'2rem'}
-      textAlign={'center'}
-      mt={'6rem'}
+      borderColor="gray.600"
+      boxShadow="xs"
+      rounded="md"
+      p={6}
+      mt="24"
     >
-      <Heading as="h3" size="lg" fontWeight={''}>
-        SWAP
-      </Heading>
-      <Container textAlign={'right'}>
-        <TradeSettingsModal></TradeSettingsModal>
+      <Flex mb={'4px'}>
+        <Center>
+          <Text fontSize="md">Swap</Text>
+        </Center>
+        <Spacer></Spacer>
+        <TradeOptionsPopover></TradeOptionsPopover>
+      </Flex>
+      <Container
+        borderColor="gray.600"
+        boxShadow="xs"
+        rounded="md"
+        borderWidth={'0.5px'}
+        borderStyle={'solid'}
+        padding="6px 0"
+        borderBottomRadius={'0'}
+      >
+        <Flex>
+          <Center>
+            <TokenSelect
+              defaultSymbol={defaultSymbol}
+              token={swapData.token0}
+              chainId={chainId}
+              onSelect={(token) => setToken0(token)}
+            />
+          </Center>
+          <Center width={'100%'}>
+            <Input
+              variant="main"
+              size="lg"
+              textAlign={'right'}
+              placeholder="Intput token amount"
+              value={swapData.token0AmountInput}
+              onChange={(e) => token0AmountInputHandler(e.target.value)}
+            />
+          </Center>
+        </Flex>
+        <Flex>
+          <Center ml={'14px'}>
+            <Text fontSize={'xs'}>Balance: {swapData.token0Balance.toFixed(6)}</Text>
+            <Button colorScheme="teal" variant="link" size={'xs'} ml={'6px'} textDecoration={'underline'}>
+              MAX
+            </Button>
+          </Center>
+        </Flex>
       </Container>
-      <VStack mt={'2.5rem'} spacing={4} paddingX={'2rem'} fontSize={16}>
-        <InputGroup>
-          <Text color={'#3aaa7a'} ml={4} mt={'6px'}>
-            INPUT:{' '}
-          </Text>
-          <Input
-            variant="unstyled"
-            size="lg"
-            placeholder="Intput token amount"
-            ml={4}
-            mr={6}
-            value={swapData.token0AmountInput}
-            onChange={(e) => token0AmountInputHandler(e.target.value)}
-          />
-          <TokenSelect
-            defaultSymbol={defaultSymbol}
-            token={swapData.token0}
-            chainId={chainId}
-            onSelect={(token) => setToken0(token)}
-          />
-          <br />
-        </InputGroup>
-        <Container textAlign={'right'} pr={0}>
-          <Text fontSize={'xs'}>Balance: {swapData.token0Balance.toFixed(6)}</Text>
-        </Container>
-        <Container>
-          <IconButton
-            icon={<ArrowDownIcon />}
-            colorScheme="teal"
-            aria-label="ArrowDown"
-            onClick={onReverse}
-          />
-        </Container>
-        <InputGroup>
-          <Text color={'#3aaa7a'} mt={'6px'}>
-            OUTPUT:{' '}
-          </Text>
-          <Input
-            variant="unstyled"
-            size="lg"
-            placeholder="Output token amount"
-            ml={4}
-            mr={6}
-            value={swapData.token1AmountInput}
-            onChange={(e) => token1AmountInputHandler(e.target.value)}
-          />
-          <TokenSelect chainId={chainId} token={swapData.token1} onSelect={(token) => setToken1(token)} />
-        </InputGroup>
-        <Container textAlign={'right'} pr={0}>
-          <Text fontSize={'xs'}>Balance: {swapData.token1Balance.toFixed(6)}</Text>
-        </Container>
-        <Container textAlign={'right'} pr={0}>
+      <Box position={'relative'}>
+        <IconButton
+          textAlign={'center'}
+          position={'absolute'}
+          top={'-12px'}
+          left={'48%'}
+          icon={<RepeatIcon />}
+          color="gray.500"
+          borderColor="gray.500"
+          variant={'outline'}
+          aria-label="ArrowDown"
+          onClick={onReverse}
+          bg={'#0d0703'}
+          size={'xs'}
+        />
+      </Box>
+      <Container
+        borderColor="gray.600"
+        boxShadow="xs"
+        rounded="md"
+        borderWidth={'0.5px'}
+        borderStyle={'solid'}
+        padding="6px 0"
+        borderTopRadius={0}
+      >
+        <Flex>
+          <Center>
+            <TokenSelect chainId={chainId} token={swapData.token1} onSelect={(token) => setToken1(token)} />
+          </Center>
+          <Center width={'100%'}>
+            <Input
+              variant="main"
+              size="lg"
+              textAlign={'right'}
+              placeholder="Output token amount"
+              value={swapData.token1AmountInput}
+              onChange={(e) => token1AmountInputHandler(e.target.value)}
+            />
+          </Center>
+        </Flex>
+        <Flex>
+          <Center ml={'14px'}>
+            <Text fontSize={'xs'}>Balance: {swapData.token1Balance.toFixed(6)}</Text>
+            <Button colorScheme="teal" variant="link" size={'xs'} ml={'6px'} textDecoration={'underline'}>
+              MAX
+            </Button>
+          </Center>
+        </Flex>
+      </Container>
+      <br />
+      <HStack fontSize={'small'} px="8px">
+        <Text w="40%">Exchange rate</Text>
+        <Text w="70%" textAlign={'right'}>
           {swapData.pair ? (
-            <Text fontSize={'xs'}>
-              1{swapData.pair.token1.symbol} = {swapData.pair.token1Price.toFixed(6)}{' '}
-              {swapData.pair.token0.symbol}
-              <br />1{swapData.pair.token0.symbol} = {swapData.pair.token0Price.toFixed(6)}{' '}
+            <>
+              1{swapData.pair.token0.symbol} = {swapData.pair.token0Price.toFixed(6)}{' '}
               {swapData.pair.token1.symbol}
-            </Text>
+            </>
           ) : null}
-        </Container>
+        </Text>
+      </HStack>
+      <HStack fontSize={'small'} px="8px" py={2}>
+        <Text w="40%">Gas fee</Text>
+        <Text w="70%" textAlign={'right'}>
+          {'< '}1111 Gwei
+        </Text>
+      </HStack>
+      <HStack fontSize={'small'} px="8px" py={1} color={'green'}>
+        <Text w="40%">Minimal Receive</Text>
+        <Text w="70%" textAlign={'right'}>
+          1212112 ETH
+        </Text>
+      </HStack>
+      <HStack fontSize={'small'} px="8px" py={1} color={'green'}>
+        <Text w="40%">PriceImpact</Text>
+        <Text w="70%" textAlign={'right'}>
+          1%
+        </Text>
+      </HStack>
+      <Box mt={'1rem'} fontSize={16}>
         {swapData.action === BtnAction.approve ? (
-          <Button width={'100%'} mt={4} size="lg" variant="custom" onClick={approve} isLoading={loading}>
+          <Button
+            width={'100%'}
+            size="lg"
+            colorScheme="gray"
+            variant="solid"
+            onClick={approve}
+            isLoading={loading}
+          >
             Set Approve{' '}
             {swapData.tokenAllowance[0].lessThan(swapData.token0AmountInput || 0)
               ? swapData.token0.symbol
@@ -181,23 +250,31 @@ export default function Swap() {
           </Button>
         ) : null}
         {swapData.action === BtnAction.insufficient ? (
-          <Button width={'100%'} mt={4} size="lg" variant="custom">
+          <Button width={'100%'} size="lg" colorScheme="gray" variant="solid">
             {' '}
             insufficient token{' '}
           </Button>
         ) : null}
         {swapData.action === BtnAction.disconnect ? <w3m-button /> : null}
         {swapData.action === BtnAction.available ? (
-          <Button width={'100%'} mt={4} size="lg" variant="custom" onClick={swap} isLoading={loading}>
+          <Button
+            width={'100%'}
+            size="lg"
+            margin={0}
+            colorScheme="gray"
+            variant="solid"
+            onClick={swap}
+            isLoading={loading}
+          >
             swap
           </Button>
         ) : null}
         {swapData.action === BtnAction.disable ? (
-          <Button width={'100%'} mt={4} disabled size="lg" variant="custom">
+          <Button width={'100%'} disabled size="lg" colorScheme="gray" variant="solid" rounded={'md'}>
             swap
           </Button>
         ) : null}
-      </VStack>
+      </Box>
     </Container>
   );
 }
