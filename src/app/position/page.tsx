@@ -49,8 +49,8 @@ export default function Position() {
       <Heading marginTop="44px">Positions: </Heading>
       <List marginTop="32px" width="800px">
         {
-          positionList.map(item => <ListItem>
-            <PositionItem key={item._positionId} positionId={item._positionId} />
+          positionList.map(item => <ListItem key={item._positionId}>
+            <PositionItem  positionId={item._positionId} />
           </ListItem>)
         }
       </List>
