@@ -1,5 +1,9 @@
 lockfileVersion: '6.0'
 
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
 dependencies:
   '@chainlink/contracts':
     specifier: ^0.8.0
@@ -55,6 +59,12 @@ dependencies:
   big.js:
     specifier: ^6.2.1
     version: 6.2.1
+  bignumber.js:
+    specifier: ^9.1.2
+    version: 9.1.2
+  bn.js:
+    specifier: ^5.2.1
+    version: 5.2.1
   decimal.js-light:
     specifier: ^2.5.1
     version: 2.5.1
@@ -3879,7 +3889,6 @@ packages:
       '@graphql-tools/utils': 9.2.1(graphql@16.8.1)
       graphql: 16.8.1
       tslib: 2.6.2
-    dev: true
 
   /@graphql-mesh/store@0.93.1(@graphql-mesh/cross-helpers@0.3.4)(@graphql-mesh/types@0.93.2)(@graphql-mesh/utils@0.97.5)(@graphql-tools/utils@9.2.1)(graphql@16.8.1)(tslib@2.6.2):
     resolution: {integrity: sha512-OEljVuaZn2htU1rt4Yll/aJmynw3/Kvhd6eE8V0/del0u9iuLJqiKkzFJl8HUSMh0IkO10OnficJnTM0tCmxRw==}
@@ -3898,6 +3907,7 @@ packages:
       '@graphql-tools/utils': 9.2.1(graphql@16.8.1)
       graphql: 16.8.1
       tslib: 2.6.2
+    dev: true
 
   /@graphql-mesh/string-interpolation@0.4.4(graphql@16.8.1)(tslib@2.6.2):
     resolution: {integrity: sha512-IotswBYZRaPswOebcr2wuOFuzD3dHIJxVEkPiiQubqjUIR8HhQI22XHJv0WNiQZ65z8NR9+GYWwEDIc2JRCNfQ==}
@@ -3910,7 +3920,6 @@ packages:
       json-pointer: 0.6.2
       lodash.get: 4.4.2
       tslib: 2.6.2
-    dev: true
 
   /@graphql-mesh/string-interpolation@0.5.3(graphql@16.8.1)(tslib@2.6.2):
     resolution: {integrity: sha512-/R4kj3M1uqUie/7RZ58zgRrT8RBrDsCCR6ii00s62DbLsl+jZYOZFyTqHGsFbP7L7aHnl0fo1dwhEJIs+rjCLg==}
@@ -3949,7 +3958,7 @@ packages:
       graphql: '*'
       tslib: ^2.4.0
     dependencies:
-      '@graphql-mesh/store': 0.93.1(@graphql-mesh/cross-helpers@0.3.4)(@graphql-mesh/types@0.93.2)(@graphql-mesh/utils@0.97.5)(@graphql-tools/utils@9.2.1)(graphql@16.8.1)(tslib@2.6.2)
+      '@graphql-mesh/store': 0.93.1(@graphql-mesh/cross-helpers@0.3.4)(@graphql-mesh/types@0.93.2)(@graphql-mesh/utils@0.93.2)(@graphql-tools/utils@9.2.1)(graphql@16.8.1)(tslib@2.6.2)
       '@graphql-tools/batch-delegate': 8.4.27(graphql@16.8.1)
       '@graphql-tools/delegate': 9.0.35(graphql@16.8.1)
       '@graphql-tools/utils': 9.2.1(graphql@16.8.1)
@@ -3978,7 +3987,6 @@ packages:
       lodash.topath: 4.5.2
       tiny-lru: 8.0.2
       tslib: 2.6.2
-    dev: true
 
   /@graphql-mesh/utils@0.97.5(@graphql-mesh/cross-helpers@0.3.4)(@graphql-mesh/types@0.93.2)(@graphql-tools/utils@9.2.1)(graphql@16.8.1)(tslib@2.6.2):
     resolution: {integrity: sha512-v6USLChBkKSfo4V/tFphxF8NJFnEZkpKc+ij8LyDL1clr9KR3knCTpDuAlyLFAopp7oEntmFYR6RzdrnhjvRwA==}
@@ -7928,7 +7936,6 @@ packages:
 
   /dayjs@1.11.7:
     resolution: {integrity: sha512-+Yw9U6YO5TQohxLcIkrXBeY73WP3ejHWVvx8XCk3gxvQDCTEmS48ZrSZCKciI7Bhl/uCMyxYtE9UqRILmFphkQ==}
-    dev: true
 
   /debug@2.6.9:
     resolution: {integrity: sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA==}
@@ -12937,7 +12944,6 @@ packages:
   /tiny-lru@8.0.2:
     resolution: {integrity: sha512-ApGvZ6vVvTNdsmt676grvCkUCGwzG9IqXma5Z07xJgiC5L7akUMof5U8G2JTI9Rz/ovtVhJBlY6mNhEvtjzOIg==}
     engines: {node: '>=6'}
-    dev: true
 
   /tiny-warning@1.0.3:
     resolution: {integrity: sha512-lBN9zLN/oAf68o3zNXYrdCt1kP8WsiGW8Oo2ka41b2IM5JL/S1CTyX1rW0mb/zSuJun0ZUrDxx4sqvYS2FWzPA==}
@@ -13906,7 +13912,3 @@ packages:
       react: 18.2.0
       use-sync-external-store: 1.2.0(react@18.2.0)
     dev: false
-
-settings:
-  autoInstallPeers: true
-  excludeLinksFromLockfile: false
