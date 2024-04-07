@@ -55,6 +55,12 @@ dependencies:
   big.js:
     specifier: ^6.2.1
     version: 6.2.1
+  bignumber.js:
+    specifier: ^9.1.2
+    version: 9.1.2
+  bn.js:
+    specifier: ^5.2.1
+    version: 5.2.1
   decimal.js-light:
     specifier: ^2.5.1
     version: 2.5.1
@@ -120,6 +126,9 @@ devDependencies:
   '@types/big.js':
     specifier: ^6.2.2
     version: 6.2.2
+  '@types/bn.js':
+    specifier: ^5.1.5
+    version: 5.1.5
   '@types/node':
     specifier: ^20.11.25
     version: 20.11.25
@@ -5867,6 +5876,12 @@ packages:
     dependencies:
       '@types/node': 20.11.25
     dev: false
+
+  /@types/bn.js@5.1.5:
+    resolution: {integrity: sha512-V46N0zwKRF5Q00AZ6hWtN0T8gGmDUaUzLWQvHFo5yThtVwK/VCenFY3wXVbOvNfajEpsTfQM4IN9k/d6gUVX3A==}
+    dependencies:
+      '@types/node': 20.11.25
+    dev: true
 
   /@types/chrome@0.0.136:
     resolution: {integrity: sha512-XDEiRhLkMd+SB7Iw3ZUIj/fov3wLd4HyTdLltVszkgl1dBfc3Rb7oPMVZ2Mz2TLqnF7Ow+StbR8E7r9lqpb4DA==}
