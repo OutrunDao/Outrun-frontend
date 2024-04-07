@@ -22,6 +22,14 @@ export enum BtnAction {
   available,
   approve
 }
+
+export enum SwapView {
+  swap,
+  addLiquidity,
+  createPoll
+}
+
+
 function tokenConvert(token: Currency): Token {
   if (token.equals(USDB[token.chainId])) return RUSD[token.chainId]
   return token.isNative ? Native.onChain(token.chainId).wrapped : (token as Token);
@@ -47,7 +55,7 @@ async function exactInBestRoute(pair: Pair, amountIn: string) {
   // });
 }
 
-export function useSwap(isSwap: boolean = false) {
+export function useSwap(isSwap: SwapView) {
   const chainId = useChainId();
   const publicClient = usePublicClient();
   const account = useAccount();

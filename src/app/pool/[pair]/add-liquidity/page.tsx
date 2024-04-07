@@ -1,8 +1,8 @@
-import Page from '@/views/pool/page';
+import Page from '@/views/pool/addLiquidity/page';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Pools | OUTRN',
+  title: 'AddLiquidity | OUTRN',
 };
 
 export default Page;

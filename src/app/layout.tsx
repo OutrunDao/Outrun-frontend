@@ -1,4 +1,4 @@
-import { Inter } from 'next/font/google';
+import { IBM_Plex_Sans } from 'next/font/google';
 import { Providers } from './providers';
 import PageLayout from '@/components/PageLayout';
 import Web3ContextProvider from '@/context/web3modal';
@@ -8,7 +8,7 @@ import { headers } from 'next/headers';
 
 import type { Metadata } from 'next';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = IBM_Plex_Sans({ weight: '300', subsets: ['cyrillic'] });
 
 export const metadata: Metadata = {
   title: 'Outrun App',
