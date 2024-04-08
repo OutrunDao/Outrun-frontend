@@ -12,6 +12,7 @@ import {
   Input,
   InputGroup,
   InputRightElement,
+  Link,
   Radio,
   RadioGroup,
   Spacer,
@@ -29,6 +30,7 @@ import { useSwap, BtnAction, SwapView } from '@/hook/useSwap';
 import { getRouterContract } from '@/views/pool/getContract';
 import { Percent, Token } from '@/packages/swap-core';
 import { Router as SwapRouter } from '@/packages/swap-sdk';
+import { retry } from 'radash';
 const defaultSymbol = 'ETH';
 
 export default function Swap() {
@@ -46,6 +48,7 @@ export default function Swap() {
     token0AmountInputHandler,
     token1AmountInputHandler,
     approve,
+    maxHandler,
   } = useSwap(SwapView.swap);
 
   const onReverse = () => {
@@ -57,35 +60,37 @@ export default function Swap() {
   async function swap() {
     if (!swapData.token0 || !swapData.token1 || !account.address || !walletClient) return;
     setLoading(true);
-    toast({
-      status: 'loading',
-      title: 'swap',
-      isClosable: true,
-    });
     const { methodName, args, value } = SwapRouter.swapCallParameters(swapData.tradeRoute!, {
       allowedSlippage: new Percent(5, 100),
       deadline: Math.floor(new Date().getTime() / 1000) + 5 * 60,
       recipient: account.address,
     });
+    let toastCurrent = toast({
+      status: 'loading',
+      title: 'submiting transaction',
+      description: 'please wait...',
+      duration: null,
+      isClosable: true,
+    });
     try {
       const tx = await getRouterContract(walletClient!).write[methodName](args, { value, account });
-      toast({
-        title: 'transaction success',
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
+      toast.update(toastCurrent, {
+        title: 'transaction submited',
+        description: 'Waiting for block confirmation',
       });
-      const data = await publicClient!.waitForTransactionReceipt({
-        hash: tx as Address,
-        confirmations: 1,
+      const data = await retry({ times: 20, delay: 5000 }, async () => {
+        return await publicClient!.getTransactionReceipt({
+          hash: tx as Address,
+        });
       });
-      toast({
+      toast.update(toastCurrent, {
         title: data.status === 'success' ? 'swap success' : 'swap failed',
         status: data.status === 'success' ? 'success' : 'error',
         duration: 3000,
         isClosable: true,
       });
     } catch (e: any) {
+      toast.closeAll();
       toast({
         title: 'swap failed',
         description: e.message,
@@ -131,6 +136,7 @@ export default function Swap() {
               defaultSymbol={defaultSymbol}
               token={swapData.token0}
               chainId={chainId}
+              tokenDisable={swapData.token1}
               onSelect={(token) => setToken0(token)}
             />
           </Center>
@@ -139,6 +145,7 @@ export default function Swap() {
               variant="main"
               size="lg"
               textAlign={'right'}
+              isDisabled={!swapData.pair}
               placeholder="Intput token amount"
               value={swapData.token0AmountInput}
               onChange={(e) => token0AmountInputHandler(e.target.value)}
@@ -148,9 +155,18 @@ export default function Swap() {
         <Flex>
           <Center ml={'14px'}>
             <Text fontSize={'xs'}>Balance: {swapData.token0Balance.toFixed(6)}</Text>
-            <Button colorScheme="teal" variant="link" size={'xs'} ml={'6px'} textDecoration={'underline'}>
-              MAX
-            </Button>
+            {swapData.token0Balance.gt(0) ? (
+              <Button
+                colorScheme="teal"
+                variant="link"
+                size={'xs'}
+                ml={'6px'}
+                textDecoration={'underline'}
+                onClick={() => maxHandler(0)}
+              >
+                MAX
+              </Button>
+            ) : null}
           </Center>
         </Flex>
       </Container>
@@ -181,13 +197,19 @@ export default function Swap() {
       >
         <Flex>
           <Center>
-            <TokenSelect chainId={chainId} token={swapData.token1} onSelect={(token) => setToken1(token)} />
+            <TokenSelect
+              tokenDisable={swapData.token0}
+              chainId={chainId}
+              token={swapData.token1}
+              onSelect={(token) => setToken1(token)}
+            />
           </Center>
           <Center width={'100%'}>
             <Input
               variant="main"
               size="lg"
               textAlign={'right'}
+              isDisabled={!swapData.pair}
               placeholder="Output token amount"
               value={swapData.token1AmountInput}
               onChange={(e) => token1AmountInputHandler(e.target.value)}
@@ -197,9 +219,18 @@ export default function Swap() {
         <Flex>
           <Center ml={'14px'}>
             <Text fontSize={'xs'}>Balance: {swapData.token1Balance.toFixed(6)}</Text>
-            <Button colorScheme="teal" variant="link" size={'xs'} ml={'6px'} textDecoration={'underline'}>
-              MAX
-            </Button>
+            {swapData.token1Balance.gt(0) ? (
+              <Button
+                colorScheme="teal"
+                variant="link"
+                size={'xs'}
+                ml={'6px'}
+                textDecoration={'underline'}
+                onClick={() => maxHandler(1)}
+              >
+                MAX
+              </Button>
+            ) : null}
           </Center>
         </Flex>
       </Container>
@@ -224,7 +255,7 @@ export default function Swap() {
       <HStack fontSize={'small'} px="8px" py={1} color={'green'}>
         <Text w="40%">Minimal Receive</Text>
         <Text w="70%" textAlign={'right'}>
-          1212112 ETH
+          --
         </Text>
       </HStack>
       <HStack fontSize={'small'} px="8px" py={1} color={'green'}>
@@ -233,6 +264,14 @@ export default function Swap() {
           1%
         </Text>
       </HStack>
+      {!swapData.pair ? (
+        <Box textAlign={'center'} fontSize={'x-small'} color={'brand.500'}>
+          <Text>This pool is not exists yet, you can create pool </Text>
+          <Link href={`/pool/create`} textDecoration={'underline'}>
+            Here
+          </Link>
+        </Box>
+      ) : null}
       <Box mt={'1rem'} fontSize={16}>
         {swapData.action === BtnAction.approve ? (
           <Button
@@ -264,13 +303,14 @@ export default function Swap() {
             colorScheme="gray"
             variant="solid"
             onClick={swap}
+            isDisabled={!swapData.pair}
             isLoading={loading}
           >
             swap
           </Button>
         ) : null}
         {swapData.action === BtnAction.disable ? (
-          <Button width={'100%'} disabled size="lg" colorScheme="gray" variant="solid" rounded={'md'}>
+          <Button width={'100%'} isDisabled size="lg" colorScheme="gray" variant="solid" rounded={'md'}>
             swap
           </Button>
         ) : null}

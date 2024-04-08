@@ -22,12 +22,16 @@ import { TokenInfo } from '@uniswap/token-lists';
 import { Token } from '@/packages/swap-core';
 import { Native } from '@/packages/swap-sdk';
 
-function getTokenRaw(symbol: string | undefined, chainId: number): TokenInfo | undefined {
-  if (!chainId || !symbol) {
+function getTokenRaw(symbol: string | undefined, chainId: number, address?: string): TokenInfo | undefined {
+  if (!chainId || (!symbol && !address)) {
     return undefined;
   }
   if (symbol === 'ETH') return undefined;
-  return tokenList.tokens.find((token) => token.symbol === symbol && token.chainId === chainId);
+  return tokenList.tokens.find(
+    (token) =>
+      ((token.symbol && token.symbol === symbol) || (token.address && token.address === address)) &&
+      token.chainId === chainId
+  );
 }
 
 export function getToken(symbol: string, chainId: number): Token | Native | undefined {
@@ -43,11 +47,13 @@ export default function TokenSelect({
   onSelect,
   defaultSymbol,
   token,
+  tokenDisable,
   chainId,
 }: {
   onSelect: (token: Token | Native) => void;
   defaultSymbol?: string;
   token?: Token | Native;
+  tokenDisable?: Token | Native;
   chainId: number;
 }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -66,8 +72,11 @@ export default function TokenSelect({
     onClose();
   }
   useEffect(() => {
+    // console.log('token upate', token);
+
     if (token) {
-      setTokenInfo(getTokenRaw(token.symbol, chainId));
+      // @ts-ignore
+      setTokenInfo(getTokenRaw(token.symbol, chainId, token.address));
     }
   }, [token]);
   return (
@@ -113,6 +122,7 @@ export default function TokenSelect({
                   colorScheme="teal"
                   justifyContent={'left'}
                   variant="ghost"
+                  isDisabled={tokenDisable?.isNative}
                   w={'100%'}
                   leftIcon={<QuestionIcon></QuestionIcon>}
                   onClick={() => handleSelectNative()}
@@ -126,6 +136,10 @@ export default function TokenSelect({
                       justifyContent={'left'}
                       variant="ghost"
                       w={'100%'}
+                      isDisabled={
+                        // @ts-ignore
+                        tokenDisable?.address === token.address
+                      }
                       leftIcon={
                         !token.logoURI ? (
                           <QuestionIcon></QuestionIcon>

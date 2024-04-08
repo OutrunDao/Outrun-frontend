@@ -93,6 +93,7 @@ export function useSwap(isSwap: SwapView) {
     ).catch((e) => undefined);
     setPair(pair);
   };
+  // watch and update balance
   useEffect(() => {
     const fetchBalance = async () => {
       const balance0 =
@@ -108,6 +109,8 @@ export function useSwap(isSwap: SwapView) {
     };
     fetchBalance();
   }, [token0, token1, account.address]);
+
+  // watch and update pair
   useEffect(() => {
     if (!token0 || !token1) {
       setPair(undefined);
@@ -118,6 +121,7 @@ export function useSwap(isSwap: SwapView) {
     }
   }, [token0, token1]);
 
+  // watch and update available action
   useEffect(() => {
     if (!account.isConnected) return setAction(BtnAction.disconnect)
     if (!token0 || !token1 || !token0AmountInput || !token1AmountInput) return setAction(BtnAction.disable)
@@ -136,6 +140,13 @@ export function useSwap(isSwap: SwapView) {
 
   async function approve() {
     let tokenForApprove = tokenAllowance[0].lessThan(token0AmountInput || 0) ? token0 : token1!;
+    let toastCurrent = toast({
+      status: 'loading',
+      title: 'submiting approve transaction',
+      description: 'please wait...',
+      duration: null,
+      isClosable: true,
+    });
     setLoading(true);
     try {
       if (tokenForApprove.isNative) return;
@@ -148,18 +159,24 @@ export function useSwap(isSwap: SwapView) {
         ),
         walletClient!
       );
-      await publicClient!.getTransactionReceipt({
-        hash: tx as Address,
-      });
-      toast({
-        title: 'Approve success',
-        status: 'success',
+      const result = await retry({
+        times: 20,
+        delay: 5000
+      }, async () => {
+        return await publicClient!.getTransactionReceipt({
+          hash: tx as Address
+        })
+      })
+      if (result.status === "success") {
+        fetchAllowance();
+      }
+      toast.update(toastCurrent, {
+        title: result.status === "success" ? 'Approve success' : "Approve failed",
+        status: result.status === 'success' ? 'success' : "error",
         duration: 3000,
-        isClosable: true,
-      });
-      fetchAllowance();
+      })
     } catch (e: any) {
-      toast({
+      toast.update(toastCurrent, {
         title: 'Approve failed',
         description: e.message,
         status: 'error',
@@ -173,10 +190,11 @@ export function useSwap(isSwap: SwapView) {
   async function token0AmountInputHandler(value: string) {
     setToken0AmountInput(value);
     if (!pair || !token0 || isNaN(+value)) return;
-    if (!isSwap) {
+
+    if (SwapView.addLiquidity) {
       const price = pair.priceOf(tokenConvert(token0));
       setToken1AmountInput((+price.toSignificant(6) * +value).toFixed(6));
-    } else {
+    } else if (SwapView.swap) {
       const result = Trade.bestTradeExactIn(
         [pair],
         CurrencyAmount.fromRawAmount(
@@ -196,10 +214,10 @@ export function useSwap(isSwap: SwapView) {
   async function token1AmountInputHandler(value: string) {
     setToken1AmountInput(value);
     if (!pair || !token1 || isNaN(+value)) return;
-    if (!isSwap) {
+    if (SwapView.addLiquidity) {
       const price = pair.priceOf(tokenConvert(token1));
       setToken0AmountInput((+price.toSignificant(6) * +value).toFixed(6));
-    } else {
+    } else if (SwapView.swap) {
 
       const result = Trade.bestTradeExactOut(
         [pair],
@@ -219,6 +237,13 @@ export function useSwap(isSwap: SwapView) {
       // console.log(result[0].inputAmount, result[0].outputAmount)
       setTradeRoute(result[0])
     }
+  }
+
+  async function maxHandler(flag: number) {
+    if (flag === 0) {
+      return token0AmountInputHandler(token0Balance.toString())
+    }
+    return token1AmountInputHandler(token1Balance.toString())
   }
 
   return {
@@ -243,5 +268,6 @@ export function useSwap(isSwap: SwapView) {
     approve,
     token0AmountInputHandler,
     token1AmountInputHandler,
+    maxHandler
   };
 }

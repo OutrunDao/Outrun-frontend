@@ -29,6 +29,7 @@ import Decimal from 'decimal.js-light';
 import { getRouterContract } from './getContract';
 import { waitForTransactionReceipt } from 'viem/actions';
 import tokenSwitch, { CurrencyPairType } from './tokenSwitch';
+import { ArrowForwardIcon, ArrowRightIcon, ArrowUpIcon } from '@chakra-ui/icons';
 function LiquidityRatio({ liquidityToken, userAddress }: { liquidityToken: Token; userAddress: Address }) {
   const publicClient = usePublicClient();
   const [totalSupply, setTotalSupply] = useState<Decimal>(new Decimal(0));
@@ -146,20 +147,26 @@ export default function UserLiquiditesPannel() {
               {pairs && pairs.length
                 ? pairs.map((pair, index) => (
                     <Tr key={index} marginTop="20px">
-                      <Th color="#666" fontSize="16px">
+                      <Td>
                         {pair.token0.symbol} / {pair.token1.symbol || 'unknown token'}
-                      </Th>
-                      <Th color="#666" fontSize="16px">
+                      </Td>
+                      <Td>
                         {pair.reserveOf(pair.token0).toExact()}/{pair.reserveOf(pair.token1).toExact()}
-                      </Th>
-                      <Th>
+                      </Td>
+                      <Td>
                         <LiquidityRatio liquidityToken={pair.liquidityToken} userAddress={account.address!} />
-                      </Th>
-                      <Th>
-                        <Button colorScheme="gray" size={'sm'} onClick={() => removeLiquidity(pair)}>
-                          remove liquidity
+                      </Td>
+                      <Td>
+                        <Button
+                          variant="link"
+                          size={'sm'}
+                          colorScheme="teal"
+                          rightIcon={<ArrowForwardIcon fontSize={'smaller'} />}
+                          onClick={() => removeLiquidity(pair)}
+                        >
+                          withdraw
                         </Button>
-                      </Th>
+                      </Td>
                     </Tr>
                   ))
                 : null}

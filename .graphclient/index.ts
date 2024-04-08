@@ -2198,6 +2198,12 @@ const merger = new(StitchingMerger as any)({
         },
         location: 'PairCreatedsDocument.graphql'
       },{
+        document: PairTargetDocument,
+        get rawSDL() {
+          return printWithCache(PairTargetDocument);
+        },
+        location: 'PairTargetDocument.graphql'
+      },{
         document: UserLiquiditiesDocument,
         get rawSDL() {
           return printWithCache(UserLiquiditiesDocument);
@@ -2258,6 +2264,13 @@ export type PairCreatedsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type PairCreatedsQuery = { pairCreateds: Array<Pick<PairCreated, 'id' | 'token0' | 'token1' | 'pair'>> };
 
+export type PairTargetQueryVariables = Exact<{
+  addr?: InputMaybe<Scalars['Bytes']>;
+}>;
+
+
+export type PairTargetQuery = { pairCreateds: Array<Pick<PairCreated, 'id' | 'token0' | 'token1' | 'pair'>> };
+
 export type UserLiquiditiesQueryVariables = Exact<{
   user?: InputMaybe<Scalars['Bytes']>;
 }>;
@@ -2288,6 +2301,16 @@ export const PairCreatedsDocument = gql`
   }
 }
     ` as unknown as DocumentNode<PairCreatedsQuery, PairCreatedsQueryVariables>;
+export const PairTargetDocument = gql`
+    query PairTarget($addr: Bytes) {
+  pairCreateds(first: 1, where: {pair: $addr}) {
+    id
+    token0
+    token1
+    pair
+  }
+}
+    ` as unknown as DocumentNode<PairTargetQuery, PairTargetQueryVariables>;
 export const UserLiquiditiesDocument = gql`
     query UserLiquidities($user: Bytes) {
   liquidityHoldings(first: 20, where: {user: $user}) {
@@ -2330,11 +2353,15 @@ export const StakeRETHDocument = gql`
 
 
 
+
 export type Requester<C = {}, E = unknown> = <R, V>(doc: DocumentNode, vars?: V, options?: C) => Promise<R> | AsyncIterable<R>
 export function getSdk<C, E>(requester: Requester<C, E>) {
   return {
     PairCreateds(variables?: PairCreatedsQueryVariables, options?: C): Promise<PairCreatedsQuery> {
       return requester<PairCreatedsQuery, PairCreatedsQueryVariables>(PairCreatedsDocument, variables, options) as Promise<PairCreatedsQuery>;
+    },
+    PairTarget(variables?: PairTargetQueryVariables, options?: C): Promise<PairTargetQuery> {
+      return requester<PairTargetQuery, PairTargetQueryVariables>(PairTargetDocument, variables, options) as Promise<PairTargetQuery>;
     },
     UserLiquidities(variables?: UserLiquiditiesQueryVariables, options?: C): Promise<UserLiquiditiesQuery> {
       return requester<UserLiquiditiesQuery, UserLiquiditiesQueryVariables>(UserLiquiditiesDocument, variables, options) as Promise<UserLiquiditiesQuery>;

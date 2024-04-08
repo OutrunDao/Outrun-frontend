@@ -23,6 +23,7 @@ import { Pair } from '@/packages/swap-sdk';
 import { use, useEffect, useState } from 'react';
 import { Address, getAddress, parseUnits, formatUnits } from 'viem';
 import { Link } from '@chakra-ui/next-js';
+import { AddIcon } from '@chakra-ui/icons';
 
 export default function PoolTvlPannel() {
   const chainId = useChainId();
@@ -54,18 +55,23 @@ export default function PoolTvlPannel() {
             {pairTvls && pairTvls.length
               ? pairTvls.map((pair, index) => (
                   <Tr key={index} marginTop="20px">
-                    <Th color="#666" fontSize="16px">
+                    <Td fontSize="16px" maxWidth={'2rem'}>
                       {pair.symbol0 || pair.token0} / {pair.symbol1 || 'unknown token'}
-                    </Th>
-                    <Th color="#666" fontSize="16px">
+                    </Td>
+                    <Td fontSize="16px">
                       {formatUnits(pair.reserve0, 18)}/{formatUnits(pair.reserve1, 18)}
-                    </Th>
-                    <Th>10000$</Th>
-                    <Th>
-                      <Button colorScheme="gray" size={'sm'}>
+                    </Td>
+                    <Td>--$</Td>
+                    <Td>
+                      <Button
+                        variant="link"
+                        size={'sm'}
+                        colorScheme="teal"
+                        leftIcon={<AddIcon fontSize={'smaller'} />}
+                      >
                         <Link href={`/pool/` + pair.pair + '/add-liquidity'}>Add Liquidity</Link>
                       </Button>
-                    </Th>
+                    </Td>
                   </Tr>
                 ))
               : null}

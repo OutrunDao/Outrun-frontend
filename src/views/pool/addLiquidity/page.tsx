@@ -15,22 +15,35 @@ import {
 } from '@chakra-ui/react';
 import TokenSelect, { getToken } from '@/components/TokenSelect';
 import { useAccount, useChainId, usePublicClient, useWalletClient } from 'wagmi';
-import { Address, formatUnits, getAddress, parseUnits } from 'viem';
+import { useQuery } from '@tanstack/react-query';
+import { useParams } from 'next/navigation';
+
 import { useSwap, BtnAction, SwapView } from '@/hook/useSwap';
-import { getRouterContract } from '../getContract';
-import { Percent } from '@/packages/swap-core';
-import { retry } from 'radash';
+import useLiquidity from '../useLiquidity';
+import { execute, PairTargetDocument, PairCreated } from '@/subgraph';
+import { useEffect } from 'react';
 import { Token } from '@/packages/swap-core';
-import tokenSwitch, { CurrencyPairType } from '../tokenSwitch';
+import { Fetcher } from '@/packages/swap-sdk/fetcher';
 
 const defaultSymbol = 'ETH';
 
-export default function AddLiquidity() {
+export default function AddLiquidityPage() {
   const chainId = useChainId();
   const account = useAccount();
   const publicClient = usePublicClient();
   const toast = useToast();
   const { data: walletClient } = useWalletClient();
+  const { pair: pairAddress } = useParams<{ pair: string }>();
+  // const { param } = router.query;
+  const { data: pairTarget } = useQuery({
+    queryKey: ['pairfind', pairAddress],
+    queryFn: async (): Promise<PairCreated> => {
+      return execute(PairTargetDocument, { addr: pairAddress }).then(
+        (res: { data: { pairCreateds: PairCreated[] } }) => res.data.pairCreateds[0]
+      );
+    },
+  });
+
   const {
     swapData,
     loading,
@@ -40,95 +53,25 @@ export default function AddLiquidity() {
     token0AmountInputHandler,
     token1AmountInputHandler,
     approve,
+    maxHandler,
   } = useSwap(SwapView.addLiquidity);
+  const { addLiquidity } = useLiquidity();
 
   async function _addLiquidity() {
-    toast({
-      status: 'loading',
-      title: 'addLiquidity',
-      isClosable: true,
-    });
-    if (!swapData.token0 || !swapData.token1 || !account.address || !walletClient) return;
-    setLoading(true);
-    const slippage = 0.05;
-    let execution = 'addLiquidity';
-    let token0Input = parseUnits(swapData.token0AmountInput!, swapData.token0.decimals);
-    let token1Input = parseUnits(swapData.token1AmountInput!, swapData.token1.decimals);
-    let token0AmountMin = parseUnits(
-      (+swapData.token0AmountInput! * slippage).toString(),
-      swapData.token0.decimals
-    );
-    // 计算最小输出逻辑应该不对,待改
-    let token1AmountMin = parseUnits(
-      (+swapData.token1AmountInput! * slippage).toString(),
-      swapData.token1.decimals
-    );
-    let deadline = Math.floor(Date.now() / 1000) + 60 * 10;
-    let to = account.address;
-    let args: (string | number | bigint)[] = [
-      (swapData.token0 as Token).address,
-      (swapData.token1 as Token).address,
-      token0Input,
-      token1Input,
-      token0AmountMin,
-      token1AmountMin,
-      to,
-      deadline,
-    ];
-    let config;
-    const [type, tokenA, tokenB, tokenAInput, tokenBInput, tokenAMin, tokenBMin] = tokenSwitch(
-      swapData.token0,
-      swapData.token1,
-      token0Input,
-      token1Input,
-      token0AmountMin,
-      token1AmountMin
-    );
-    // console.log(type, tokenA, tokenB, tokenAInput, tokenBInput, tokenAMin, tokenBMin);
-    if (type === CurrencyPairType.EthAndUsdb) {
-      execution = 'addLiquidityETHAndUSDB';
-      args = [tokenBInput!, tokenAMin!, tokenBMin!, to, deadline];
-      config = { value: tokenAInput, account };
-    } else if (type === CurrencyPairType.EthAndToken) {
-      execution = 'addLiquidityETH';
-      args = [(tokenB as Token).address, tokenBInput!, tokenAMin!, tokenBMin!, to, deadline];
-      config = { value: tokenAInput, account };
-    } else if (type === CurrencyPairType.UsdbAndToken) {
-      execution = 'addLiquidityUSDB';
-      args = [(tokenB as Token).address, tokenBInput!, tokenAInput!, tokenBMin!, tokenAMin!, to, deadline];
-    }
-
-    try {
-      const tx = await getRouterContract(walletClient!).write[execution](args, config);
-      toast({
-        title: 'transaction success',
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-      });
-      const data = await retry({ times: 10, delay: 5000 }, async () => {
-        return await publicClient!.getTransactionReceipt({
-          hash: tx as Address,
-        });
-      });
-      console.log(data);
-      toast({
-        title: data.status === 'success' ? 'Add liquidity success' : 'Add liquidity failed',
-        status: data.status === 'success' ? 'success' : 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-    } catch (e: any) {
-      toast({
-        title: 'Add liquidity failed',
-        description: e.message,
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-    }
-    setLoading(false);
+    addLiquidity(swapData);
   }
+
+  useEffect(() => {
+    if (!pairAddress || !pairTarget || !publicClient) return;
+    // 写死,待改进
+    Fetcher.fetchTokenData(chainId, pairTarget.token0, publicClient!).then((token) => {
+      setToken0(token);
+    });
+    Fetcher.fetchTokenData(chainId, pairTarget.token1, publicClient!).then((token) => {
+      setToken1(token);
+    });
+    // setToken1(new Token(chainId, pairTarget.token1, 18));
+  }, [pairAddress, pairTarget, chainId]);
 
   return (
     <Container
@@ -159,6 +102,7 @@ export default function AddLiquidity() {
             <TokenSelect
               defaultSymbol={defaultSymbol}
               token={swapData.token0}
+              tokenDisable={swapData.token1}
               chainId={chainId}
               onSelect={(token) => setToken0(token)}
             />
@@ -177,9 +121,18 @@ export default function AddLiquidity() {
         <Flex>
           <Center ml={'14px'}>
             <Text fontSize={'xs'}>Balance: {swapData.token0Balance.toFixed(6)}</Text>
-            <Button colorScheme="teal" variant="link" size={'xs'} ml={'6px'} textDecoration={'underline'}>
-              MAX
-            </Button>
+            {swapData.token0Balance.gt(0) ? (
+              <Button
+                colorScheme="teal"
+                variant="link"
+                size={'xs'}
+                ml={'6px'}
+                textDecoration={'underline'}
+                onClick={() => maxHandler(0)}
+              >
+                MAX
+              </Button>
+            ) : null}
           </Center>
         </Flex>
       </Container>
@@ -194,7 +147,12 @@ export default function AddLiquidity() {
       >
         <Flex>
           <Center>
-            <TokenSelect chainId={chainId} token={swapData.token1} onSelect={(token) => setToken1(token)} />
+            <TokenSelect
+              chainId={chainId}
+              tokenDisable={swapData.token0}
+              token={swapData.token1}
+              onSelect={(token) => setToken1(token)}
+            />
           </Center>
           <Center width={'100%'}>
             <Input
@@ -210,9 +168,18 @@ export default function AddLiquidity() {
         <Flex>
           <Center ml={'14px'}>
             <Text fontSize={'xs'}>Balance: {swapData.token1Balance.toFixed(6)}</Text>
-            <Button colorScheme="teal" variant="link" size={'xs'} ml={'6px'} textDecoration={'underline'}>
-              MAX
-            </Button>
+            {swapData.token1Balance.gt(0) ? (
+              <Button
+                colorScheme="teal"
+                variant="link"
+                size={'xs'}
+                ml={'6px'}
+                textDecoration={'underline'}
+                onClick={() => maxHandler(1)}
+              >
+                MAX
+              </Button>
+            ) : null}
           </Center>
         </Flex>
       </Container>
@@ -230,7 +197,15 @@ export default function AddLiquidity() {
       </HStack>
       <Box mt={'1rem'} fontSize={16}>
         {swapData.action === BtnAction.approve ? (
-          <Button width={'100%'} mt={4} size="lg" variant="custom" onClick={approve} isLoading={loading}>
+          <Button
+            width={'100%'}
+            mt={4}
+            size="lg"
+            variant="solid"
+            colorScheme="gray"
+            onClick={approve}
+            isLoading={loading}
+          >
             Set Approve{' '}
             {swapData.tokenAllowance[0].lessThan(swapData.token0AmountInput || 0)
               ? swapData.token0.symbol
@@ -238,7 +213,7 @@ export default function AddLiquidity() {
           </Button>
         ) : null}
         {swapData.action === BtnAction.insufficient ? (
-          <Button width={'100%'} mt={4} size="lg" variant="custom">
+          <Button width={'100%'} mt={4} size="lg" variant="solid" colorScheme="gray">
             {' '}
             insufficient token{' '}
           </Button>
@@ -258,7 +233,7 @@ export default function AddLiquidity() {
           </Button>
         ) : null}
         {swapData.action === BtnAction.disable ? (
-          <Button width={'100%'} mt={4} disabled size="lg" colorScheme="gray" variant="solid">
+          <Button width={'100%'} mt={4} disabled size="lg" isDisabled colorScheme="gray" variant="solid">
             add liquidity
           </Button>
         ) : null}

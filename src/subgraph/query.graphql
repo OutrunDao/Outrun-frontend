@@ -6,6 +6,14 @@ query PairCreateds {
     pair
   }
 }
+query PairTarget($addr: Bytes) {
+  pairCreateds(first: 1, where: { pair: $addr }) {
+    id
+    token0
+    token1
+    pair
+  }
+}
 
 query UserLiquidities($user: Bytes) {
   liquidityHoldings(first: 20, where: { user: $user }) {
