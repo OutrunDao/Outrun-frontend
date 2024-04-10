@@ -1,6 +1,6 @@
 "use client"
 import { List, ListItem, Heading, Tabs, Flex, TabList, Tab, Box, Text, Container } from '@chakra-ui/react'
-import { StakeRETHDocument ,StakeRETHQuery, execute } from '@/subgraph'
+import {  RethPositionDocument, RethPositionQuery, execute } from '@/subgraph'
 import { useState, useEffect } from "react";
 import { observer } from "mobx-react-lite"
 import { useAccount, useWriteContract } from 'wagmi';
@@ -33,14 +33,13 @@ const UnstakeABI = [{
 }]
 
 export default function Position() {
-  const [positionList, setPositionList] = useState<StakeRETHQuery['stakeRETHs']>([])
+  const [positionList, setPositionList] = useState<RethPositionQuery['positions']>([])
   const account = useAccount().address;  
 
   useEffect(() => {
-    execute(StakeRETHDocument, { account: account }).then((result: {data: StakeRETHQuery }) => {
-      console.log('result.data.stakeRETHs', result.data.stakeRETHs);
-      
-      setPositionList(result.data.stakeRETHs)
+    execute(RethPositionDocument, { account: account }).then((result: {data: RethPositionQuery }) => {
+      console.log('result.data.stakeRETHs', result.data.positions);
+      setPositionList(result.data.positions)
     })
   }, [account])
 
@@ -49,8 +48,8 @@ export default function Position() {
       <Heading marginTop="44px">Positions: </Heading>
       <List marginTop="32px" width="800px">
         {
-          positionList.map(item => <ListItem key={item._positionId}>
-            <PositionItem  positionId={item._positionId} />
+          positionList.map(item => <ListItem key={item.id}>
+            <PositionItem  positionId={item.positionId} />
           </ListItem>)
         }
       </List>

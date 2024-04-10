@@ -21,6 +21,7 @@ const InputSelect =(props: IPros) => {
   return (
     <Flex>
       <Input 
+        color="#fff"
         width="280px" 
         boxShadow="0 0 0 1px #3182ce" 
         borderColor="#3182ce" 

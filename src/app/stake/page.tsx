@@ -53,7 +53,11 @@ const  Stake = () => {
           <TabList>
             {
               tabList.map((item) => {
-                return <Tab key={item.key} onClick={() => setTabId(item.key)}>{item.label}</Tab>
+                return <Tab key={item.key} onClick={() => {
+                    setTabId(item.key)
+                    store.currentTabType = item.key
+                  }}
+                >{item.label}</Tab>
               })
             }
           </TabList>
@@ -67,6 +71,7 @@ const  Stake = () => {
             <Flex justifyContent="center" marginTop="-12px">
               <ArrowDownIcon onClick={() => onSwitch()} boxSize={8} w={6} cursor="pointer" _hover={{ opacity: '0.5' }} />
             </Flex>
+
             
             {/* 带价格的 coin */}
             <PriceCoin selectedTokenPair={currTokenPairMap[store.selectedToken as keyof CurrTokenPair]}></PriceCoin>

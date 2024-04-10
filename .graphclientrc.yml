@@ -6,6 +6,6 @@ sources:
   - name: outrunStake
     handler:
       graphql:
-        endpoint: https://api.studio.thegraph.com/query/64787/outrun/v0.0.1
+        endpoint: https://api.studio.thegraph.com/query/64787/outrun/version/latest
 documents:
   - ./src/subgraph/query.graphql

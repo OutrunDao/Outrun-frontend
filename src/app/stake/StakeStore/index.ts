@@ -18,6 +18,7 @@ class StakeStore {
   switchState: 0 | 1 = 0;
   balance: string = '0';
   isLoadingBtn = false;
+  stakeDays = 30;
 
   constructor() {
     makeAutoObservable(this);

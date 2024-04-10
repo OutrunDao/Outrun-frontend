@@ -75,7 +75,7 @@ const StakeBtn = () => {
       address: managAddress,
       account,
       functionName: 'stake',
-      args: [parseEther(store.inputValue), 365, account, account, account]
+      args: [parseEther(store.inputValue), store.stakeDays || 30, account, account, account]
     }
 
     writeContract(params, {

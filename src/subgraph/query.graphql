@@ -32,11 +32,12 @@ query PairTvls {
   }
 }
 
-query StakeRETH($account: Bytes) {
-  stakeRETHs(first: 10, where: { _account: $account }) {
-    _positionId
-    _account
-    _amountInRETH
-    _deadline
+query RethPosition($account: Bytes) {
+  positions(first: 100, where: { owner: $account }) {
+    id
+    positionId
+    owner
+    amountInRETH
+    deadline
   }
 }

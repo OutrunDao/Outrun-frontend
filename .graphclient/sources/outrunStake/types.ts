@@ -37,6 +37,74 @@ export type Block_height = {
   number_gte?: InputMaybe<Scalars['Int']>;
 };
 
+export type Demo = {
+  id: Scalars['Bytes'];
+  extendDays: Scalars['BigInt'];
+  positionId: Scalars['BigInt'];
+  owner: Scalars['Bytes'];
+  newOwner: Scalars['Bytes'];
+};
+
+export type Demo_filter = {
+  id?: InputMaybe<Scalars['Bytes']>;
+  id_not?: InputMaybe<Scalars['Bytes']>;
+  id_gt?: InputMaybe<Scalars['Bytes']>;
+  id_lt?: InputMaybe<Scalars['Bytes']>;
+  id_gte?: InputMaybe<Scalars['Bytes']>;
+  id_lte?: InputMaybe<Scalars['Bytes']>;
+  id_in?: InputMaybe<Array<Scalars['Bytes']>>;
+  id_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
+  id_contains?: InputMaybe<Scalars['Bytes']>;
+  id_not_contains?: InputMaybe<Scalars['Bytes']>;
+  extendDays?: InputMaybe<Scalars['BigInt']>;
+  extendDays_not?: InputMaybe<Scalars['BigInt']>;
+  extendDays_gt?: InputMaybe<Scalars['BigInt']>;
+  extendDays_lt?: InputMaybe<Scalars['BigInt']>;
+  extendDays_gte?: InputMaybe<Scalars['BigInt']>;
+  extendDays_lte?: InputMaybe<Scalars['BigInt']>;
+  extendDays_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  extendDays_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  positionId?: InputMaybe<Scalars['BigInt']>;
+  positionId_not?: InputMaybe<Scalars['BigInt']>;
+  positionId_gt?: InputMaybe<Scalars['BigInt']>;
+  positionId_lt?: InputMaybe<Scalars['BigInt']>;
+  positionId_gte?: InputMaybe<Scalars['BigInt']>;
+  positionId_lte?: InputMaybe<Scalars['BigInt']>;
+  positionId_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  positionId_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  owner?: InputMaybe<Scalars['Bytes']>;
+  owner_not?: InputMaybe<Scalars['Bytes']>;
+  owner_gt?: InputMaybe<Scalars['Bytes']>;
+  owner_lt?: InputMaybe<Scalars['Bytes']>;
+  owner_gte?: InputMaybe<Scalars['Bytes']>;
+  owner_lte?: InputMaybe<Scalars['Bytes']>;
+  owner_in?: InputMaybe<Array<Scalars['Bytes']>>;
+  owner_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
+  owner_contains?: InputMaybe<Scalars['Bytes']>;
+  owner_not_contains?: InputMaybe<Scalars['Bytes']>;
+  newOwner?: InputMaybe<Scalars['Bytes']>;
+  newOwner_not?: InputMaybe<Scalars['Bytes']>;
+  newOwner_gt?: InputMaybe<Scalars['Bytes']>;
+  newOwner_lt?: InputMaybe<Scalars['Bytes']>;
+  newOwner_gte?: InputMaybe<Scalars['Bytes']>;
+  newOwner_lte?: InputMaybe<Scalars['Bytes']>;
+  newOwner_in?: InputMaybe<Array<Scalars['Bytes']>>;
+  newOwner_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
+  newOwner_contains?: InputMaybe<Scalars['Bytes']>;
+  newOwner_not_contains?: InputMaybe<Scalars['Bytes']>;
+  /** Filter for the block changed event. */
+  _change_block?: InputMaybe<BlockChangedFilter>;
+  and?: InputMaybe<Array<InputMaybe<Demo_filter>>>;
+  or?: InputMaybe<Array<InputMaybe<Demo_filter>>>;
+};
+
+export type Demo_orderBy =
+  | 'id'
+  | 'extendDays'
+  | 'positionId'
+  | 'owner'
+  | 'newOwner';
+
 export type ExtendLockTime = {
   id: Scalars['Bytes'];
   positionId: Scalars['BigInt'];
@@ -208,6 +276,104 @@ export type OwnershipTransferred_orderBy =
   | 'blockTimestamp'
   | 'transactionHash';
 
+export type Position = {
+  id: Scalars['Bytes'];
+  positionId: Scalars['BigInt'];
+  owner: Scalars['Bytes'];
+  deadline?: Maybe<Scalars['BigInt']>;
+  amountInRETH: Scalars['BigInt'];
+  blockNumber: Scalars['BigInt'];
+  blockTimestamp: Scalars['BigInt'];
+  transactionHash: Scalars['Bytes'];
+};
+
+export type Position_filter = {
+  id?: InputMaybe<Scalars['Bytes']>;
+  id_not?: InputMaybe<Scalars['Bytes']>;
+  id_gt?: InputMaybe<Scalars['Bytes']>;
+  id_lt?: InputMaybe<Scalars['Bytes']>;
+  id_gte?: InputMaybe<Scalars['Bytes']>;
+  id_lte?: InputMaybe<Scalars['Bytes']>;
+  id_in?: InputMaybe<Array<Scalars['Bytes']>>;
+  id_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
+  id_contains?: InputMaybe<Scalars['Bytes']>;
+  id_not_contains?: InputMaybe<Scalars['Bytes']>;
+  positionId?: InputMaybe<Scalars['BigInt']>;
+  positionId_not?: InputMaybe<Scalars['BigInt']>;
+  positionId_gt?: InputMaybe<Scalars['BigInt']>;
+  positionId_lt?: InputMaybe<Scalars['BigInt']>;
+  positionId_gte?: InputMaybe<Scalars['BigInt']>;
+  positionId_lte?: InputMaybe<Scalars['BigInt']>;
+  positionId_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  positionId_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  owner?: InputMaybe<Scalars['Bytes']>;
+  owner_not?: InputMaybe<Scalars['Bytes']>;
+  owner_gt?: InputMaybe<Scalars['Bytes']>;
+  owner_lt?: InputMaybe<Scalars['Bytes']>;
+  owner_gte?: InputMaybe<Scalars['Bytes']>;
+  owner_lte?: InputMaybe<Scalars['Bytes']>;
+  owner_in?: InputMaybe<Array<Scalars['Bytes']>>;
+  owner_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
+  owner_contains?: InputMaybe<Scalars['Bytes']>;
+  owner_not_contains?: InputMaybe<Scalars['Bytes']>;
+  deadline?: InputMaybe<Scalars['BigInt']>;
+  deadline_not?: InputMaybe<Scalars['BigInt']>;
+  deadline_gt?: InputMaybe<Scalars['BigInt']>;
+  deadline_lt?: InputMaybe<Scalars['BigInt']>;
+  deadline_gte?: InputMaybe<Scalars['BigInt']>;
+  deadline_lte?: InputMaybe<Scalars['BigInt']>;
+  deadline_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  deadline_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  amountInRETH?: InputMaybe<Scalars['BigInt']>;
+  amountInRETH_not?: InputMaybe<Scalars['BigInt']>;
+  amountInRETH_gt?: InputMaybe<Scalars['BigInt']>;
+  amountInRETH_lt?: InputMaybe<Scalars['BigInt']>;
+  amountInRETH_gte?: InputMaybe<Scalars['BigInt']>;
+  amountInRETH_lte?: InputMaybe<Scalars['BigInt']>;
+  amountInRETH_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  amountInRETH_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  blockNumber?: InputMaybe<Scalars['BigInt']>;
+  blockNumber_not?: InputMaybe<Scalars['BigInt']>;
+  blockNumber_gt?: InputMaybe<Scalars['BigInt']>;
+  blockNumber_lt?: InputMaybe<Scalars['BigInt']>;
+  blockNumber_gte?: InputMaybe<Scalars['BigInt']>;
+  blockNumber_lte?: InputMaybe<Scalars['BigInt']>;
+  blockNumber_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  blockNumber_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  blockTimestamp?: InputMaybe<Scalars['BigInt']>;
+  blockTimestamp_not?: InputMaybe<Scalars['BigInt']>;
+  blockTimestamp_gt?: InputMaybe<Scalars['BigInt']>;
+  blockTimestamp_lt?: InputMaybe<Scalars['BigInt']>;
+  blockTimestamp_gte?: InputMaybe<Scalars['BigInt']>;
+  blockTimestamp_lte?: InputMaybe<Scalars['BigInt']>;
+  blockTimestamp_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  blockTimestamp_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  transactionHash?: InputMaybe<Scalars['Bytes']>;
+  transactionHash_not?: InputMaybe<Scalars['Bytes']>;
+  transactionHash_gt?: InputMaybe<Scalars['Bytes']>;
+  transactionHash_lt?: InputMaybe<Scalars['Bytes']>;
+  transactionHash_gte?: InputMaybe<Scalars['Bytes']>;
+  transactionHash_lte?: InputMaybe<Scalars['Bytes']>;
+  transactionHash_in?: InputMaybe<Array<Scalars['Bytes']>>;
+  transactionHash_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
+  transactionHash_contains?: InputMaybe<Scalars['Bytes']>;
+  transactionHash_not_contains?: InputMaybe<Scalars['Bytes']>;
+  /** Filter for the block changed event. */
+  _change_block?: InputMaybe<BlockChangedFilter>;
+  and?: InputMaybe<Array<InputMaybe<Position_filter>>>;
+  or?: InputMaybe<Array<InputMaybe<Position_filter>>>;
+};
+
+export type Position_orderBy =
+  | 'id'
+  | 'positionId'
+  | 'owner'
+  | 'deadline'
+  | 'amountInRETH'
+  | 'blockNumber'
+  | 'blockTimestamp'
+  | 'transactionHash';
+
 export type Query = {
   extendLockTime?: Maybe<ExtendLockTime>;
   extendLockTimes: Array<ExtendLockTime>;
@@ -227,6 +393,10 @@ export type Query = {
   unstakes: Array<Unstake>;
   withdrawYield?: Maybe<WithdrawYield>;
   withdrawYields: Array<WithdrawYield>;
+  position?: Maybe<Position>;
+  positions: Array<Position>;
+  demo?: Maybe<Demo>;
+  demos: Array<Demo>;
   /** Access to subgraph metadata */
   _meta?: Maybe<_Meta_>;
 };
@@ -389,6 +559,42 @@ export type QuerywithdrawYieldsArgs = {
   orderBy?: InputMaybe<WithdrawYield_orderBy>;
   orderDirection?: InputMaybe<OrderDirection>;
   where?: InputMaybe<WithdrawYield_filter>;
+  block?: InputMaybe<Block_height>;
+  subgraphError?: _SubgraphErrorPolicy_;
+};
+
+
+export type QuerypositionArgs = {
+  id: Scalars['ID'];
+  block?: InputMaybe<Block_height>;
+  subgraphError?: _SubgraphErrorPolicy_;
+};
+
+
+export type QuerypositionsArgs = {
+  skip?: InputMaybe<Scalars['Int']>;
+  first?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<Position_orderBy>;
+  orderDirection?: InputMaybe<OrderDirection>;
+  where?: InputMaybe<Position_filter>;
+  block?: InputMaybe<Block_height>;
+  subgraphError?: _SubgraphErrorPolicy_;
+};
+
+
+export type QuerydemoArgs = {
+  id: Scalars['ID'];
+  block?: InputMaybe<Block_height>;
+  subgraphError?: _SubgraphErrorPolicy_;
+};
+
+
+export type QuerydemosArgs = {
+  skip?: InputMaybe<Scalars['Int']>;
+  first?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<Demo_orderBy>;
+  orderDirection?: InputMaybe<OrderDirection>;
+  where?: InputMaybe<Demo_filter>;
   block?: InputMaybe<Block_height>;
   subgraphError?: _SubgraphErrorPolicy_;
 };
@@ -781,6 +987,10 @@ export type Subscription = {
   unstakes: Array<Unstake>;
   withdrawYield?: Maybe<WithdrawYield>;
   withdrawYields: Array<WithdrawYield>;
+  position?: Maybe<Position>;
+  positions: Array<Position>;
+  demo?: Maybe<Demo>;
+  demos: Array<Demo>;
   /** Access to subgraph metadata */
   _meta?: Maybe<_Meta_>;
 };
@@ -943,6 +1153,42 @@ export type SubscriptionwithdrawYieldsArgs = {
   orderBy?: InputMaybe<WithdrawYield_orderBy>;
   orderDirection?: InputMaybe<OrderDirection>;
   where?: InputMaybe<WithdrawYield_filter>;
+  block?: InputMaybe<Block_height>;
+  subgraphError?: _SubgraphErrorPolicy_;
+};
+
+
+export type SubscriptionpositionArgs = {
+  id: Scalars['ID'];
+  block?: InputMaybe<Block_height>;
+  subgraphError?: _SubgraphErrorPolicy_;
+};
+
+
+export type SubscriptionpositionsArgs = {
+  skip?: InputMaybe<Scalars['Int']>;
+  first?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<Position_orderBy>;
+  orderDirection?: InputMaybe<OrderDirection>;
+  where?: InputMaybe<Position_filter>;
+  block?: InputMaybe<Block_height>;
+  subgraphError?: _SubgraphErrorPolicy_;
+};
+
+
+export type SubscriptiondemoArgs = {
+  id: Scalars['ID'];
+  block?: InputMaybe<Block_height>;
+  subgraphError?: _SubgraphErrorPolicy_;
+};
+
+
+export type SubscriptiondemosArgs = {
+  skip?: InputMaybe<Scalars['Int']>;
+  first?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<Demo_orderBy>;
+  orderDirection?: InputMaybe<OrderDirection>;
+  where?: InputMaybe<Demo_filter>;
   block?: InputMaybe<Block_height>;
   subgraphError?: _SubgraphErrorPolicy_;
 };
@@ -1198,6 +1444,14 @@ export type _SubgraphErrorPolicy_ =
   withdrawYield: InContextSdkMethod<Query['withdrawYield'], QuerywithdrawYieldArgs, MeshContext>,
   /** null **/
   withdrawYields: InContextSdkMethod<Query['withdrawYields'], QuerywithdrawYieldsArgs, MeshContext>,
+  /** null **/
+  position: InContextSdkMethod<Query['position'], QuerypositionArgs, MeshContext>,
+  /** null **/
+  positions: InContextSdkMethod<Query['positions'], QuerypositionsArgs, MeshContext>,
+  /** null **/
+  demo: InContextSdkMethod<Query['demo'], QuerydemoArgs, MeshContext>,
+  /** null **/
+  demos: InContextSdkMethod<Query['demos'], QuerydemosArgs, MeshContext>,
   /** Access to subgraph metadata **/
   _meta: InContextSdkMethod<Query['_meta'], Query_metaArgs, MeshContext>
   };
@@ -1243,6 +1497,14 @@ export type _SubgraphErrorPolicy_ =
   withdrawYield: InContextSdkMethod<Subscription['withdrawYield'], SubscriptionwithdrawYieldArgs, MeshContext>,
   /** null **/
   withdrawYields: InContextSdkMethod<Subscription['withdrawYields'], SubscriptionwithdrawYieldsArgs, MeshContext>,
+  /** null **/
+  position: InContextSdkMethod<Subscription['position'], SubscriptionpositionArgs, MeshContext>,
+  /** null **/
+  positions: InContextSdkMethod<Subscription['positions'], SubscriptionpositionsArgs, MeshContext>,
+  /** null **/
+  demo: InContextSdkMethod<Subscription['demo'], SubscriptiondemoArgs, MeshContext>,
+  /** null **/
+  demos: InContextSdkMethod<Subscription['demos'], SubscriptiondemosArgs, MeshContext>,
   /** Access to subgraph metadata **/
   _meta: InContextSdkMethod<Subscription['_meta'], Subscription_metaArgs, MeshContext>
   };
