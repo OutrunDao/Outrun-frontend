@@ -17,7 +17,7 @@ import {
   Tbody,
 } from '@chakra-ui/react';
 import { useAccount, useChainId, usePublicClient, useWalletClient } from 'wagmi';
-import { execute, PairTvlsDocument, PairTvl } from '@/subgraph';
+import { execute, PoolsDocument, Pair as PairType } from '@/subgraph';
 import { useQuery } from '@tanstack/react-query';
 import { Pair } from '@/packages/swap-sdk';
 import { use, useEffect, useState } from 'react';
@@ -32,10 +32,8 @@ export default function PoolTvlPannel() {
   const publicClient = usePublicClient();
   const { data: pairTvls } = useQuery({
     queryKey: ['pairTvls', account.address],
-    queryFn: async (): Promise<PairTvl[]> => {
-      return execute(PairTvlsDocument, {}).then(
-        (res: { data: { pairTvls: PairTvl[] } }) => res.data.pairTvls
-      );
+    queryFn: async (): Promise<PairType[]> => {
+      return execute(PoolsDocument, {}).then((res: { data: { pairs: PairType[] } }) => res.data.pairs);
     },
   });
 
@@ -56,10 +54,10 @@ export default function PoolTvlPannel() {
               ? pairTvls.map((pair, index) => (
                   <Tr key={index} marginTop="20px">
                     <Td fontSize="16px" maxWidth={'2rem'}>
-                      {pair.symbol0 || pair.token0} / {pair.symbol1 || 'unknown token'}
+                      {pair.token0.symbol} / {pair.token1.symbol}
                     </Td>
                     <Td fontSize="16px">
-                      {formatUnits(pair.reserve0, 18)}/{formatUnits(pair.reserve1, 18)}
+                      {pair.reserve0}/{pair.reserve1}
                     </Td>
                     <Td>--$</Td>
                     <Td>
@@ -69,7 +67,7 @@ export default function PoolTvlPannel() {
                         colorScheme="teal"
                         leftIcon={<AddIcon fontSize={'smaller'} />}
                       >
-                        <Link href={`/pool/` + pair.pair + '/add-liquidity'}>Add Liquidity</Link>
+                        <Link href={`/pool/` + pair.id + '/add-liquidity'}>Add Liquidity</Link>
                       </Button>
                     </Td>
                   </Tr>
