@@ -41,11 +41,18 @@ query PairTvls {
 }
 
 query RethPosition($account: Bytes) {
-  positions(first: 100, where: { owner: $account }) {
+  positions(first: 100, where: { account: $account }) {
     id
     positionId
-    owner
+    account
     amountInRETH
+    amountInPETH
+    amountInREY
     deadline
+    blockNumber
+    blockTimestamp
+    transactionHash
+    extendDays
+    newDeadLine
   }
 }
