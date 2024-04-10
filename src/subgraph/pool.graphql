@@ -44,6 +44,8 @@ query LiquidityPositions($user: String) {
       token1 {
         ...PoolToken
       }
+      reserve0
+      reserve1
     }
     user {
       id

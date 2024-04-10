@@ -17,14 +17,14 @@ import {
   Tbody,
 } from '@chakra-ui/react';
 import { useAccount, useChainId, usePublicClient, useWalletClient } from 'wagmi';
-import { execute, UserLiquiditiesDocument, LiquidityHolding } from '@/subgraph';
+import { execute, LiquidityPositionsDocument, LiquidityPosition } from '@/subgraph';
 import { useQuery } from '@tanstack/react-query';
 import { Pair } from '@/packages/swap-sdk';
 import { use, useEffect, useState } from 'react';
 import { Fetcher } from '@/packages/swap-sdk/fetcher';
 import { map, sleep } from 'radash';
 import { Address, ContractFunctionExecutionError, getAddress, parseUnits } from 'viem';
-import { Token, V2_ROUTER_ADDRESSES } from '@/packages/swap-core';
+import { CurrencyAmount, Token, V2_ROUTER_ADDRESSES } from '@/packages/swap-core';
 import Decimal from 'decimal.js-light';
 import { getRouterContract } from './getContract';
 import { waitForTransactionReceipt } from 'viem/actions';
@@ -61,9 +61,9 @@ export default function UserLiquiditesPannel() {
   const [pairs, setPairs] = useState<Array<Pair>>([]);
   const { data: userLiquidites } = useQuery({
     queryKey: ['userLiquidites', account.address],
-    queryFn: async (): Promise<LiquidityHolding[]> => {
-      return execute(UserLiquiditiesDocument, { user: account.address }).then(
-        (res: { data: { liquidityHoldings: LiquidityHolding[] } }) => res.data.liquidityHoldings
+    queryFn: async (): Promise<LiquidityPosition[]> => {
+      return execute(LiquidityPositionsDocument, { user: account.address }).then(
+        (res: { data: { liquidityPositions: LiquidityPosition[] } }) => res.data.liquidityPositions
       );
     },
   });
@@ -71,10 +71,28 @@ export default function UserLiquiditesPannel() {
     if (!userLiquidites || !userLiquidites.length) return;
     const fetchPairs = async () => {
       return await map(userLiquidites, async (liquidity) => {
-        let token0 = await Fetcher.fetchTokenData(chainId, liquidity.token0, publicClient!);
-        let token1 = await Fetcher.fetchTokenData(chainId, liquidity.token1, publicClient!);
-        let pair = await Fetcher.fetchPairData(token0, token1, publicClient!);
-        return pair;
+        return new Pair(
+          CurrencyAmount.fromRawAmount(
+            new Token(
+              chainId,
+              liquidity.pair.token0.id,
+              +liquidity.pair.token0.decimals,
+              liquidity.pair.token0.symbol,
+              liquidity.pair.token0.name
+            ),
+            parseUnits(liquidity.pair.reserve0, +liquidity.pair.token0.decimals).toString()
+          ),
+          CurrencyAmount.fromRawAmount(
+            new Token(
+              chainId,
+              liquidity.pair.token1.id,
+              +liquidity.pair.token1.decimals,
+              liquidity.pair.token1.symbol,
+              liquidity.pair.token1.name
+            ),
+            parseUnits(liquidity.pair.reserve1, +liquidity.pair.token1.decimals).toString()
+          )
+        );
       });
     };
     fetchPairs()
@@ -82,10 +100,7 @@ export default function UserLiquiditesPannel() {
         setPairs(pairs);
       })
       .catch((e) => {
-        console.log(e.cause);
-        // console.log(e instanceof ContractFunctionExecutionError);
-        // const cause = e.cause.walk().message.split(':')[2].split('\n')[0].trim();
-        // console.log(e.cause.walk().message);
+        console.log(e);
       });
   }, [userLiquidites]);
 

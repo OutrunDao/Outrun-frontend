@@ -59,7 +59,7 @@ export default function PoolTvlPannel() {
                     <Td fontSize="16px">
                       {pair.reserve0}/{pair.reserve1}
                     </Td>
-                    <Td>--$</Td>
+                    <Td>{pair.volumeUSD}</Td>
                     <Td>
                       <Button
                         variant="link"
