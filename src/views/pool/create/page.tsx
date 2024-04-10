@@ -9,6 +9,7 @@ import {
   HStack,
   IconButton,
   Input,
+  Link,
   Spacer,
   Text,
   useToast,
@@ -17,8 +18,7 @@ import TokenSelect, { getToken } from '@/components/TokenSelect';
 import { useAccount, useChainId, usePublicClient, useWalletClient } from 'wagmi';
 import { Address, formatUnits, getAddress, parseUnits } from 'viem';
 import { useSwap, BtnAction, SwapView } from '@/hook/useSwap';
-import { getRouterContract } from '../getContract';
-import { Percent } from '@/packages/swap-core';
+import useLiquidity from '../useLiquidity';
 const defaultSymbol = 'ETH';
 
 export default function PoolCreate() {
@@ -27,6 +27,7 @@ export default function PoolCreate() {
   const publicClient = usePublicClient();
   const toast = useToast();
   const { data: walletClient } = useWalletClient();
+  const { addLiquidity } = useLiquidity();
   const {
     swapData,
     loading,
@@ -36,9 +37,12 @@ export default function PoolCreate() {
     token0AmountInputHandler,
     token1AmountInputHandler,
     approve,
+    maxHandler,
   } = useSwap(SwapView.createPoll);
 
-  async function createPool() {}
+  async function createPool() {
+    addLiquidity(swapData);
+  }
 
   return (
     <Container
@@ -69,6 +73,7 @@ export default function PoolCreate() {
             <TokenSelect
               defaultSymbol={defaultSymbol}
               token={swapData.token0}
+              tokenDisable={swapData.token1}
               chainId={chainId}
               onSelect={(token) => setToken0(token)}
             />
@@ -78,6 +83,7 @@ export default function PoolCreate() {
               variant="main"
               size="lg"
               textAlign={'right'}
+              isDisabled={!!swapData.pair}
               placeholder="token amount"
               value={swapData.token0AmountInput}
               onChange={(e) => token0AmountInputHandler(e.target.value)}
@@ -87,9 +93,18 @@ export default function PoolCreate() {
         <Flex>
           <Center ml={'14px'}>
             <Text fontSize={'xs'}>Balance: {swapData.token0Balance.toFixed(6)}</Text>
-            <Button colorScheme="teal" variant="link" size={'xs'} ml={'6px'} textDecoration={'underline'}>
-              MAX
-            </Button>
+            {swapData.token0Balance.gt(0) ? (
+              <Button
+                colorScheme="teal"
+                variant="link"
+                size={'xs'}
+                ml={'6px'}
+                textDecoration={'underline'}
+                onClick={() => maxHandler(0)}
+              >
+                MAX
+              </Button>
+            ) : null}
           </Center>
         </Flex>
       </Container>
@@ -104,13 +119,19 @@ export default function PoolCreate() {
       >
         <Flex>
           <Center>
-            <TokenSelect chainId={chainId} token={swapData.token1} onSelect={(token) => setToken1(token)} />
+            <TokenSelect
+              chainId={chainId}
+              tokenDisable={swapData.token0}
+              token={swapData.token1}
+              onSelect={(token) => setToken1(token)}
+            />
           </Center>
           <Center width={'100%'}>
             <Input
               variant="main"
               size="lg"
               textAlign={'right'}
+              isDisabled={!!swapData.pair}
               placeholder="token amount"
               value={swapData.token1AmountInput}
               onChange={(e) => token1AmountInputHandler(e.target.value)}
@@ -120,13 +141,22 @@ export default function PoolCreate() {
         <Flex>
           <Center ml={'14px'}>
             <Text fontSize={'xs'}>Balance: {swapData.token1Balance.toFixed(6)}</Text>
-            <Button colorScheme="teal" variant="link" size={'xs'} ml={'6px'} textDecoration={'underline'}>
-              MAX
-            </Button>
+            {swapData.token1Balance.gt(0) ? (
+              <Button
+                colorScheme="teal"
+                variant="link"
+                size={'xs'}
+                ml={'6px'}
+                textDecoration={'underline'}
+                onClick={() => maxHandler(1)}
+              >
+                MAX
+              </Button>
+            ) : null}
           </Center>
         </Flex>
       </Container>
-      <br />
+      {/* <br />
       <HStack fontSize={'small'} px="8px">
         <Text w="40%">Exchange rate</Text>
         <Text w="70%" textAlign={'right'}>
@@ -137,7 +167,19 @@ export default function PoolCreate() {
             </>
           ) : null}
         </Text>
-      </HStack>
+      </HStack> */}
+      <br />
+      {swapData.pair ? (
+        <Box textAlign={'center'} fontSize={'x-small'} color={'brand.500'}>
+          <Text>This pool already exists, you can add liquidity </Text>
+          <Link
+            href={`/pool/${swapData.pair.liquidityToken.address}/add-liquidity`}
+            textDecoration={'underline'}
+          >
+            Here
+          </Link>
+        </Box>
+      ) : null}
       <Box mt={'1rem'} fontSize={16}>
         {swapData.action === BtnAction.approve ? (
           <Button
@@ -168,6 +210,7 @@ export default function PoolCreate() {
             margin={0}
             colorScheme="gray"
             variant="solid"
+            isDisabled={!!swapData.pair}
             onClick={createPool}
             isLoading={loading}
           >
@@ -175,7 +218,7 @@ export default function PoolCreate() {
           </Button>
         ) : null}
         {swapData.action === BtnAction.disable ? (
-          <Button width={'100%'} disabled size="lg" colorScheme="gray" variant="solid" rounded={'md'}>
+          <Button width={'100%'} size="lg" colorScheme="gray" isDisabled variant="solid" rounded={'md'}>
             create pool
           </Button>
         ) : null}
