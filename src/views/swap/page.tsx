@@ -55,6 +55,8 @@ export default function Swap() {
     if (!swapData.token0 || !swapData.token1) return;
     setToken0(swapData.token1);
     setToken1(swapData.token0);
+    token0AmountInputHandler(swapData.token1AmountInput);
+    token1AmountInputHandler(swapData.token0AmountInput);
   };
 
   async function swap() {
@@ -249,7 +251,7 @@ export default function Swap() {
       <HStack fontSize={'small'} px="8px" py={2}>
         <Text w="40%">Gas fee</Text>
         <Text w="70%" textAlign={'right'}>
-          {'< '}1111 Gwei
+          {'< '}-- Gwei
         </Text>
       </HStack>
       <HStack fontSize={'small'} px="8px" py={1} color={'green'}>
@@ -261,10 +263,10 @@ export default function Swap() {
       <HStack fontSize={'small'} px="8px" py={1} color={'green'}>
         <Text w="40%">PriceImpact</Text>
         <Text w="70%" textAlign={'right'}>
-          1%
+          ---
         </Text>
       </HStack>
-      {!swapData.pair ? (
+      {!swapData.pair && swapData.token0 && swapData.token1 ? (
         <Box textAlign={'center'} fontSize={'x-small'} color={'brand.500'}>
           <Text>This pool is not exists yet, you can create pool </Text>
           <Link href={`/pool/create`} textDecoration={'underline'}>

@@ -3440,7 +3440,7 @@ export type PairQueryVariables = Exact<{
 
 
 export type PairQuery = { pairs: Array<(
-    Pick<Pair, 'id'>
+    Pick<Pair, 'id' | 'reserve0' | 'reserve1' | 'totalSupply'>
     & { token0: Pick<Token, 'id' | 'name' | 'symbol' | 'decimals'>, token1: Pick<Token, 'id' | 'name' | 'symbol' | 'decimals'> }
   )> };
 
@@ -3450,19 +3450,20 @@ export type PoolsQueryVariables = Exact<{
 
 
 export type PoolsQuery = { pairs: Array<(
-    Pick<Pair, 'id' | 'reserve0' | 'reserve1' | 'volumeUSD'>
+    Pick<Pair, 'id' | 'reserve0' | 'reserve1' | 'volumeUSD' | 'reserveUSD' | 'reserveETH'>
     & { token0: Pick<Token, 'id' | 'name' | 'symbol' | 'decimals'>, token1: Pick<Token, 'id' | 'name' | 'symbol' | 'decimals'>, pairHourData: Array<Pick<PairHourData, 'hourlyVolumeUSD'>> }
   )> };
 
 export type LiquidityPositionsQueryVariables = Exact<{
   user?: InputMaybe<Scalars['String']>;
+  pair?: InputMaybe<Scalars['String']>;
 }>;
 
 
 export type LiquidityPositionsQuery = { liquidityPositions: Array<(
     Pick<LiquidityPosition, 'liquidityTokenBalance'>
     & { pair: (
-      Pick<Pair, 'reserve0' | 'reserve1'>
+      Pick<Pair, 'id' | 'reserve0' | 'reserve1' | 'totalSupply'>
       & { token0: Pick<Token, 'id' | 'name' | 'symbol' | 'decimals'>, token1: Pick<Token, 'id' | 'name' | 'symbol' | 'decimals'> }
     ), user: Pick<User, 'id'> }
   )> };
@@ -3492,6 +3493,9 @@ export const PairDocument = gql`
     token1 {
       ...PoolToken
     }
+    reserve0
+    reserve1
+    totalSupply
   }
 }
     ${PoolTokenFragmentDoc}` as unknown as DocumentNode<PairQuery, PairQueryVariables>;
@@ -3508,6 +3512,8 @@ export const PoolsDocument = gql`
     reserve0
     reserve1
     volumeUSD
+    reserveUSD
+    reserveETH
     pairHourData {
       hourlyVolumeUSD
     }
@@ -3515,13 +3521,14 @@ export const PoolsDocument = gql`
 }
     ${PoolTokenFragmentDoc}` as unknown as DocumentNode<PoolsQuery, PoolsQueryVariables>;
 export const LiquidityPositionsDocument = gql`
-    query LiquidityPositions($user: String) {
+    query LiquidityPositions($user: String, $pair: String) {
   liquidityPositions(
-    where: {user: $user}
+    where: {user: $user, pair: $pair, liquidityTokenBalance_gt: "0"}
     first: 30
     orderBy: liquidityTokenBalance
   ) {
     pair {
+      id
       token0 {
         ...PoolToken
       }
@@ -3530,6 +3537,7 @@ export const LiquidityPositionsDocument = gql`
       }
       reserve0
       reserve1
+      totalSupply
     }
     user {
       id

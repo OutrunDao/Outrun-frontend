@@ -55,7 +55,7 @@ export default function AddLiquidityPage() {
     approve,
     maxHandler,
   } = useSwap(SwapView.addLiquidity);
-  const { addLiquidity } = useLiquidity();
+  const { addLiquidity, loading: submitLoading } = useLiquidity();
 
   async function _addLiquidity() {
     addLiquidity(swapData);
@@ -236,7 +236,7 @@ export default function AddLiquidityPage() {
             colorScheme="gray"
             variant="solid"
             onClick={_addLiquidity}
-            isLoading={loading}
+            isLoading={loading || submitLoading}
           >
             add liquidity
           </Button>
