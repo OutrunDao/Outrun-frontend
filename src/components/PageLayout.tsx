@@ -25,6 +25,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <Button variant="link" color="grey.600" fontSize={14} fontWeight={'normal'}>
               <Link href={'/stake'}>Stake</Link>
             </Button>
+            <Button variant="link" color="grey.600" fontSize={14} fontWeight={'normal'}>
+              <Link href={'/launchpad'}>Launchpad</Link>
+            </Button>
           </HStack>
         </Box>
         <Spacer />
