@@ -20,10 +20,10 @@ import { useParams } from 'next/navigation';
 
 import { useSwap, BtnAction, SwapView } from '@/hook/useSwap';
 import useLiquidity from '../useLiquidity';
-import { execute, PairTargetDocument, PairCreated } from '@/subgraph';
+import { execute, PairDocument, Pair as PairType } from '@/subgraph';
 import { useEffect } from 'react';
-import { Token } from '@/packages/swap-core';
 import { Fetcher } from '@/packages/swap-sdk/fetcher';
+import { Token } from '@/packages/swap-core';
 
 const defaultSymbol = 'ETH';
 
@@ -37,9 +37,9 @@ export default function AddLiquidityPage() {
   // const { param } = router.query;
   const { data: pairTarget } = useQuery({
     queryKey: ['pairfind', pairAddress],
-    queryFn: async (): Promise<PairCreated> => {
-      return execute(PairTargetDocument, { addr: pairAddress }).then(
-        (res: { data: { pairCreateds: PairCreated[] } }) => res.data.pairCreateds[0]
+    queryFn: async (): Promise<PairType> => {
+      return execute(PairDocument, { addr: pairAddress }).then(
+        (res: { data: { pairs: PairType[] } }) => res.data.pairs[0]
       );
     },
   });
@@ -63,15 +63,24 @@ export default function AddLiquidityPage() {
 
   useEffect(() => {
     if (!pairAddress || !pairTarget || !publicClient) return;
-    // 写死,待改进
-    Fetcher.fetchTokenData(chainId, pairTarget.token0, publicClient!).then((token) => {
-      setToken0(token);
-    });
-    Fetcher.fetchTokenData(chainId, pairTarget.token1, publicClient!).then((token) => {
-      setToken1(token);
-    });
+    const token0 = new Token(
+      chainId,
+      pairTarget.token0.id,
+      +pairTarget.token0.decimals,
+      pairTarget.token0.symbol,
+      pairTarget.token0.name
+    );
+    setToken0(token0);
+    const token1 = new Token(
+      chainId,
+      pairTarget.token1.id,
+      +pairTarget.token1.decimals,
+      pairTarget.token1.symbol,
+      pairTarget.token1.name
+    );
+    setToken1(token1);
     // setToken1(new Token(chainId, pairTarget.token1, 18));
-  }, [pairAddress, pairTarget, chainId]);
+  }, [pairTarget, chainId]);
 
   return (
     <Container

@@ -2,10 +2,11 @@ sources:
   - name: outrun
     handler:
       graphql:
-        endpoint: https://api.studio.thegraph.com/query/68891/outrun/version/latest
+        endpoint: https://api.studio.thegraph.com/query/68891/outrun/0.1.22
   - name: outrunStake
     handler:
       graphql:
         endpoint: https://api.studio.thegraph.com/query/64787/outstake/version/latest
 documents:
   - ./src/subgraph/query.graphql
+  - ./src/subgraph/pool.graphql
