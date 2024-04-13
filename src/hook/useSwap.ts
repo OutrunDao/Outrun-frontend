@@ -1,8 +1,8 @@
 import { Fetcher } from '@/packages/swap-sdk/fetcher';
-import { all, retry, set } from 'radash';
+import { all, map, retry, set } from 'radash';
 import { Native, Trade } from '@/packages/swap-sdk';
 import { useAccount, useChainId, usePublicClient, useWalletClient } from 'wagmi';
-import { Address, formatUnits, getAddress, maxUint256, parseUnits } from 'viem';
+import { Address, PublicClient, formatUnits, getAddress, maxUint256, parseUnits } from 'viem';
 import { Token, Currency } from '@/packages/swap-core';
 import { Pair } from '@/packages/swap-sdk';
 import { getToken } from '@/components/TokenSelect';
@@ -12,7 +12,8 @@ import Decimal from 'decimal.js-light';
 import { CurrencyAmount, Percent, V2_ROUTER_ADDRESSES } from '@/packages/swap-core';
 import { TradeType } from '@/packages/swap-core';
 import { USDB, RUSD } from '@/packages/swap-core';
-import JSBI from 'jsbi';
+import { LocalTokenAddress } from '@/contants/address';
+
 const defaultSymbol = 'ETH';
 
 export enum BtnAction {
@@ -35,27 +36,32 @@ function tokenConvert(token: Currency): Token {
   return token.isNative ? Native.onChain(token.chainId).wrapped : (token as Token);
 }
 
-async function exactInBestRoute(pair: Pair, amountIn: string) {
-  // SwapRouter.swapCallParameters(bestRoutes, tradeOptions);
-  const data = Trade.bestTradeExactIn(
-    [pair],
-    CurrencyAmount.fromRawAmount(
-      pair.token0,
-      new Decimal(amountIn!).times(10 ** pair.token0.decimals).toString()
-    ),
-    pair.token1
-  );
-  // console.log(data);
-  // data.map((d) => {
-  //   console.log(
-  //     `${d.inputAmount.currency.symbol} ${d.outputAmount.currency.symbol} ${
-  //       d.minimumAmountOut(new Percent(5, 100)).quotient
-  //     }`
-  //   );
-  // });
+async function makePairs(tokenA: Currency, tokenB: Currency, publicClient: PublicClient): Promise<Pair[]> {
+  const chainId = publicClient.chain!.id
+  let pairs: Pair[] = []
+  await map([
+    [new Token(chainId, LocalTokenAddress.RETH, 18, 'RETH'), new Token(chainId, LocalTokenAddress.RUSD, 18, 'RUSD')],
+    [new Token(chainId, LocalTokenAddress.RETH, 18, 'RETH'), new Token(chainId, LocalTokenAddress.USDB, 18, 'USDB')]
+  ], async rawPair => {
+
+    let p = await Fetcher.fetchPairData(rawPair[0], rawPair[1], publicClient!).catch(() => null)
+    if (p) pairs.push(p)
+  })
+
+  await map([
+    new Token(chainId, LocalTokenAddress.RETH, 18, 'RETH'),
+    new Token(chainId, LocalTokenAddress.USDB, 18, 'USDB'),
+    new Token(chainId, LocalTokenAddress.RUSD, 18, 'RUSD')
+  ], async token => {
+    let p1 = await Fetcher.fetchPairData(tokenConvert(tokenA), token, publicClient!).catch(() => null)
+    if (p1) pairs.push(p1)
+    let p2 = await Fetcher.fetchPairData(tokenConvert(tokenB), token, publicClient!).catch(() => null)
+    if (p2) pairs.push(p2)
+  })
+  return pairs
 }
 
-export function useSwap(isSwap: SwapView) {
+export function useSwap(view: SwapView) {
   const chainId = useChainId();
   const publicClient = usePublicClient();
   const account = useAccount();
@@ -190,44 +196,53 @@ export function useSwap(isSwap: SwapView) {
   async function token0AmountInputHandler(value: string) {
     setToken0AmountInput(value);
     if (!pair || !token0 || isNaN(+value)) return;
-
-    if (SwapView.addLiquidity) {
+    if (view === SwapView.addLiquidity) {
       const price = pair.priceOf(tokenConvert(token0));
       setToken1AmountInput((+price.toSignificant(6) * +value).toFixed(6));
-    } else if (SwapView.swap) {
+    } else if (view === SwapView.swap) {
       const result = Trade.bestTradeExactIn(
-        [pair],
+        await makePairs(token0, token1!, publicClient!),
         CurrencyAmount.fromRawAmount(
           tokenConvert(token0),
-          JSBI.BigInt(+value * 10 ** token0.decimals)
+          parseUnits(value, token0.decimals).toString()
+          // JSBI.BigInt(+value * 10 ** token0.decimals)
         ),
         tokenConvert(token1!)
       );
+
+      console.log('route result:', result);
+
       if (!result || !result.length) {
-        console.log('未找到兑换路径，池子余额不够或不存在');
+        console.log('池子余额不够或不存在');
         return setToken1AmountInput('');
       }      // setToken1AmountInput(trade.outputAmount.toSignificant(6));
       setToken1AmountInput(result[0].outputAmount.toFixed(6));
       setTradeRoute(result[0])
+      let path = result.map(item => {
+        return item.route.path.map(i => i.symbol).join('->')
+      })
+      console.log(path);
+
     }
   }
   async function token1AmountInputHandler(value: string) {
     setToken1AmountInput(value);
     if (!pair || !token1 || isNaN(+value)) return;
-    if (SwapView.addLiquidity) {
+    if (view === SwapView.addLiquidity) {
       const price = pair.priceOf(tokenConvert(token1));
       setToken0AmountInput((+price.toSignificant(6) * +value).toFixed(6));
-    } else if (SwapView.swap) {
+    } else if (view === SwapView.swap) {
 
       const result = Trade.bestTradeExactOut(
-        [pair],
+        await makePairs(token0, token1!, publicClient!),
         tokenConvert(token0),
         CurrencyAmount.fromRawAmount(
           tokenConvert(token1),
-          JSBI.BigInt(+value * 10 ** token1.decimals)
-          // JSBI.multiply(JSBI.BigInt(value), JSBI.BigInt(10 ** token1.decimals))
+          parseUnits(value, token1.decimals).toString()
         )
       );
+      console.log('route result:', result);
+      console.log(result[0].priceImpact.toFixed())
       if (!result || !result.length) {
         console.log('未找到兑换路径，池子余额不够或不存在');
         return setToken0AmountInput('');
@@ -236,6 +251,10 @@ export function useSwap(isSwap: SwapView) {
       // setToken1AmountInput(result[0].minimumAmountOut(new Percent(5, 100)).toSignificant(6));
       // console.log(result[0].inputAmount, result[0].outputAmount)
       setTradeRoute(result[0])
+      let path = result.map(item => {
+        return item.route.path.map(i => i.symbol).join('->')
+      })
+      console.log(path);
     }
   }
 

@@ -46,6 +46,7 @@ export function getToken(symbol: string, chainId: number): Token | Native | unde
 export default function TokenSelect({
   onSelect,
   defaultSymbol,
+  isDisabled,
   token,
   tokenDisable,
   chainId,
@@ -53,6 +54,7 @@ export default function TokenSelect({
   onSelect: (token: Token | Native) => void;
   defaultSymbol?: string;
   token?: Token | Native;
+  isDisabled?: boolean;
   tokenDisable?: Token | Native;
   chainId: number;
 }) {
@@ -88,6 +90,7 @@ export default function TokenSelect({
         size="sm"
         bg={'transparent'}
         color={'#fff'}
+        isDisabled={isDisabled}
         px={'10px'}
         leftIcon={
           tokenInfo && tokenInfo.logoURI ? (
@@ -108,11 +111,18 @@ export default function TokenSelect({
       </Button>
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
-        <ModalContent mt={40} bgColor={'rgb(29 12 23)'} color="#fff" pb={10}>
+        <ModalContent
+          mt={40}
+          bgColor={'#0d0703'}
+          borderColor={'#515151'}
+          borderWidth={'1px'}
+          color="#fff"
+          pb={10}
+        >
           <ModalHeader>Select Token</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <Input variant="outline" placeholder="Search Name or paste address" size="lg" />
+            <Input variant="outline" placeholder="Search Name or paste address" size="md" />
             <Heading as="h5" size="md" mt={6}>
               Token Name
             </Heading>

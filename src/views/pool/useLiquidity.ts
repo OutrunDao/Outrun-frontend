@@ -3,7 +3,7 @@ import { useToast } from '@chakra-ui/react';
 import { getRouterContract } from './getContract';
 import { Percent } from '@/packages/swap-core';
 import { useAccount, useChainId, usePublicClient, useWalletClient } from 'wagmi';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { retry } from 'radash';
 import { Token } from '@/packages/swap-core';
 import tokenSwitch, { CurrencyPairType } from './tokenSwitch';
@@ -13,7 +13,7 @@ export default function useLiquidity() {
   const publicClient = usePublicClient();
   const toast = useToast();
   const { data: walletClient } = useWalletClient();
-  const toastIdRef = useRef()
+  const [loading, setLoading] = useState(false)
 
   async function addLiquidity(swapData: any) {
     if (!swapData.token0 || !swapData.token1 || !account.address || !walletClient) return;
@@ -64,7 +64,7 @@ export default function useLiquidity() {
       execution = 'addLiquidityUSDB';
       args = [(tokenB as Token).address, tokenBInput!, tokenAInput!, tokenBMin!, tokenAMin!, to, deadline];
     }
-
+    setLoading(true)
     try {
       let toastCurrent = toast({
         status: 'loading',
@@ -101,9 +101,11 @@ export default function useLiquidity() {
         isClosable: true,
       });
     }
+    setLoading(false)
   }
 
   return {
+    loading,
     addLiquidity
   }
 }
