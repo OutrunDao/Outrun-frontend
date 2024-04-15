@@ -30,15 +30,25 @@ const MintBtn = () => {
       args: store.selectedToken === LocalTokenSymbol.ETH ? [] : [parseEther(store.inputValue)]
     }
 
+    store.isLoadingBtn = true
+
     writeContract(writeContractParams, {
       onError: (error) => {
         console.error('writeContract error', error)
       },
       onSuccess: (data) => {
         console.log('writeContract success', data)
+      },
+      onSettled: () => {
+        store.isLoadingBtn = false
       }
     })
   }
+
+  if (store.isLoadingBtn) {
+    return <Button style={store.BtnStyle} onClick={onHandleMint} isLoading loadingText="Minting..."></Button>
+  }
+
   return (
     <Button style={store.BtnStyle} onClick={onHandleMint}>
       Mint

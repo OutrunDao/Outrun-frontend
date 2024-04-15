@@ -1,13 +1,18 @@
+"use client"
+import { useRouter } from 'next/navigation'
 import { observer } from "mobx-react-lite"
-import {Button} from '@chakra-ui/react'
+import { Button, Text } from '@chakra-ui/react'
 import store from '@/app/stake/StakeStore'
-import Link from 'next/link';
 
 const UnstakeBtn = () => {
-  
+  const router = useRouter()
+  const onRoute =() => {
+    console.log('to position');
+    router.push('/position') 
+  }
   return (
     <Button isLoading={store.isLoadingBtn} style={store.BtnStyle}>
-      <Link href="/position">Unstake</Link>
+      <Text onClick={onRoute}>Unstake</Text>
     </Button>
   )
 }
