@@ -24,7 +24,7 @@ import {
 } from '@chakra-ui/react';
 import { useAccount, useChainId, usePublicClient, useWalletClient } from 'wagmi';
 
-const Launchpad = () => {
+const LaunchpadDetail = () => {
   const chainId = useChainId();
   const account = useAccount();
   const publicClient = usePublicClient();
@@ -50,4 +50,4 @@ const Launchpad = () => {
   );
 };
 
-export default Launchpad;
+export default LaunchpadDetail;
