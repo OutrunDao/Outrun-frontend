@@ -44,7 +44,7 @@ const Launchpad = () => {
         <VStack>
           <Heading as={'h2'}>The most equitable and fair token launch platform</Heading>
           <br />
-          <Heading as="h5" size={'sm'} mt="10">
+          <Heading as="h5" size={'sm'} mt="6">
             Enjoy high-quality projects around the world
           </Heading>
           <br />
@@ -62,7 +62,7 @@ const Launchpad = () => {
         boxShadow="xs"
         rounded="md"
         p={6}
-        mt="24"
+        mt="18"
       >
         <Flex>
           <Center width={'200px'} p="10">
@@ -120,6 +120,13 @@ const Launchpad = () => {
           </VStack>
         </Flex>
       </Container>
+      <Center my="8">
+        <Button colorScheme="pink" variant={'link'}>
+          <Link href="https://forms.gle/RGPrhUYSdKbSdFnNA" target="blank">
+            launch your project?
+          </Link>
+        </Button>
+      </Center>
     </Box>
   );
 };
