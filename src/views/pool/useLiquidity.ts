@@ -84,12 +84,13 @@ export default function useLiquidity() {
           hash: tx as Address,
         });
       });
-      console.log(data);
       toast.update(toastCurrent, {
-        status: "success",
-        title: 'Add liquidity success',
+        status: data.status === 'success' ? "success" : "error",
+        title: data.status === 'success' ? 'Add liquidity success' : 'Add liquidity fail',
         description: "",
-        duration: 5000
+        isClosable: true,
+
+        duration: 10000
       })
     } catch (e: any) {
       toast.closeAll()

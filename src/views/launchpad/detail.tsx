@@ -37,19 +37,26 @@ import {
   StepDescription,
   StepSeparator,
 } from '@chakra-ui/react';
-import { useAccount, useChainId, usePublicClient, useWalletClient } from 'wagmi';
+import { useAccount, useBalance, useChainId, usePublicClient, useWalletClient } from 'wagmi';
 import { FaXTwitter } from 'react-icons/fa6';
 import { FaDiscord, FaInternetExplorer } from 'react-icons/fa';
 import { useState } from 'react';
+import { useContract } from './useContract';
+import { getBalance } from 'viem/actions';
+import { formatEther, getAddress, parseEther } from 'viem';
 const LaunchpadDetail = () => {
   const chainId = useChainId();
   const account = useAccount();
   const publicClient = usePublicClient();
+  const { data: ethBalanceData } = useBalance({
+    address: account.address,
+  });
   const toast = useToast();
   const { data: walletClient } = useWalletClient();
-  const [depositeAmount, setDepositeAmount] = useState('');
+  const { deposit } = useContract();
+  const [depositAmount, setDepositAmount] = useState('');
   const steps = [
-    { title: 'Deposite', description: '' },
+    { title: 'Deposit', description: '' },
     { title: 'Claim', description: 'Date & Time' },
     { title: 'Trade', description: 'Select Rooms' },
   ];
@@ -57,8 +64,24 @@ const LaunchpadDetail = () => {
     index: 0,
     count: steps.length,
   });
-  function depositeHandler(value: string) {
-    setDepositeAmount(value);
+  function depositAmountHandler(value: string) {
+    setDepositAmount(value);
+  }
+  async function depositHandler() {
+    if (!publicClient || !ethBalanceData) return;
+    if (!depositAmount || isNaN(+depositAmount))
+      return toast({
+        title: 'Input error',
+        status: 'error',
+        description: 'the input is not a number',
+      });
+    if (ethBalanceData?.value < parseEther(depositAmount))
+      return toast({
+        title: 'Input error',
+        status: 'error',
+        description: 'insufficient eth amount',
+      });
+    await deposit(depositAmount);
   }
   return (
     <Box>
@@ -161,8 +184,11 @@ const LaunchpadDetail = () => {
                 ))}
               </Stepper>
             </Box>
-            <Text textAlign={'center'} my="8">
-              Deposite Eth to earn token rewards
+            <Text textAlign={'center'} mt="8">
+              Deposit Eth to earn token rewards
+            </Text>
+            <Text align={'center'} fontSize={12} color="brand.500">
+              balance: {ethBalanceData && formatEther(ethBalanceData.value)}
             </Text>
             <Center my={6}>
               <HStack>
@@ -172,12 +198,12 @@ const LaunchpadDetail = () => {
                   size="sm"
                   color="#fff"
                   textAlign={'left'}
-                  value={depositeAmount}
-                  onChange={(e) => depositeHandler(e.target.value)}
+                  value={depositAmount}
+                  onChange={(e) => depositAmountHandler(e.target.value)}
                   placeholder="Input token amount"
                 />
-                <Button size="sm" variant="solid" rounded={'4px'} colorScheme="pink">
-                  Deposite
+                <Button size="sm" variant="solid" rounded={'4px'} colorScheme="pink" onClick={depositHandler}>
+                  Deposit
                 </Button>
               </HStack>
             </Center>
