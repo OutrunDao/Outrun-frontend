@@ -191,19 +191,6 @@
   },
   {
     "type": "function",
-    "name": "count",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
     "name": "extendLockTime",
     "inputs": [
       {
@@ -255,6 +242,19 @@
   {
     "type": "function",
     "name": "getStakedRETH",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "idCounter",
     "inputs": [],
     "outputs": [
       {
@@ -334,19 +334,6 @@
   },
   {
     "type": "function",
-    "name": "nextId",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
     "name": "outETHVault",
     "inputs": [],
     "outputs": [
@@ -389,18 +376,18 @@
         "components": [
           {
             "name": "RETHAmount",
-            "type": "uint96",
-            "internalType": "uint96"
+            "type": "uint104",
+            "internalType": "uint104"
           },
           {
             "name": "PETHAmount",
-            "type": "uint96",
-            "internalType": "uint96"
+            "type": "uint104",
+            "internalType": "uint104"
           },
           {
             "name": "deadline",
-            "type": "uint56",
-            "internalType": "uint56"
+            "type": "uint40",
+            "internalType": "uint40"
           },
           {
             "name": "closed",
@@ -609,7 +596,7 @@
     "name": "withdrawYield",
     "inputs": [
       {
-        "name": "amountInREY",
+        "name": "burnedREY",
         "type": "uint256",
         "internalType": "uint256"
       }
@@ -654,6 +641,12 @@
       },
       {
         "name": "extendDays",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "newDeadLine",
         "type": "uint256",
         "indexed": false,
         "internalType": "uint256"
@@ -710,7 +703,7 @@
     "name": "SetForceUnstakeFee",
     "inputs": [
       {
-        "name": "_forceUnstakeFee",
+        "name": "forceUnstakeFee",
         "type": "uint256",
         "indexed": false,
         "internalType": "uint256"
@@ -723,7 +716,7 @@
     "name": "SetMaxLockupDays",
     "inputs": [
       {
-        "name": "_maxLockupDays",
+        "name": "maxLockupDays",
         "type": "uint16",
         "indexed": false,
         "internalType": "uint16"
@@ -736,7 +729,7 @@
     "name": "SetMinLockupDays",
     "inputs": [
       {
-        "name": "_minLockupDays",
+        "name": "minLockupDays",
         "type": "uint16",
         "indexed": false,
         "internalType": "uint16"
@@ -749,7 +742,7 @@
     "name": "SetOutETHVault",
     "inputs": [
       {
-        "name": "_outETHVault",
+        "name": "outETHVault",
         "type": "address",
         "indexed": false,
         "internalType": "address"
@@ -762,25 +755,37 @@
     "name": "StakeRETH",
     "inputs": [
       {
-        "name": "_positionId",
+        "name": "positionId",
         "type": "uint256",
         "indexed": true,
         "internalType": "uint256"
       },
       {
-        "name": "_account",
+        "name": "account",
         "type": "address",
         "indexed": true,
         "internalType": "address"
       },
       {
-        "name": "_amountInRETH",
+        "name": "amountInRETH",
         "type": "uint256",
         "indexed": false,
         "internalType": "uint256"
       },
       {
-        "name": "_deadline",
+        "name": "amountInPETH",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "amountInREY",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "deadline",
         "type": "uint256",
         "indexed": false,
         "internalType": "uint256"
@@ -793,19 +798,25 @@
     "name": "Unstake",
     "inputs": [
       {
-        "name": "_positionId",
+        "name": "positionId",
         "type": "uint256",
         "indexed": true,
         "internalType": "uint256"
       },
       {
-        "name": "_account",
-        "type": "address",
-        "indexed": true,
-        "internalType": "address"
+        "name": "amountInRETH",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
       },
       {
-        "name": "_amountInRETH",
+        "name": "burnedPETH",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "burnedREY",
         "type": "uint256",
         "indexed": false,
         "internalType": "uint256"
@@ -818,13 +829,13 @@
     "name": "WithdrawYield",
     "inputs": [
       {
-        "name": "user",
+        "name": "account",
         "type": "address",
         "indexed": true,
         "internalType": "address"
       },
       {
-        "name": "amountInREY",
+        "name": "burnedREY",
         "type": "uint256",
         "indexed": false,
         "internalType": "uint256"

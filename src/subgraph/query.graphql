@@ -1,16 +1,14 @@
 query RethPosition($account: Bytes) {
-  positions(first: 100, where: { account: $account }) {
+  stakeRETHs(first: 100, where: { account: $account }) {
     id
     positionId
     account
     amountInRETH
     amountInPETH
     amountInREY
-    deadline
     blockNumber
     blockTimestamp
     transactionHash
-    extendDays
-    newDeadLine
+    deadline
   }
 }
