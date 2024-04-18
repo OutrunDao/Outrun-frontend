@@ -33,13 +33,13 @@ const UnstakeABI = [{
 }]
 
 export default function Position() {
-  const [positionList, setPositionList] = useState<RethPositionQuery['positions']>([])
+  const [positionList, setPositionList] = useState<RethPositionQuery["stakeRETHs"]>([])
   const account = useAccount().address;  
 
   useEffect(() => {
     execute(RethPositionDocument, { account: account }).then((result: {data: RethPositionQuery }) => {
-      console.log('result.data.stakeRETHs', result.data.positions);
-      setPositionList(result.data.positions)
+      console.log('result.data.stakeRETHs', result.data.stakeRETHs);
+      setPositionList(result.data.stakeRETHs)
     })
   }, [account])
 

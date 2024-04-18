@@ -68,6 +68,9 @@ const StakeBtn = () => {
     hash: approveHash
   })
 
+  console.log('approveData', approveData.status);
+  
+
   const onHandleStake = async () => {
     setConfirmLoading(true)
     const params = {
