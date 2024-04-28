@@ -1,5 +1,5 @@
 import { LocalTokenSymbol, ContractAddrKey } from '@/types/index.d';
-import RETHABI from './RETH';
+import RETHABI from './RETH.json';
 import RETHStakeManager from './RETHStakeManager.json';
 
 export const TokenABIMap = {
