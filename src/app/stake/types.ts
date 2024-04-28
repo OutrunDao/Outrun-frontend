@@ -27,8 +27,8 @@ export const PairSelectList = {
     1: [LocalTokenSymbol.RETH, LocalTokenSymbol.RUSD],
   },
   [TabType.Stake]: {
-    0: [LocalTokenSymbol.RETH, LocalTokenSymbol.RUSD, LocalTokenSymbol.REY],
-    1: [LocalTokenSymbol.PETH, LocalTokenSymbol.PUSD, LocalTokenSymbol.RUY],
+    0: [LocalTokenSymbol.RETH, LocalTokenSymbol.RUSD],
+    1: [LocalTokenSymbol.PETH, LocalTokenSymbol.PUSD],
   },
 };
 
@@ -42,12 +42,12 @@ export const TokenPairMap = {
   [TabType.Stake]: {
     [LocalTokenSymbol.RETH]: LocalTokenSymbol.PETH,
     [LocalTokenSymbol.RUSD]: LocalTokenSymbol.PUSD,
-    [LocalTokenSymbol.REY]: LocalTokenSymbol.RUY,
     [LocalTokenSymbol.PETH]: LocalTokenSymbol.RETH,
     [LocalTokenSymbol.PUSD]: LocalTokenSymbol.RUSD,
-    [LocalTokenSymbol.RUY]: LocalTokenSymbol.REY,
   },
 };
 
 export type TokenMint = keyof (typeof TokenPairMap)[TabType.Mint];
 export type TokenStake = keyof (typeof TokenPairMap)[TabType.Stake];
+
+export type BtnHandleState = MintType | StakeType;

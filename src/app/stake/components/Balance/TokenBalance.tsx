@@ -1,12 +1,13 @@
+import { useEffect } from 'react';
 import { useReadContract, useAccount, useBalance } from 'wagmi';
 import { formatEther } from 'viem';
 import { LocalTokenAddress } from '@/contants/address';
-import { Text } from '@chakra-ui/react'
-import { observer } from "mobx-react-lite"
-import store from '@/app/stake/StakeStore'
+import { Text } from '@chakra-ui/react';
+import { observer } from 'mobx-react-lite';
+import store from '@/app/stake/StakeStore';
 
-
-const ABI = [{
+const ABI = [
+  {
     inputs: [
       {
         internalType: 'address',
@@ -24,8 +25,8 @@ const ABI = [{
     ],
     stateMutability: 'view',
     type: 'function',
-  }
-]
+  },
+];
 
 const TokenBalance = () => {
   const account = useAccount().address || 0n;
@@ -35,13 +36,14 @@ const TokenBalance = () => {
     functionName: 'balanceOf',
     args: [account],
   });
-  
-  if (!data) return <Text>0</Text>
-  
-  const balance = formatEther(data as bigint)
-  store.setBalance(balance)
 
-  return <Text>{balance}</Text>
-}
+  const balance = formatEther(data as bigint).slice(0, 6) || '0';
 
-export default observer(TokenBalance)
+  useEffect(() => {
+    store.setBalance(balance);
+  }, [balance]);
+
+  return <Text>Balance: {balance}</Text>;
+};
+
+export default observer(TokenBalance);

@@ -51,6 +51,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </Button>
             <Button
               variant="link"
+              color={pathname === '/position' ? 'brand.500' : 'grey.600'}
+              fontSize={14}
+              fontWeight={'normal'}
+              leftIcon={<Icon fontSize={16} as={GiMiner}></Icon>}
+            >
+              <Link href={'/position'}>Positions</Link>
+            </Button>
+            <Button
+              variant="link"
               color={pathname === '/launchpad' ? 'brand.500' : 'grey.600'}
               fontSize={14}
               fontWeight={'normal'}
