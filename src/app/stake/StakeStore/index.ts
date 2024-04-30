@@ -12,7 +12,7 @@ const BtnBaseStyle = {
 };
 
 class StakeStore {
-  inputValue: number = 0;
+  inputValue: string = '0';
   currentTabType: TabType = TabType.Mint;
   selectedToken: LocalTokenSymbol = LocalTokenSymbol.ETH;
   switchState: 0 | 1 = 0;
@@ -66,12 +66,12 @@ class StakeStore {
     return BtnBaseStyle;
   }
   get BtnText() {
-    if (this.inputValue > this.balance) {
+    if (Number(this.inputValue) > this.balance) {
       this.btnDisabled = true;
       return 'Insufficient Balance';
     }
 
-    if (this.inputValue <= 0) {
+    if (Number(this.inputValue) <= 0) {
       this.btnDisabled = true;
       return 'Invalid Value';
     }
@@ -110,7 +110,7 @@ class StakeStore {
   }
 
   setInputValue(val: string) {
-    this.inputValue = Number(val);
+    this.inputValue = val;
   }
 
   setBalance(balance: string) {

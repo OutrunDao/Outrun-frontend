@@ -29,7 +29,7 @@ const InputSelect = (props: IPros) => {
         max={Number(store.balance)}
         boxShadow="0 0 0 1px #3182ce"
         placeholder={`${store.selectedToken} Amount`}
-        onChange={(e) => (store.inputValue = Number(e.target.value))}
+        onChange={(e) => (store.inputValue = e.target.value)}
       />
 
       <Flex

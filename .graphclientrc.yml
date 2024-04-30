@@ -7,6 +7,10 @@ sources:
     handler:
       graphql:
         endpoint: https://api.studio.thegraph.com/query/64787/outstake/version/latest
+  - name: stakeRUSD
+    handler:
+      graphql:
+        endpoint: https://api.studio.thegraph.com/query/64787/stake-rusd-manage/version/latest
 documents:
   - ./src/subgraph/query.graphql
   - ./src/subgraph/pool.graphql

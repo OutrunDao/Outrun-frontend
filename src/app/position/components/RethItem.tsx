@@ -8,16 +8,14 @@ import { useMemo, useState } from 'react';
 import { ContractAddressMap } from '@/contants/address';
 import UnstakeButton from './UnstakeButton';
 import ExtendDays from './ExtendDays';
-interface IProps {
-  positionId: string;
-}
 
-interface PositionResponse {
-  RETHAmount: string;
-  PETHAmount: string;
+interface IProps {
+  id: string;
+  positionId: string;
+  amountInRETH: string;
+  amountInPETH: string;
+  amountInREY: string;
   deadline: string;
-  closed: boolean;
-  owner: string;
 }
 
 const PositionItem = (props: IProps) => {
@@ -28,6 +26,9 @@ const PositionItem = (props: IProps) => {
   const [unstakeHash, setUnstakeHash] = useState<`0x${string}`>();
   const contractAddr = ContractAddressMap.RETHStakeManager;
 
+  const timeStamp = Number(props.deadline || 0) * 1000;
+  const date = new Date(timeStamp).toLocaleDateString();
+
   const params = {
     abi: RETHStakeManagerABI,
     address: contractAddr,
@@ -35,9 +36,7 @@ const PositionItem = (props: IProps) => {
     account,
     args: [props.positionId],
   };
-  const { data }: { data: PositionResponse | undefined } = useReadContract(params);
-  const timeStamp = Number(data?.deadline || 0) * 1000;
-  const date = new Date(timeStamp).toLocaleDateString();
+  const { data }: { data: { closed: boolean } | undefined } = useReadContract(params);
 
   const onUnstake = async () => {
     const writeParams = {
@@ -94,7 +93,7 @@ const PositionItem = (props: IProps) => {
             RETH Amount:
           </Text>
           <Text fontWeight="bold" color="#fff" marginRight="22px">
-            {formatEther(BigInt(data?.RETHAmount || 0n))}
+            {formatEther(BigInt(props.amountInRETH || 0n))}
           </Text>
         </Flex>
         <Flex color="#999" justifyContent="flex-start" marginBottom="6px">
@@ -102,7 +101,15 @@ const PositionItem = (props: IProps) => {
             PETH Amount:
           </Text>
           <Text fontWeight="bold" color="#fff" marginRight="22px">
-            {formatEther(BigInt(data?.PETHAmount || 0n))}
+            {formatEther(BigInt(props.amountInPETH || 0n))}
+          </Text>
+        </Flex>
+        <Flex color="#999" justifyContent="flex-start" marginBottom="6px">
+          <Text width="120px" color="#999" marginRight="12px" fontWeight="bold">
+            REY Amount:
+          </Text>
+          <Text fontWeight="bold" color="#fff" marginRight="22px">
+            {formatEther(BigInt(props.amountInREY || 0n))}
           </Text>
         </Flex>
 

@@ -12,3 +12,15 @@ query RethPosition($account: Bytes) {
     deadline
   }
 }
+
+query RusdPosition($account: Bytes) {
+  stakeRUSDs(first: 100, where: { account: $account }) {
+    id
+    positionId
+    account
+    amountInRUSD
+    amountInPUSD
+    amountInRUY
+    deadline
+  }
+}

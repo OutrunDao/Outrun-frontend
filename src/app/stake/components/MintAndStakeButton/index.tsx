@@ -25,7 +25,7 @@ const MintAndStakeButton = () => {
     if (isETH) {
       store.isMinting = true;
       try {
-        const val = parseEther(store.inputValue.toString());
+        const val = parseEther(store.inputValue);
         const tx = await walletClient!.writeContract({
           address: LocalTokenAddress.RETH,
           abi: RETHAbi,
@@ -58,14 +58,13 @@ const MintAndStakeButton = () => {
         LocalTokenAddress.RUSD,
         publicClient!
       );
-      console.log('usdbAllowance < BigInt(store.inputValue)', usdbAllowance < Number(store.inputValue));
 
       if (usdbAllowance < Number(store.inputValue)) {
         store.isApproving = true;
         try {
           const approveTx = await getUsdbContract(walletClient!).write['approve']([
             LocalTokenAddress.RUSD,
-            parseEther(store.inputValue.toString()),
+            parseEther(store.inputValue),
           ]);
 
           const result = await getTxStatus(publicClient!, approveTx);
@@ -96,14 +95,24 @@ const MintAndStakeButton = () => {
           abi: RUSDAbi,
           account: account,
           functionName: 'deposit',
-          args: [parseEther(store.inputValue.toString())],
+          args: [parseEther(store.inputValue)],
         });
 
         const result = await getTxStatus(publicClient!, tx);
 
+        console.log('result', result);
+
         if (result.status === 'success') {
           toast({
             title: 'Mint Successful',
+          });
+        }
+
+        if (result.status === 'reverted') {
+          toast({
+            title: 'Mint failed',
+            status: 'error',
+            description: 'Transcation reverted',
           });
         }
         store.isMinting = false;
@@ -111,8 +120,8 @@ const MintAndStakeButton = () => {
         store.isMinting = false;
         toast({
           title: 'Mint Failed',
+          status: 'error',
         });
-        return false;
       }
     }
   };
@@ -126,7 +135,7 @@ const MintAndStakeButton = () => {
         abi,
         account: account,
         functionName: 'withdraw',
-        args: [parseEther(store.inputValue.toString())],
+        args: [parseEther(store.inputValue)],
       });
       const result = await getTxStatus(publicClient!, tx);
       if (result.status === 'success') {
@@ -160,7 +169,7 @@ const MintAndStakeButton = () => {
           abi: ApproveABI,
           account,
           functionName: 'approve',
-          args: [spender, parseEther(store.inputValue.toString())],
+          args: [spender, parseEther(store.inputValue)],
         });
 
         const result = await getTxStatus(publicClient!, approveTx);
@@ -192,7 +201,7 @@ const MintAndStakeButton = () => {
         abi: StakeABI,
         account: account,
         functionName: 'stake',
-        args: [parseEther(store.inputValue.toString()), store.stakeDays || 30, account, account, account],
+        args: [parseEther(store.inputValue), store.stakeDays || 30, account, account, account],
       });
 
       const result = await getTxStatus(publicClient!, stakeTx);

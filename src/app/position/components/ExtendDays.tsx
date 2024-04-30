@@ -26,7 +26,7 @@ const contractAddr = ContractAddressMap.RETHStakeManager;
 
 const ExtendDays = (props: IProps) => {
   const { date, positionId, closed } = props;
-  const [stakeDays, setStakeDays] = useState<number>(30);
+  const [stakeDays, setStakeDays] = useState<number>(0);
   const account = useAccount().address;
   const { writeContract, writeContractAsync } = useWriteContract();
   const [exrendHash, setExrendHash] = useState<`0x${string}`>();
@@ -107,7 +107,7 @@ const ExtendDays = (props: IProps) => {
       {!closed && (
         <Flex alignItems="center">
           <Text width={120} color="#999" fontWeight="bold">
-            Deadline Days:
+            Extend Days:
           </Text>
 
           <Flex justifyContent="space-between" alignItems="center">
@@ -116,7 +116,7 @@ const ExtendDays = (props: IProps) => {
               min={0}
               width="240px"
               aria-label="slider-ex-1"
-              defaultValue={30}
+              defaultValue={0}
               colorScheme="#fcfc10"
               onChangeEnd={(val) => onChangeDays(val)}
             >
