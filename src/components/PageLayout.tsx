@@ -4,6 +4,7 @@ import { Link } from '@chakra-ui/next-js';
 import { Silkscreen } from 'next/font/google';
 import { IoSwapVertical } from 'react-icons/io5';
 import { PiSwimmingPool } from 'react-icons/pi';
+import { RiCoinFill } from 'react-icons/ri';
 import { GiMiner } from 'react-icons/gi';
 import { FaHotjar } from 'react-icons/fa';
 import { usePathname } from 'next/navigation';
@@ -54,7 +55,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               color={pathname === '/position' ? 'brand.500' : 'grey.600'}
               fontSize={14}
               fontWeight={'normal'}
-              leftIcon={<Icon fontSize={16} as={GiMiner}></Icon>}
+              leftIcon={<Icon fontSize={16} as={RiCoinFill}></Icon>}
             >
               <Link href={'/position'}>Positions</Link>
             </Button>
