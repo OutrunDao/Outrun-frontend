@@ -1,11 +1,15 @@
 import { useReadContract, useAccount, useBalance } from 'wagmi';
 import { Tabs, Flex, TabList, Tab, Box, Text, Container } from '@chakra-ui/react';
 import store from '@/app/stake/StakeStore';
-import { formatEther } from 'viem';
+import { Address, formatEther } from 'viem';
 import { LocalTokenAddress, ContractAddressMap } from '@/contants/address';
 import { LocalTokenSymbol } from '@/types/index.d';
 import { observer } from 'mobx-react-lite';
 import { tabList, TabType, TokenPairMap } from '../../types';
+import RETHStakeManager from '@/ABI/RETHStakeManager.json';
+import RUSDStakeManage from '@/ABI/RUSDStakeManage.json';
+
+type CurrTokenPair = (typeof TokenPairMap)[TabType];
 
 const BalanceABI = [
   {
@@ -29,8 +33,6 @@ const BalanceABI = [
   },
 ];
 
-type CurrTokenPair = (typeof TokenPairMap)[TabType];
-
 interface IProps {
   currTokenPairMap: CurrTokenPair;
 }
@@ -47,12 +49,38 @@ const TokenBalance = ({ token }: { token: LocalTokenSymbol }) => {
   return <Text>{formatEther(data)}</Text>;
 };
 
+const CalcExchangeRate = (props) => {
+  const { data = 0n }: { data: bigint | undefined } = useReadContract({
+    address: ContractAddressMap.RETHStakeManager,
+    abi: RETHStakeManager,
+    functionName: 'calcPETHAmount',
+    args: [store.inputValue],
+  });
+
+  return (
+    <Flex justifyContent="space-between" marginTop="12px">
+      <Text color="rgb(170, 170, 191)">Exchange rate</Text>
+      <Text color="rgb(170, 170, 191)">{(Number(data) * 100).toFixed(2)}%</Text>
+    </Flex>
+  );
+};
+
+const NormalExchangeRate = (props: IProps) => {
+  return (
+    <Flex justifyContent="space-between" marginTop="12px">
+      <Text color="rgb(170, 170, 191)">Exchange rate</Text>
+      <Text color="rgb(170, 170, 191)">
+        1 {store.selectedToken} = 1 {props.currTokenPairMap[store.selectedToken as keyof CurrTokenPair]}
+      </Text>
+    </Flex>
+  );
+};
+
 const EarnTokenInfo = (props: IProps) => {
   const { currTokenPairMap } = props;
+  const account = useAccount().address || 0n;
 
   const renderEarnToken = () => {
-    console.log('renderEarnings');
-
     if (store.currentTabType === TabType.Mint) return '';
     const earnToken =
       store.selectedToken === LocalTokenSymbol.RETH ? LocalTokenSymbol.REY : LocalTokenSymbol.RUY;
@@ -75,23 +103,37 @@ const EarnTokenInfo = (props: IProps) => {
       </Box>
     );
   };
+
+  const renderAPR = () => {
+    const aprToken = currTokenPairMap[store.selectedToken as keyof CurrTokenPair];
+
+    return (
+      <>
+        <Flex justifyContent="space-between" marginTop="12px">
+          <Text color="rgb(170, 170, 191)">RETH APR</Text>
+          <Text color="rgb(170, 170, 191)">12.7%</Text>
+        </Flex>
+        <Flex justifyContent="space-between" marginTop="12px">
+          <Text color="rgb(170, 170, 191)">RUSD APR</Text>
+          <Text color="rgb(170, 170, 191)">10.7%</Text>
+        </Flex>
+      </>
+    );
+  };
+
+  const renderExchange = () => {
+    if (store.currentTabType === TabType.Mint) {
+      return <NormalExchangeRate currTokenPairMap={currTokenPairMap}></NormalExchangeRate>;
+    }
+
+    return <CalcExchangeRate></CalcExchangeRate>;
+  };
+
   return (
     <Box marginTop="32px" padding="16px" backgroundColor="rgb(52 30 56 / 50%)" borderRadius="12px">
       {renderEarnToken()}
-      {/* <Flex justifyContent="space-between" marginTop="12px">
-        <Text color="rgb(170, 170, 191)">RETH APR</Text>
-        <Text color="rgb(170, 170, 191)">12.7%</Text>
-      </Flex>
-      <Flex justifyContent="space-between" marginTop="12px">
-        <Text color="rgb(170, 170, 191)">ETH-RETH APR</Text>
-        <Text color="rgb(170, 170, 191)">10.7%</Text>
-      </Flex> */}
-      <Flex justifyContent="space-between" marginTop="12px">
-        <Text color="rgb(170, 170, 191)">Exchange rate</Text>
-        <Text color="rgb(170, 170, 191)">
-          1 {store.selectedToken} = 1 {currTokenPairMap[store.selectedToken as keyof CurrTokenPair]}
-        </Text>
-      </Flex>
+      {renderAPR()}
+      {renderExchange()}
     </Box>
   );
 };

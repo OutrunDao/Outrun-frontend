@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { IBM_Plex_Sans } from 'next/font/google';
 import { Providers } from './providers';
 import PageLayout from '@/components/PageLayout';

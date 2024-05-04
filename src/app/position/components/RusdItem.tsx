@@ -1,7 +1,7 @@
 import { useWriteContract, useReadContract, useAccount, useTransactionReceipt } from 'wagmi';
 import { observer } from 'mobx-react-lite';
 import store from '@/app/stake/StakeStore';
-import { formatEther } from 'viem';
+import { formatEther, numberToBytes } from 'viem';
 import { Text, Box, Flex, useToast } from '@chakra-ui/react';
 import RUSDStakeManage from '@/ABI/RETHStakeManager.json';
 import { useMemo, useState } from 'react';
@@ -51,12 +51,11 @@ const PositionItem = (props: IProps) => {
 
     writeContract(writeParams, {
       onError: (error) => {
-        console.error('onUnstake failed: ', error);
         toast({
           title: 'Unstake failed',
           status: 'error',
-          description: error.message,
         });
+        console.error('onUnstake failed: ', error);
       },
       onSuccess: (txHash) => {
         setUnstakeHash(txHash);
@@ -82,7 +81,7 @@ const PositionItem = (props: IProps) => {
     >
       <Box>
         <Flex color="#999" justifyContent="flex-start" marginBottom="6px">
-          <Text width="90px" color="#999" marginRight="12px" fontWeight="bold">
+          <Text width="120px" color="#999" marginRight="12px" fontWeight="bold">
             Position ID:
           </Text>
           <Text color="#eaeaea" marginRight="22px">
@@ -105,17 +104,15 @@ const PositionItem = (props: IProps) => {
             {formatEther(BigInt(props.amountInRUSD))}
           </Text>
         </Flex>
-        <Flex color="#999" justifyContent="flex-start" marginBottom="6px">
-          <Text width="120px" color="#999" marginRight="12px" fontWeight="bold">
-            RUY Amount:
-          </Text>
-          <Text fontWeight="bold" color="#fff" marginRight="22px">
-            {formatEther(BigInt(props.amountInRUY))}
-          </Text>
-        </Flex>
 
         <Flex color="#999" justifyContent="flex-start" margin="6px 0">
-          <ExtendDays date={date} closed={data?.closed} positionId={props.positionId}></ExtendDays>
+          <ExtendDays
+            amount={Number(props.amountInRUSD)}
+            isETH={false}
+            date={date}
+            closed={data?.closed}
+            positionId={props.positionId}
+          ></ExtendDays>
         </Flex>
       </Box>
 

@@ -7,7 +7,7 @@ import {
   RusdPositionQuery,
   execute,
 } from '@/subgraph';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useAccount, useWriteContract } from 'wagmi';
 import { parseEther } from 'viem';
@@ -49,7 +49,6 @@ export default function Position() {
     execute(RethPositionDocument, { account: account }).then((result: { data: RethPositionQuery }) => {
       setRETHPositionList(result.data.stakeRETHs);
     });
-
     execute(RusdPositionDocument, { account: account }).then((result: { data: RusdPositionQuery }) => {
       console.log('result.data', result.data.stakeRUSDs);
       setRUSDPositionList(result.data.stakeRUSDs);

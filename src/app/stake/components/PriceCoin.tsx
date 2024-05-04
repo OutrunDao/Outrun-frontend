@@ -25,7 +25,7 @@ const PriceCoin = (props: IProps): ReactElement => {
   const renderEarnings = () => {
     console.log('renderEarnings');
 
-    if (store.currentTabType === TabType.Mint) return '';
+    if (store.currentTabType === TabType.Mint) return <span></span>;
     const earnToken =
       store.selectedToken === LocalTokenSymbol.RETH ? LocalTokenSymbol.REY : LocalTokenSymbol.RUY;
     const earnCount = Number(store.inputValue) * store.stakeDays;
@@ -42,9 +42,23 @@ const PriceCoin = (props: IProps): ReactElement => {
 
   return (
     <Box>
-      <Flex justifyContent="space-between" padding="22px" paddingRight="0" paddingTop="0" alignItems="center">
+      <Flex
+        justifyContent="space-between"
+        padding="22px"
+        paddingRight="22px"
+        paddingTop="0"
+        alignItems="center"
+      >
         {renderEarnings()}
-        <Flex backgroundColor="#1E1E38" borderRadius="6px" padding="6px 22px" marginTop="12px">
+        <Flex
+          height="40px"
+          width="100px"
+          alignItems="center"
+          backgroundColor="#1E1E38"
+          borderRadius="6px"
+          padding="6px 22px"
+          marginTop="12px"
+        >
           {selectedTokenPair} <Text visibility={'hidden'} marginRight="8px"></Text>({store.inputValue})
         </Flex>
       </Flex>

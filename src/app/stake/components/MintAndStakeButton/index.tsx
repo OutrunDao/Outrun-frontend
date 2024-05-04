@@ -105,6 +105,7 @@ const MintAndStakeButton = () => {
         if (result.status === 'success') {
           toast({
             title: 'Mint Successful',
+            status: 'success',
           });
         }
 
@@ -141,12 +142,18 @@ const MintAndStakeButton = () => {
       if (result.status === 'success') {
         toast({
           title: 'Redeem successful',
+          status: 'success',
+          description: `You have redeemed ${store.inputValue} ${store.selectedToken}`,
         });
       }
       store.isRedeeming = false;
     } catch (error) {
+      toast({
+        title: 'Redeem failed',
+        status: 'error',
+      });
       store.isRedeeming = false;
-      console.error(error);
+      console.error('Redeem failed: ', error);
     }
   };
 

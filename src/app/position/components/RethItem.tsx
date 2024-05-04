@@ -81,7 +81,7 @@ const PositionItem = (props: IProps) => {
     >
       <Box>
         <Flex color="#999" justifyContent="flex-start" marginBottom="6px">
-          <Text width="90px" color="#999" marginRight="12px" fontWeight="bold">
+          <Text width="120px" color="#999" marginRight="12px" fontWeight="bold">
             Position ID:
           </Text>
           <Text color="#eaeaea" marginRight="22px">
@@ -104,17 +104,15 @@ const PositionItem = (props: IProps) => {
             {formatEther(BigInt(props.amountInPETH || 0n))}
           </Text>
         </Flex>
-        <Flex color="#999" justifyContent="flex-start" marginBottom="6px">
-          <Text width="120px" color="#999" marginRight="12px" fontWeight="bold">
-            REY Amount:
-          </Text>
-          <Text fontWeight="bold" color="#fff" marginRight="22px">
-            {formatEther(BigInt(props.amountInREY || 0n))}
-          </Text>
-        </Flex>
 
         <Flex color="#999" justifyContent="flex-start" margin="6px 0">
-          <ExtendDays date={date} closed={data?.closed} positionId={props.positionId}></ExtendDays>
+          <ExtendDays
+            date={date}
+            isETH={true}
+            amount={Number(props.amountInRETH)}
+            closed={data?.closed}
+            positionId={props.positionId}
+          ></ExtendDays>
         </Flex>
       </Box>
 

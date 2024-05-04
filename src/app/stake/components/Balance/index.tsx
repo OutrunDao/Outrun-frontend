@@ -9,7 +9,9 @@ import {
   Box,
   Button,
 } from '@chakra-ui/react';
-import { LocalTokenSymbol } from '@/types/index.d';
+import { useReadContracts, useAccount } from 'wagmi';
+import RETHStakeManagerABI from '@/ABI/RETHStakeManager.json';
+import { ContractAddressMap } from '@/contants/address';
 import ETHBalance from './ETHBalance';
 import TokenBalance from './TokenBalance';
 import { observer } from 'mobx-react-lite';
@@ -23,10 +25,31 @@ interface IProps {
 const BalanceCoin = (props: IProps) => {
   const [stakeDays, setStakeDays] = useState<number>(30);
   const { isConnected } = props;
+  const account = useAccount().address;
   const onChangeDays = (val: number) => {
     setStakeDays(val);
     store.stakeDays = val;
   };
+
+  const readParams = {
+    abi: RETHStakeManagerABI,
+    address: ContractAddressMap.RETHStakeManager,
+    account,
+    functionName: 'maxLockupDays',
+    args: [],
+  };
+
+  const { data: [maxLockupDays, minLockupDays] = [] } = useReadContracts({
+    contracts: [
+      {
+        ...readParams,
+      },
+      {
+        ...readParams,
+        functionName: 'minLockupDays',
+      },
+    ],
+  });
 
   console.log('store.switchState', store.switchState);
 
@@ -49,8 +72,8 @@ const BalanceCoin = (props: IProps) => {
       {store.currentTabType === TabType.Stake && store.switchState === 0 && (
         <Flex justifyContent="space-between" marginTop="12px">
           <Slider
-            max={365}
-            min={0}
+            max={(maxLockupDays?.result as number) || 365}
+            min={(minLockupDays?.result as number) || 7}
             aria-label="slider-ex-1"
             defaultValue={30}
             colorScheme="#fcfc10"
