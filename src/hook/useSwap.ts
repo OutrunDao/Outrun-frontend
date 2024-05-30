@@ -40,17 +40,15 @@ async function makePairs(tokenA: Currency, tokenB: Currency, publicClient: Publi
   const chainId = publicClient.chain!.id
   let pairs: Pair[] = []
   await map([
-    [new Token(chainId, LocalTokenAddress.RETH, 18, 'ORETH'), new Token(chainId, LocalTokenAddress.RUSD, 18, 'ORUSD')],
+    [new Token(chainId, LocalTokenAddress.RETH, 18, 'orETH'), new Token(chainId, LocalTokenAddress.RUSD, 18, 'orUSD')],
   ], async rawPair => {
     let p = await Fetcher.fetchPairData(rawPair[0], rawPair[1], publicClient!).catch(() => null)
-    console.log(p);
-
     if (p) pairs.push(p)
   })
 
   await map([
-    new Token(chainId, LocalTokenAddress.RETH, 18, 'ORETH'),
-    new Token(chainId, LocalTokenAddress.RUSD, 18, 'ORUSD')
+    new Token(chainId, LocalTokenAddress.RETH, 18, 'orETH'),
+    new Token(chainId, LocalTokenAddress.RUSD, 18, 'orUSD')
   ], async token => {
     if (!tokenA.equals(token)) {
       let p1 = await Fetcher.fetchPairData(tokenConvert(tokenA), token, publicClient!).catch(() => null)
@@ -61,8 +59,6 @@ async function makePairs(tokenA: Currency, tokenB: Currency, publicClient: Publi
       if (p2) pairs.push(p2)
     }
   })
-  console.log(pairs);
-
   return pairs
 }
 
@@ -77,10 +73,14 @@ export function useSwap(view: SwapView) {
   const [token1Balance, setToken1Balance] = useState<Decimal>(new Decimal(0));
   const [token0AmountInput, setToken0AmountInput] = useState<string>('');
   const [token1AmountInput, setToken1AmountInput] = useState<string>('');
+  const [priceImpact, setPriceImpact] = useState('')
+  const [minOut, setMinOut] = useState('')
+  const [maxIn, setMaxIn] = useState('')
   const [tokenAllowance, setTokenAllowance] = useState<Decimal[]>([new Decimal(0), new Decimal(0)]);
   const [pair, setPair] = useState<Pair>();
   const [loading, setLoading] = useState<boolean>(false);
   const [tradeRoute, setTradeRoute] = useState<Trade<Currency, Currency, TradeType>>()
+  const [tradeRoutePath, setTradeRoutePath] = useState('')
   const [action, setAction] = useState<BtnAction>(BtnAction.disable)
   const toast = useToast();
 
@@ -200,7 +200,7 @@ export function useSwap(view: SwapView) {
 
   async function token0AmountInputHandler(value: string) {
     setToken0AmountInput(value);
-    if (!pair || !token0 || isNaN(+value)) return;
+    if (!pair || !token0 || isNaN(+value) || +value <= 0) return;
     if (view === SwapView.addLiquidity) {
       const price = pair.priceOf(tokenConvert(token0));
       setToken1AmountInput((+price.toSignificant(6) * +value).toFixed(6));
@@ -212,21 +212,26 @@ export function useSwap(view: SwapView) {
           parseUnits(value, token0.decimals).toString()
           // JSBI.BigInt(+value * 10 ** token0.decimals)
         ),
-        tokenConvert(token1!)
+        tokenConvert(token1!), { maxNumResults: 1 }
       );
 
-      console.log('route result:', result);
+
 
       if (!result || !result.length) {
         console.log('池子余额不够或不存在');
+        setPriceImpact('')
+        setTradeRoutePath('')
         return setToken1AmountInput('');
       }      // setToken1AmountInput(trade.outputAmount.toSignificant(6));
+      setPriceImpact(result[0].priceImpact.toFixed())
       setToken1AmountInput(result[0].outputAmount.toFixed(6));
       setTradeRoute(result[0])
+      setMinOut(result[0].minimumAmountOut(new Percent(2, 100)).toFixed(6))
+      setMaxIn('')
       let path = result.map(item => {
         return item.route.path.map(i => i.symbol).join('->')
       })
-      console.log(path);
+      setTradeRoutePath(path.join('->'))
 
     }
   }
@@ -244,22 +249,27 @@ export function useSwap(view: SwapView) {
         CurrencyAmount.fromRawAmount(
           tokenConvert(token1),
           parseUnits(value, token1.decimals).toString()
-        )
+        ), {
+        maxNumResults: 1
+      }
       );
-      console.log('route result:', result);
-      console.log(result[0].priceImpact.toFixed())
       if (!result || !result.length) {
         console.log('未找到兑换路径，池子余额不够或不存在');
+        setPriceImpact('')
+        setTradeRoutePath('')
         return setToken0AmountInput('');
       }
+      setPriceImpact(result[0].priceImpact.toFixed())
       setToken0AmountInput(result[0].inputAmount.toFixed(6));
+      setMaxIn(result[0].maximumAmountIn(new Percent(2, 100)).toFixed(6))
+      setMinOut('')
       // setToken1AmountInput(result[0].minimumAmountOut(new Percent(5, 100)).toSignificant(6));
       // console.log(result[0].inputAmount, result[0].outputAmount)
       setTradeRoute(result[0])
       let path = result.map(item => {
         return item.route.path.map(i => i.symbol).join('->')
       })
-      console.log(path);
+      setTradeRoutePath(path.join('->'))
     }
   }
 
@@ -281,7 +291,11 @@ export function useSwap(view: SwapView) {
       tokenAllowance,
       pair,
       tradeRoute,
-      action
+      tradeRoutePath,
+      minOut,
+      maxIn,
+      action,
+      priceImpact
     },
     loading,
     setLoading,

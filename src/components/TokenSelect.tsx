@@ -21,13 +21,19 @@ import { useEffect, useState } from 'react';
 import { TokenInfo } from '@uniswap/token-lists';
 import { Token } from '@/packages/swap-core';
 import { Native } from '@/packages/swap-sdk';
+import { isAddress } from 'viem';
+import { fetchTokenByAddress } from '@/utils/erc20';
+import { usePublicClient } from 'wagmi';
+
+let tokensAdded = [] as TokenInfo[];
 
 function getTokenRaw(symbol: string | undefined, chainId: number, address?: string): TokenInfo | undefined {
   if (!chainId || (!symbol && !address)) {
     return undefined;
   }
   if (symbol === 'ETH') return undefined;
-  return tokenList.tokens.find(
+  const list = tokenList.tokens.concat(tokensAdded);
+  return list.find(
     (token) =>
       ((token.symbol && token.symbol === symbol) || (token.address && token.address === address)) &&
       token.chainId === chainId
@@ -61,6 +67,9 @@ export default function TokenSelect({
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [tokenInfo, setTokenInfo] = useState<TokenInfo | undefined>(getTokenRaw(defaultSymbol, chainId));
   const [isNative, setIsNative] = useState(defaultSymbol === 'ETH');
+  const [searchValue, setSearchValue] = useState('');
+  const [list, setList] = useState<TokenInfo[]>(tokenList.tokens.concat(tokensAdded || []));
+  const publicClient = usePublicClient();
   function handleSelect(_token: TokenInfo) {
     setTokenInfo(_token);
     setIsNative(false);
@@ -81,6 +90,27 @@ export default function TokenSelect({
       setTokenInfo(getTokenRaw(token.symbol, chainId, token.address));
     }
   }, [token]);
+
+  async function onSearchHandler(value: string) {
+    setSearchValue(value);
+    value = value.trim().toLocaleLowerCase();
+    if (!value) return setList(tokenList.tokens.concat(tokensAdded || []));
+    if (isAddress(value)) {
+      const { name, symbol, decimals } = await fetchTokenByAddress(value, publicClient!);
+      const newToken = {
+        symbol,
+        name,
+        decimals,
+        address: value,
+        chainId,
+      };
+      if (!tokensAdded.find((i) => i.address === newToken.address)) tokensAdded.push(newToken);
+      setList([newToken]);
+    } else {
+      setList(list.filter((i) => ~i.symbol.toLocaleLowerCase().indexOf(value)));
+    }
+  }
+
   return (
     <>
       <Button
@@ -122,7 +152,14 @@ export default function TokenSelect({
           <ModalHeader>Select Token</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <Input variant="outline" color={'#fff'} placeholder="Search Name or paste address" size="md" />
+            <Input
+              variant="outline"
+              color={'#fff'}
+              value={searchValue}
+              placeholder="Search Name or paste address"
+              size="md"
+              onChange={(e) => onSearchHandler(e.target.value)}
+            />
             <Heading as="h5" size="md" mt={6}>
               Token Name
             </Heading>
@@ -139,7 +176,7 @@ export default function TokenSelect({
                 >
                   ETH
                 </Button>
-                {tokenList.tokens.map((token) => {
+                {list.map((token) => {
                   return (
                     <Button
                       colorScheme="teal"

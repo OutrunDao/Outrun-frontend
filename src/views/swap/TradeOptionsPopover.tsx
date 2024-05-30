@@ -51,16 +51,16 @@ export const TradeOptionsPopover = () => {
             <Heading as="h6" size="xs" mb="1rem">
               Slippage tolerance
             </Heading>
-            <RadioGroup>
+            <RadioGroup value="2">
               <Stack spacing={2} direction="row">
                 <Radio value="1" size={'sm'}>
-                  0.1%
+                  1%
                 </Radio>
                 <Radio value="2" size="sm">
-                  0.5%
+                  2%
                 </Radio>
                 <Radio value="3" size="sm">
-                  1%
+                  5%
                 </Radio>
                 <Input variant="outline" placeholder="5" size={'sm'} color={'#fff'} width="50px" />
                 <Center>
@@ -71,7 +71,7 @@ export const TradeOptionsPopover = () => {
             <Heading as="h6" size="xs" mb="1rem" mt="1rem">
               Transaction Deadline (min)
             </Heading>
-            <RadioGroup>
+            <RadioGroup value="1">
               <Stack spacing={2} direction="row">
                 <Radio value="1" size={'sm'}>
                   10m

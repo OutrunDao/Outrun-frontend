@@ -249,21 +249,21 @@ export default function Swap() {
         </Text>
       </HStack>
       <HStack fontSize={'small'} px="8px" py={2}>
-        <Text w="40%">Gas fee</Text>
+        <Text w="40%">Exchange Route</Text>
         <Text w="70%" textAlign={'right'}>
-          {'< '}-- Gwei
+          {swapData.tradeRoutePath || '---'}
         </Text>
       </HStack>
       <HStack fontSize={'small'} px="8px" py={1} color={'green'}>
         <Text w="40%">Minimal Receive</Text>
         <Text w="70%" textAlign={'right'}>
-          --
+          {swapData.minOut}
         </Text>
       </HStack>
       <HStack fontSize={'small'} px="8px" py={1} color={'green'}>
         <Text w="40%">PriceImpact</Text>
         <Text w="70%" textAlign={'right'}>
-          ---
+          {swapData.priceImpact ? swapData.priceImpact + '%' : '---'}
         </Text>
       </HStack>
       {!swapData.pair && swapData.token0 && swapData.token1 ? (
