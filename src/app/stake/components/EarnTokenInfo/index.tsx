@@ -49,7 +49,7 @@ const TokenBalance = ({ token }: { token: LocalTokenSymbol }) => {
   return <Text>{formatEther(data)}</Text>;
 };
 
-const CalcExchangeRate = (props) => {
+const CalcExchangeRate = (props: any) => {
   const { data = 0n }: { data: bigint | undefined } = useReadContract({
     address: ContractAddressMap.RETHStakeManager,
     abi: RETHStakeManager,
