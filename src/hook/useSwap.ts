@@ -40,24 +40,29 @@ async function makePairs(tokenA: Currency, tokenB: Currency, publicClient: Publi
   const chainId = publicClient.chain!.id
   let pairs: Pair[] = []
   await map([
-    [new Token(chainId, LocalTokenAddress.RETH, 18, 'RETH'), new Token(chainId, LocalTokenAddress.RUSD, 18, 'RUSD')],
-    [new Token(chainId, LocalTokenAddress.RETH, 18, 'RETH'), new Token(chainId, LocalTokenAddress.USDB, 18, 'USDB')]
+    [new Token(chainId, LocalTokenAddress.RETH, 18, 'ORETH'), new Token(chainId, LocalTokenAddress.RUSD, 18, 'ORUSD')],
   ], async rawPair => {
-
     let p = await Fetcher.fetchPairData(rawPair[0], rawPair[1], publicClient!).catch(() => null)
+    console.log(p);
+
     if (p) pairs.push(p)
   })
 
   await map([
-    new Token(chainId, LocalTokenAddress.RETH, 18, 'RETH'),
-    new Token(chainId, LocalTokenAddress.USDB, 18, 'USDB'),
-    new Token(chainId, LocalTokenAddress.RUSD, 18, 'RUSD')
+    new Token(chainId, LocalTokenAddress.RETH, 18, 'ORETH'),
+    new Token(chainId, LocalTokenAddress.RUSD, 18, 'ORUSD')
   ], async token => {
-    let p1 = await Fetcher.fetchPairData(tokenConvert(tokenA), token, publicClient!).catch(() => null)
-    if (p1) pairs.push(p1)
-    let p2 = await Fetcher.fetchPairData(tokenConvert(tokenB), token, publicClient!).catch(() => null)
-    if (p2) pairs.push(p2)
+    if (!tokenA.equals(token)) {
+      let p1 = await Fetcher.fetchPairData(tokenConvert(tokenA), token, publicClient!).catch(() => null)
+      if (p1) pairs.push(p1)
+    }
+    if (!tokenB.equals(token)) {
+      let p2 = await Fetcher.fetchPairData(tokenConvert(tokenB), token, publicClient!).catch(() => null)
+      if (p2) pairs.push(p2)
+    }
   })
+  console.log(pairs);
+
   return pairs
 }
 

@@ -7,17 +7,17 @@ export const RETH: { [chainId: number]: Token } = {
   // blast testnet
   [ChainId.BLAST_SEPOLIA]: new Token(
     ChainId.BLAST_SEPOLIA,
-    '0x4E06Dc746f8d3AB15BC7522E2B3A1ED087F14617',
+    '0xF62f5dB01cb60d80219F478D5CDffB6398Cee9A5',
     18,
-    'RETH',
+    'ORETH',
     'Wrapped Ether'
   ),
   // blast mainnet
   [ChainId.BLAST]: new Token(
     ChainId.BLAST,
-    '0x4E06Dc746f8d3AB15BC7522E2B3A1ED087F14617',
+    '0xF62f5dB01cb60d80219F478D5CDffB6398Cee9A5',
     18,
-    'RETH',
+    'ORETH',
     'Wrapped Ether'
   ),
 };

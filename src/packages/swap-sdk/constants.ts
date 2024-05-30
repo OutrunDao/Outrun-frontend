@@ -4,7 +4,7 @@ import JSBI from 'jsbi';
 export const FACTORY_ADDRESS_MAP: { [chainId: number]: string } = V2_FACTORY_ADDRESSES;
 
 // copy from \OutswapV1\src\libraries\OutswapV1Library.sol
-export const INIT_CODE_HASH = '0x5fa9c12988c5dbb30e1f457fc8fa806d3118b38306a1480f8cf8f97334d3004a';
+export const INIT_CODE_HASH = '0xf34369c1315f6c393c40a626058c08197d799d689082d5f891f9b12588b1ee2d';
 
 export const MINIMUM_LIQUIDITY = JSBI.BigInt(1000);
 

@@ -122,7 +122,7 @@ export default function TokenSelect({
           <ModalHeader>Select Token</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <Input variant="outline" placeholder="Search Name or paste address" size="md" />
+            <Input variant="outline" color={'#fff'} placeholder="Search Name or paste address" size="md" />
             <Heading as="h5" size="md" mt={6}>
               Token Name
             </Heading>

@@ -21,8 +21,8 @@ import { MeshStore, FsStoreStorageAdapter } from '@graphql-mesh/store';
 import { path as pathModule } from '@graphql-mesh/cross-helpers';
 import { ImportFn } from '@graphql-mesh/types';
 import type { StakeRusdTypes } from './sources/stakeRUSD/types';
-import type { OutrunStakeTypes } from './sources/outrunStake/types';
 import type { OutrunTypes } from './sources/outrun/types';
+import type { OutrunStakeTypes } from './sources/outrunStake/types';
 import * as importedModule$0 from "./sources/stakeRUSD/introspectionSchema";
 import * as importedModule$1 from "./sources/outrun/introspectionSchema";
 import * as importedModule$2 from "./sources/outrunStake/introspectionSchema";
@@ -3756,7 +3756,7 @@ const stakeRusdTransforms = [];
 const additionalTypeDefs = [] as any[];
 const outrunHandler = new GraphqlHandler({
               name: "outrun",
-              config: {"endpoint":"https://api.studio.thegraph.com/query/68891/outrun/0.1.22"},
+              config: {"endpoint":"https://api.studio.thegraph.com/query/68891/outrun/0.1.23"},
               baseDir,
               cache,
               pubsub,

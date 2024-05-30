@@ -4,7 +4,7 @@ import { cookieStorage, createStorage } from "wagmi";
 import { blastSepolia, mainnet, sepolia } from "wagmi/chains";
 
 // Get projectId at https://cloud.walletconnect.com
-export const projectId = "0d7b7c5359cf854f93dcb41e584ff02a"; //process.env.NEXT_PUBLIC_PROJECT_ID
+export const projectId = "72a15f70b924100a3ba6cf792a54462c"; //process.env.NEXT_PUBLIC_PROJECT_ID
 
 if (!projectId) throw new Error("Project ID is not defined");
 
@@ -12,7 +12,7 @@ const metadata = {
   name: "Outrun App",
   description: "Outrun app",
   url: "", // origin must match your domain & subdomain
-  icons: [],
+  icons: ["https://raw.githubusercontent.com/OutrunDao/Outrun-frontend/master/src/app/favicon.ico"],
 };
 
 // Create wagmiConfig

@@ -23,28 +23,28 @@ function constructSameAddressMap(address: string, additionalNetworks: ChainId[] 
 /**
  * @deprecated use V2_FACTORY_ADDRESSES instead
  */
-export const V2_FACTORY_ADDRESS = '0x3cEca1C6e131255e7C95788D40581934E84A1F9d';
+export const V2_FACTORY_ADDRESS = '0xb65EEEa6f65A2991F582c65D0f86557320446070';
 export const V2_FACTORY_ADDRESSES: AddressMap = {
-  [ChainId.BLAST]: '0x3cEca1C6e131255e7C95788D40581934E84A1F9d',
-  [ChainId.BLAST_SEPOLIA]: '0x3cEca1C6e131255e7C95788D40581934E84A1F9d',
+  [ChainId.BLAST]: '0xb65EEEa6f65A2991F582c65D0f86557320446070',
+  [ChainId.BLAST_SEPOLIA]: '0xb65EEEa6f65A2991F582c65D0f86557320446070',
 };
 /**
  * @deprecated use V2_ROUTER_ADDRESSES instead
  */
-export const V2_ROUTER_ADDRESS = '0xd48CA5f376A9abbee74997c226a55D71b4168790';
+export const V2_ROUTER_ADDRESS = '0x354Ecc33f434D111405F1f3B19FE013c3bEFcb73';
 export const V2_ROUTER_ADDRESSES: AddressMap = {
-  [ChainId.BLAST]: '0xd48CA5f376A9abbee74997c226a55D71b4168790',
-  [ChainId.BLAST_SEPOLIA]: '0xd48CA5f376A9abbee74997c226a55D71b4168790',
+  [ChainId.BLAST]: '0x354Ecc33f434D111405F1f3B19FE013c3bEFcb73',
+  [ChainId.BLAST_SEPOLIA]: '0x354Ecc33f434D111405F1f3B19FE013c3bEFcb73',
 };
 
 // sepolia v3 addresses
 const BLAST_SEPOLIA_ADDRESSES: ChainAddresses = {
-  factoryAddress: '0x3cEca1C6e131255e7C95788D40581934E84A1F9d',
+  factoryAddress: '0xb65EEEa6f65A2991F582c65D0f86557320446070',
   multicallAddress: '0xca11bde05977b3631167028862be2a173976ca11',
   quoterAddress: '',
   nonfungiblePositionManagerAddress: '',
   tickLensAddress: '',
-  routerAddress: '0xd48CA5f376A9abbee74997c226a55D71b4168790',
+  routerAddress: '0x354Ecc33f434D111405F1f3B19FE013c3bEFcb73',
 };
 
 const BLAST_ADDRESSES: ChainAddresses = {
