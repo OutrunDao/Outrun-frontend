@@ -31,6 +31,7 @@ import { getRouterContract } from '@/views/pool/getContract';
 import { Percent, Token } from '@/packages/swap-core';
 import { Router as SwapRouter } from '@/packages/swap-sdk';
 import { retry } from 'radash';
+import { useState } from 'react';
 const defaultSymbol = 'ETH';
 
 export default function Swap() {
@@ -47,10 +48,12 @@ export default function Swap() {
     setLoading,
     token0AmountInputHandler,
     token1AmountInputHandler,
+    setSlippage,
     approve,
     maxHandler,
   } = useSwap(SwapView.swap);
-
+  const [slippageTolerance, setSlippageTolerance] = useState(2);
+  const [deadlineInput, setDeadlineInput] = useState(10);
   const onReverse = () => {
     if (!swapData.token0 || !swapData.token1) return;
     setToken0(swapData.token1);
@@ -63,8 +66,8 @@ export default function Swap() {
     if (!swapData.token0 || !swapData.token1 || !account.address || !walletClient) return;
     setLoading(true);
     const { methodName, args, value } = SwapRouter.swapCallParameters(swapData.tradeRoute!, {
-      allowedSlippage: new Percent(5, 100),
-      deadline: Math.floor(new Date().getTime() / 1000) + 5 * 60,
+      allowedSlippage: new Percent(slippageTolerance, 100),
+      deadline: Math.floor(new Date().getTime() / 1000) + deadlineInput * 60,
       recipient: account.address,
     });
     let toastCurrent = toast({
@@ -104,6 +107,12 @@ export default function Swap() {
     setLoading(false);
   }
 
+  function onTradeOptionsHandler(slip: string, deadline: string) {
+    setDeadlineInput(+deadline);
+    setSlippageTolerance(+slip);
+    setSlippage(+slip);
+  }
+
   return (
     <Container
       w={'420px'}
@@ -121,7 +130,7 @@ export default function Swap() {
           <Text fontSize="md">Swap</Text>
         </Center>
         <Spacer></Spacer>
-        <TradeOptionsPopover></TradeOptionsPopover>
+        <TradeOptionsPopover onSelect={onTradeOptionsHandler}></TradeOptionsPopover>
       </Flex>
       <Container
         borderColor="gray.600"
@@ -242,8 +251,7 @@ export default function Swap() {
         <Text w="70%" textAlign={'right'}>
           {swapData.pair ? (
             <>
-              1{swapData.pair.token0.symbol} = {swapData.pair.token0Price.toFixed(6)}{' '}
-              {swapData.pair.token1.symbol}
+              1{swapData.pair.token0.symbol} = {swapData.exchangeRate} {swapData.pair.token1.symbol}
             </>
           ) : null}
         </Text>

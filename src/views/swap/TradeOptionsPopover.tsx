@@ -19,19 +19,44 @@ import {
 } from '@chakra-ui/react';
 import { SettingsIcon } from '@chakra-ui/icons';
 
-import React from 'react';
+import React, { useState } from 'react';
 
-export const TradeOptionsPopover = () => {
+export const TradeOptionsPopover = ({
+  onSelect,
+}: {
+  onSelect: (slippageTolerance: string, deadline: string) => void;
+}) => {
   const { onOpen, onClose, isOpen } = useDisclosure();
+  const [slippageTolerance, setSlippageTolerance] = useState('2');
+  const [slippageToleranceInput, setSlippageToleranceInput] = useState('');
+  const [deadlineInput, setDeadlineInput] = useState('10');
   const firstFieldRef = React.useRef(null);
-
+  function onSlippageHandler(v: string) {
+    setSlippageTolerance(v);
+  }
+  function onDeadlineHandler(v: string) {
+    setDeadlineInput(v);
+  }
+  function onSlippageInputHandler(v: string) {
+    setSlippageToleranceInput(v);
+    v = v.trim();
+    if (v) {
+      setSlippageTolerance('');
+    } else {
+      setSlippageTolerance('2');
+    }
+  }
+  function onCloseHandler() {
+    onSelect(slippageToleranceInput || slippageTolerance, deadlineInput);
+    onClose();
+  }
   return (
     <>
       <Popover
         isOpen={isOpen}
         initialFocusRef={firstFieldRef}
         onOpen={onOpen}
-        onClose={onClose}
+        onClose={onCloseHandler}
         placement="bottom"
         closeOnBlur={true}
       >
@@ -51,7 +76,7 @@ export const TradeOptionsPopover = () => {
             <Heading as="h6" size="xs" mb="1rem">
               Slippage tolerance
             </Heading>
-            <RadioGroup value="2">
+            <RadioGroup value={slippageTolerance} onChange={onSlippageHandler}>
               <Stack spacing={2} direction="row">
                 <Radio value="1" size={'sm'}>
                   1%
@@ -62,7 +87,15 @@ export const TradeOptionsPopover = () => {
                 <Radio value="3" size="sm">
                   5%
                 </Radio>
-                <Input variant="outline" placeholder="5" size={'sm'} color={'#fff'} width="50px" />
+                <Input
+                  variant="outline"
+                  placeholder="5"
+                  size={'sm'}
+                  color={'#fff'}
+                  value={slippageToleranceInput}
+                  width="50px"
+                  onChange={(e) => onSlippageInputHandler(e.target.value)}
+                />
                 <Center>
                   <Text>%</Text>
                 </Center>
@@ -71,21 +104,21 @@ export const TradeOptionsPopover = () => {
             <Heading as="h6" size="xs" mb="1rem" mt="1rem">
               Transaction Deadline (min)
             </Heading>
-            <RadioGroup value="1">
+            <RadioGroup value={deadlineInput} onChange={onDeadlineHandler}>
               <Stack spacing={2} direction="row">
-                <Radio value="1" size={'sm'}>
+                <Radio value="10" size={'sm'}>
                   10m
                 </Radio>
-                <Radio value="2" size="sm">
+                <Radio value="20" size="sm">
                   20m
                 </Radio>
-                <Radio value="3" size="sm">
+                <Radio value="30" size="sm">
                   30m
                 </Radio>
-                <Input variant="outline" placeholder="60" size={'sm'} color={'#fff'} width="50px" />
+                {/* <Input variant="outline" placeholder="60" size={'sm'} color={'#fff'} width="50px" />
                 <Center>
                   <Text>minutes</Text>
-                </Center>
+                </Center> */}
               </Stack>
             </RadioGroup>
           </Box>

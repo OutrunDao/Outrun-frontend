@@ -74,6 +74,8 @@ export function useSwap(view: SwapView) {
   const [token0AmountInput, setToken0AmountInput] = useState<string>('');
   const [token1AmountInput, setToken1AmountInput] = useState<string>('');
   const [priceImpact, setPriceImpact] = useState('')
+  const [exchangeRate, setExchangeRate] = useState('')
+  const [slipage, setSlippage] = useState(2)
   const [minOut, setMinOut] = useState('')
   const [maxIn, setMaxIn] = useState('')
   const [tokenAllowance, setTokenAllowance] = useState<Decimal[]>([new Decimal(0), new Decimal(0)]);
@@ -221,12 +223,14 @@ export function useSwap(view: SwapView) {
         console.log('池子余额不够或不存在');
         setPriceImpact('')
         setTradeRoutePath('')
+        setExchangeRate('')
         return setToken1AmountInput('');
       }      // setToken1AmountInput(trade.outputAmount.toSignificant(6));
       setPriceImpact(result[0].priceImpact.toFixed())
       setToken1AmountInput(result[0].outputAmount.toFixed(6));
       setTradeRoute(result[0])
-      setMinOut(result[0].minimumAmountOut(new Percent(2, 100)).toFixed(6))
+      setExchangeRate(result[0].executionPrice.toFixed())
+      setMinOut(result[0].minimumAmountOut(new Percent(slipage, 100)).toFixed(6))
       setMaxIn('')
       let path = result.map(item => {
         return item.route.path.map(i => i.symbol).join('->')
@@ -257,11 +261,13 @@ export function useSwap(view: SwapView) {
         console.log('未找到兑换路径，池子余额不够或不存在');
         setPriceImpact('')
         setTradeRoutePath('')
+        setExchangeRate('')
         return setToken0AmountInput('');
       }
+      setExchangeRate(result[0].executionPrice.toFixed())
       setPriceImpact(result[0].priceImpact.toFixed())
       setToken0AmountInput(result[0].inputAmount.toFixed(6));
-      setMaxIn(result[0].maximumAmountIn(new Percent(2, 100)).toFixed(6))
+      setMaxIn(result[0].maximumAmountIn(new Percent(slipage, 100)).toFixed(6))
       setMinOut('')
       // setToken1AmountInput(result[0].minimumAmountOut(new Percent(5, 100)).toSignificant(6));
       // console.log(result[0].inputAmount, result[0].outputAmount)
@@ -295,7 +301,8 @@ export function useSwap(view: SwapView) {
       minOut,
       maxIn,
       action,
-      priceImpact
+      priceImpact,
+      exchangeRate
     },
     loading,
     setLoading,
@@ -303,6 +310,7 @@ export function useSwap(view: SwapView) {
     setToken1,
     setToken0AmountInput,
     setToken1AmountInput,
+    setSlippage,
     approve,
     token0AmountInputHandler,
     token1AmountInputHandler,
