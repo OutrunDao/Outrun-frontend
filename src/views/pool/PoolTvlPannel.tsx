@@ -24,12 +24,14 @@ import { use, useEffect, useState } from 'react';
 import { Address, getAddress, parseUnits, formatUnits } from 'viem';
 import { Link } from '@chakra-ui/next-js';
 import { AddIcon } from '@chakra-ui/icons';
+import { useRouter } from 'next/navigation';
 
 export default function PoolTvlPannel() {
   const chainId = useChainId();
   const account = useAccount();
   const toast = useToast();
   const publicClient = usePublicClient();
+  const router = useRouter();
   const { data: pairTvls } = useQuery({
     queryKey: ['pairTvls', account.address],
     queryFn: async (): Promise<PairType[]> => {
@@ -52,7 +54,12 @@ export default function PoolTvlPannel() {
           <Tbody>
             {pairTvls && pairTvls.length
               ? pairTvls.map((pair, index) => (
-                  <Tr key={index} marginTop="20px">
+                  <Tr
+                    key={index}
+                    marginTop="20px"
+                    onClick={() => router.push('/pool/' + pair.id)}
+                    cursor={'pointer'}
+                  >
                     <Td fontSize="16px" maxWidth={'2rem'}>
                       {pair.token0.symbol} / {pair.token1.symbol}
                     </Td>
@@ -67,7 +74,12 @@ export default function PoolTvlPannel() {
                         colorScheme="teal"
                         leftIcon={<AddIcon fontSize={'smaller'} />}
                       >
-                        <Link href={`/pool/` + pair.id + '/add-liquidity'}>Add Liquidity</Link>
+                        <Link
+                          href={`/pool/` + pair.id + '/add-liquidity'}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          Add Liquidity
+                        </Link>
                       </Button>
                     </Td>
                   </Tr>
