@@ -1,3 +1,4 @@
+import { useRouter } from 'next/navigation';
 import { Address, formatUnits, getAddress, parseUnits } from 'viem';
 import { useToast } from '@chakra-ui/react';
 import { getRouterContract } from './getContract';
@@ -7,6 +8,7 @@ import { useRef, useState } from 'react';
 import { retry } from 'radash';
 import { Token } from '@/packages/swap-core';
 import tokenSwitch, { CurrencyPairType } from './tokenSwitch';
+import { Pair } from '@/packages/swap-sdk';
 
 export default function useLiquidity() {
   const account = useAccount();
@@ -14,7 +16,7 @@ export default function useLiquidity() {
   const toast = useToast();
   const { data: walletClient } = useWalletClient();
   const [loading, setLoading] = useState(false)
-
+  const router = useRouter()
   async function addLiquidity(swapData: any) {
     if (!swapData.token0 || !swapData.token1 || !account.address || !walletClient) return;
     const slippage = 0.05;
@@ -92,6 +94,8 @@ export default function useLiquidity() {
 
         duration: 10000
       })
+      const pairAddress = Pair.getAddress(tokenA as Token, tokenB as Token)
+      router.push('/pool/' + pairAddress)
     } catch (e: any) {
       toast.closeAll()
       toast({

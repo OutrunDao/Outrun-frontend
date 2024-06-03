@@ -27,7 +27,7 @@ export const TradeOptionsPopover = ({
   onSelect: (slippageTolerance: string, deadline: string) => void;
 }) => {
   const { onOpen, onClose, isOpen } = useDisclosure();
-  const [slippageTolerance, setSlippageTolerance] = useState('2');
+  const [slippageTolerance, setSlippageTolerance] = useState('1');
   const [slippageToleranceInput, setSlippageToleranceInput] = useState('');
   const [deadlineInput, setDeadlineInput] = useState('10');
   const firstFieldRef = React.useRef(null);
@@ -85,7 +85,7 @@ export const TradeOptionsPopover = ({
                   2%
                 </Radio>
                 <Radio value="3" size="sm">
-                  5%
+                  3%
                 </Radio>
                 <Input
                   variant="outline"

@@ -59,7 +59,7 @@ export default function Swap() {
     setToken0(swapData.token1);
     setToken1(swapData.token0);
     token0AmountInputHandler(swapData.token1AmountInput);
-    token1AmountInputHandler(swapData.token0AmountInput);
+    // token1AmountInputHandler('');
   };
 
   async function swap() {

@@ -21,6 +21,7 @@ import {
   TabPanel,
   TabPanels,
   Divider,
+  HStack,
 } from '@chakra-ui/react';
 import TokenSelect, { getToken } from '@/components/TokenSelect';
 import { ArrowDownIcon } from '@chakra-ui/icons';
@@ -49,9 +50,16 @@ const PoolIndex = () => {
             Become an LP to earn trading fees
           </Heading>
           <br />
-          <Button colorScheme="gray">
-            <Link href={'/pool/create'}>Create a Pool</Link>
-          </Button>
+          <HStack spacing={4}>
+            <Button colorScheme="gray" rounded={4}>
+              <Link href={'/pool/0x5e6c8991e1bddeae585cbb1f0d8d94d7fcb22f2e/add-liquidity'}>
+                Add Liquidity
+              </Link>
+            </Button>
+            <Button colorScheme="teal" rounded={4}>
+              <Link href={'/pool/create'}>Create a Pool</Link>
+            </Button>
+          </HStack>
         </VStack>
       </Box>
       <br />

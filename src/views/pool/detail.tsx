@@ -17,8 +17,9 @@ import {
   Flex,
   Spacer,
   HStack,
+  useToast,
 } from '@chakra-ui/react';
-import { useAccount, useChainId } from 'wagmi';
+import { useAccount, useChainId, usePublicClient } from 'wagmi';
 import { useParams } from 'next/navigation';
 import { AddIcon, ArrowBackIcon, ExternalLinkIcon, MinusIcon } from '@chakra-ui/icons';
 import { BiMoneyWithdraw } from 'react-icons/bi';
@@ -27,9 +28,44 @@ import { execute, LiquidityPositionsDocument, LiquidityPosition } from '@/subgra
 import { useQuery } from '@tanstack/react-query';
 import { get } from 'radash';
 import getApy from '@/utils/getApy';
+import { useEffect, useState } from 'react';
+import { Address, PublicClient, WalletClient, formatUnits, getContract } from 'viem';
+import { useWalletClient } from 'wagmi';
+
+function getPairContract(client: PublicClient, address: Address, walletClient?: WalletClient) {
+  return getContract({
+    abi: [
+      {
+        type: 'function',
+        name: 'claimMakerFee',
+        inputs: [],
+        outputs: [{ name: 'makerFee', type: 'uint256', internalType: 'uint256' }],
+        stateMutability: 'nonpayable',
+      },
+      {
+        type: 'function',
+        name: 'viewUnClaimedFee',
+        inputs: [],
+        outputs: [
+          { name: 'amount0', type: 'uint256', internalType: 'uint256' },
+          { name: 'amount1', type: 'uint256', internalType: 'uint256' },
+        ],
+        stateMutability: 'view',
+      },
+    ],
+    address,
+    client: {
+      public: client,
+      wallet: walletClient,
+    },
+  });
+}
 
 export default function PoolDetail() {
   const account = useAccount();
+  const publicClient = usePublicClient();
+  const { data: walletClient } = useWalletClient();
+
   const { pair: pairAddress } = useParams<{ pair: string }>();
   const { data: userLiquidity } = useQuery({
     queryKey: ['userLiquidity', account.address, pairAddress],
@@ -39,6 +75,29 @@ export default function PoolDetail() {
       );
     },
   });
+  const toast = useToast();
+  const [unclaimedAmount0, setUnclaimedAmount0] = useState('0');
+  const [unclaimedAmount1, setUnclaimedAmount1] = useState('0');
+
+  useEffect(() => {
+    if (!publicClient || !account) return;
+    const contract = getPairContract(publicClient, pairAddress as Address);
+    contract.read.viewUnClaimedFee().then((r) => {
+      setUnclaimedAmount0(formatUnits(r[0]!, 18));
+      setUnclaimedAmount1(formatUnits(r[1]!, 18));
+    });
+  }, [account, pairAddress, publicClient]);
+
+  async function claimFeeHandler() {
+    const contract = getPairContract(publicClient!, pairAddress as Address, walletClient);
+    toast({
+      status: 'loading',
+      description: 'submitting transaction',
+    });
+    // @ts-ignore
+    await contract.write.claimMakerFee([]);
+  }
+
   return (
     <Container maxW={'container.lg'} p={0}>
       <Box my={6}>
@@ -103,23 +162,38 @@ export default function PoolDetail() {
           </StatGroup>
         </GridItem>
 
-        <GridItem colSpan={2} borderStyle={'solid'} borderWidth={'0.1px'} px={8} py={4}>
+        {/* <GridItem colSpan={2} borderStyle={'solid'} borderWidth={'0.1px'} px={8} py={4}>
           <Stat>
             <StatLabel>My Pool Position</StatLabel>
             <StatNumber>{(+get(userLiquidity, 'liquidityTokenBalance', '0')).toFixed(4)}</StatNumber>
           </Stat>
+        </GridItem> */}
+        <GridItem colSpan={2} rowSpan={2} borderStyle={'solid'} borderWidth={'0.1px'} px={8} py={4}>
+          <Heading as={'h5'} size={'sm'}>
+            Unclaimed Rewards{' '}
+          </Heading>
+          <br />
+          <Flex>
+            <Box mr={100}> {get(userLiquidity, 'pair.token0.symbol')}</Box>
+            <Box>{(+unclaimedAmount0).toFixed(4)}</Box>
+          </Flex>
+          <Flex mt={2}>
+            <Box mr={100}> {get(userLiquidity, 'pair.token1.symbol')}</Box>
+            <Box>{(+unclaimedAmount1).toFixed(4)}</Box>
+          </Flex>
+          <br />
+          <Button
+            width={'100%'}
+            size={'sm'}
+            colorScheme="teal"
+            rounded={4}
+            isDisabled={+unclaimedAmount0 <= 0}
+            onClick={claimFeeHandler}
+          >
+            Claim
+          </Button>
         </GridItem>
-        <GridItem colSpan={2} borderStyle={'solid'} borderWidth={'0.1px'} px={8} py={4}>
-          <HStack>
-            <Stat>
-              <StatLabel>Reward Fees</StatLabel>
-              <StatNumber>345,670</StatNumber>
-            </Stat>
-            <Button colorScheme="teal" rounded={4}>
-              Claim
-            </Button>
-          </HStack>
-        </GridItem>
+
         <GridItem rowSpan={2} colSpan={4} borderStyle={'solid'} borderWidth={'0.1px'} px={8} py={4}>
           <Heading as={'h4'} size={'md'}>
             Tokens Compose
@@ -136,9 +210,37 @@ export default function PoolDetail() {
         </GridItem>
         <GridItem rowSpan={2} colSpan={2} borderStyle={'solid'} borderWidth={'0.1px'} px={8} py={4}>
           <Stat>
-            <StatLabel>Pool Liquidity </StatLabel>
-            <StatNumber>345,670</StatNumber>
+            <StatLabel>My Pool Balance </StatLabel>
+            <StatNumber>
+              $
+              {(
+                (+get(userLiquidity, 'liquidityTokenBalance', '0') /
+                  +get(userLiquidity, 'pair.totalSupply', '1')) *
+                +get(userLiquidity, 'pair.reserveUSD', '0')
+              ).toFixed(4)}
+            </StatNumber>
           </Stat>
+          <br></br>
+          <Flex>
+            <Box mr={100}> {get(userLiquidity, 'pair.token0.symbol')}</Box>
+            <Box>
+              {(
+                (+get(userLiquidity, 'liquidityTokenBalance', '0') /
+                  +get(userLiquidity, 'pair.totalSupply', '1')) *
+                +get(userLiquidity, 'pair.reserve0', '0')
+              ).toFixed(4)}
+            </Box>
+          </Flex>
+          <Flex mt={2}>
+            <Box mr={100}> {get(userLiquidity, 'pair.token1.symbol')}</Box>
+            <Box>
+              {(
+                (+get(userLiquidity, 'liquidityTokenBalance', '0') /
+                  +get(userLiquidity, 'pair.totalSupply', '1')) *
+                +get(userLiquidity, 'pair.reserve1', '0')
+              ).toFixed(4)}
+            </Box>
+          </Flex>
         </GridItem>
       </Grid>
     </Container>

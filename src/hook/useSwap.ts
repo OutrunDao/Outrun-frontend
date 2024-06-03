@@ -202,6 +202,7 @@ export function useSwap(view: SwapView) {
 
   async function token0AmountInputHandler(value: string) {
     setToken0AmountInput(value);
+    setToken1AmountInput('');
     if (!pair || !token0 || isNaN(+value) || +value <= 0) return;
     if (view === SwapView.addLiquidity) {
       const price = pair.priceOf(tokenConvert(token0));
@@ -216,8 +217,6 @@ export function useSwap(view: SwapView) {
         ),
         tokenConvert(token1!), { maxNumResults: 1 }
       );
-
-
 
       if (!result || !result.length) {
         console.log('池子余额不够或不存在');
