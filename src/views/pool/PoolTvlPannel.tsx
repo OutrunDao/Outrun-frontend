@@ -25,6 +25,7 @@ import { Address, getAddress, parseUnits, formatUnits } from 'viem';
 import { Link } from '@chakra-ui/next-js';
 import { AddIcon } from '@chakra-ui/icons';
 import { useRouter } from 'next/navigation';
+import getApy from '@/utils/getApy';
 
 export default function PoolTvlPannel() {
   const chainId = useChainId();
@@ -46,27 +47,22 @@ export default function PoolTvlPannel() {
           <Thead>
             <Tr>
               <Th>Pool Composition</Th>
-              <Th>Token Volume</Th>
-              <Th>Tvl</Th>
+              <Th>TVL</Th>
+              <Th>Volume(24h)</Th>
+              <Th>APY</Th>
               <Th>Action</Th>
             </Tr>
           </Thead>
           <Tbody>
             {pairTvls && pairTvls.length
               ? pairTvls.map((pair, index) => (
-                  <Tr
-                    key={index}
-                    marginTop="20px"
-                    onClick={() => router.push('/pool/' + pair.id)}
-                    cursor={'pointer'}
-                  >
+                  <Tr key={index} marginTop="20px">
                     <Td fontSize="16px" maxWidth={'2rem'}>
                       {pair.token0.symbol} / {pair.token1.symbol}
                     </Td>
-                    <Td fontSize="16px">
-                      {pair.reserve0}/{pair.reserve1}
-                    </Td>
-                    <Td>{pair.reserveUSD}</Td>
+                    <Td fontSize="16px">${(+pair.reserveUSD).toFixed(2)}</Td>
+                    <Td>${(+pair.pairDayData[0].reserveUSD).toFixed(2)}</Td>
+                    <Td>{getApy(pair.pairDayData[0].reserveUSD, pair.reserveUSD)}%</Td>
                     <Td>
                       <Button
                         variant="link"

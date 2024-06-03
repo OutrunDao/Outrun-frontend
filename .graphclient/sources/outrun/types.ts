@@ -194,18 +194,18 @@ export type Pair = {
   volumeUSD: Scalars['BigDecimal'];
   reserveETH: Scalars['BigDecimal'];
   reserveUSD: Scalars['BigDecimal'];
-  pairHourData: Array<PairHourData>;
+  pairDayData: Array<PairDayData>;
   LiquidityPositions: Array<LiquidityPosition>;
   liquidityProviderCount: Scalars['BigInt'];
 };
 
 
-export type PairpairHourDataArgs = {
+export type PairpairDayDataArgs = {
   skip?: InputMaybe<Scalars['Int']>;
   first?: InputMaybe<Scalars['Int']>;
-  orderBy?: InputMaybe<PairHourData_orderBy>;
+  orderBy?: InputMaybe<PairDayData_orderBy>;
   orderDirection?: InputMaybe<OrderDirection>;
-  where?: InputMaybe<PairHourData_filter>;
+  where?: InputMaybe<PairDayData_filter>;
 };
 
 
@@ -221,6 +221,7 @@ export type PairDayData = {
   id: Scalars['String'];
   date: Scalars['Int'];
   pairAddress: Scalars['Bytes'];
+  pair: Pair;
   token0: Token;
   token1: Token;
   reserve0: Scalars['BigDecimal'];
@@ -272,6 +273,27 @@ export type PairDayData_filter = {
   pairAddress_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
   pairAddress_contains?: InputMaybe<Scalars['Bytes']>;
   pairAddress_not_contains?: InputMaybe<Scalars['Bytes']>;
+  pair?: InputMaybe<Scalars['String']>;
+  pair_not?: InputMaybe<Scalars['String']>;
+  pair_gt?: InputMaybe<Scalars['String']>;
+  pair_lt?: InputMaybe<Scalars['String']>;
+  pair_gte?: InputMaybe<Scalars['String']>;
+  pair_lte?: InputMaybe<Scalars['String']>;
+  pair_in?: InputMaybe<Array<Scalars['String']>>;
+  pair_not_in?: InputMaybe<Array<Scalars['String']>>;
+  pair_contains?: InputMaybe<Scalars['String']>;
+  pair_contains_nocase?: InputMaybe<Scalars['String']>;
+  pair_not_contains?: InputMaybe<Scalars['String']>;
+  pair_not_contains_nocase?: InputMaybe<Scalars['String']>;
+  pair_starts_with?: InputMaybe<Scalars['String']>;
+  pair_starts_with_nocase?: InputMaybe<Scalars['String']>;
+  pair_not_starts_with?: InputMaybe<Scalars['String']>;
+  pair_not_starts_with_nocase?: InputMaybe<Scalars['String']>;
+  pair_ends_with?: InputMaybe<Scalars['String']>;
+  pair_ends_with_nocase?: InputMaybe<Scalars['String']>;
+  pair_not_ends_with?: InputMaybe<Scalars['String']>;
+  pair_not_ends_with_nocase?: InputMaybe<Scalars['String']>;
+  pair_?: InputMaybe<Pair_filter>;
   token0?: InputMaybe<Scalars['String']>;
   token0_not?: InputMaybe<Scalars['String']>;
   token0_gt?: InputMaybe<Scalars['String']>;
@@ -388,6 +410,19 @@ export type PairDayData_orderBy =
   | 'id'
   | 'date'
   | 'pairAddress'
+  | 'pair'
+  | 'pair__id'
+  | 'pair__token0Price'
+  | 'pair__token1Price'
+  | 'pair__reserve0'
+  | 'pair__reserve1'
+  | 'pair__totalSupply'
+  | 'pair__volumeToken0'
+  | 'pair__volumeToken1'
+  | 'pair__volumeUSD'
+  | 'pair__reserveETH'
+  | 'pair__reserveUSD'
+  | 'pair__liquidityProviderCount'
   | 'token0'
   | 'token0__id'
   | 'token0__symbol'
@@ -691,7 +726,7 @@ export type Pair_filter = {
   reserveUSD_lte?: InputMaybe<Scalars['BigDecimal']>;
   reserveUSD_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
   reserveUSD_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
-  pairHourData_?: InputMaybe<PairHourData_filter>;
+  pairDayData_?: InputMaybe<PairDayData_filter>;
   LiquidityPositions_?: InputMaybe<LiquidityPosition_filter>;
   liquidityProviderCount?: InputMaybe<Scalars['BigInt']>;
   liquidityProviderCount_not?: InputMaybe<Scalars['BigInt']>;
@@ -731,7 +766,7 @@ export type Pair_orderBy =
   | 'volumeUSD'
   | 'reserveETH'
   | 'reserveUSD'
-  | 'pairHourData'
+  | 'pairDayData'
   | 'LiquidityPositions'
   | 'liquidityProviderCount';
 

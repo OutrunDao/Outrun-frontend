@@ -199,7 +199,7 @@ type Pair {
   volumeUSD: BigDecimal!
   reserveETH: BigDecimal!
   reserveUSD: BigDecimal!
-  pairHourData(skip: Int = 0, first: Int = 100, orderBy: PairHourData_orderBy, orderDirection: OrderDirection, where: PairHourData_filter): [PairHourData!]!
+  pairDayData(skip: Int = 0, first: Int = 100, orderBy: PairDayData_orderBy, orderDirection: OrderDirection, where: PairDayData_filter): [PairDayData!]!
   LiquidityPositions(skip: Int = 0, first: Int = 100, orderBy: LiquidityPosition_orderBy, orderDirection: OrderDirection, where: LiquidityPosition_filter): [LiquidityPosition!]!
   liquidityProviderCount: BigInt!
 }
@@ -208,6 +208,7 @@ type PairDayData {
   id: String!
   date: Int!
   pairAddress: Bytes!
+  pair: Pair!
   token0: Token!
   token1: Token!
   reserve0: BigDecimal!
@@ -259,6 +260,27 @@ input PairDayData_filter {
   pairAddress_not_in: [Bytes!]
   pairAddress_contains: Bytes
   pairAddress_not_contains: Bytes
+  pair: String
+  pair_not: String
+  pair_gt: String
+  pair_lt: String
+  pair_gte: String
+  pair_lte: String
+  pair_in: [String!]
+  pair_not_in: [String!]
+  pair_contains: String
+  pair_contains_nocase: String
+  pair_not_contains: String
+  pair_not_contains_nocase: String
+  pair_starts_with: String
+  pair_starts_with_nocase: String
+  pair_not_starts_with: String
+  pair_not_starts_with_nocase: String
+  pair_ends_with: String
+  pair_ends_with_nocase: String
+  pair_not_ends_with: String
+  pair_not_ends_with_nocase: String
+  pair_: Pair_filter
   token0: String
   token0_not: String
   token0_gt: String
@@ -375,6 +397,19 @@ enum PairDayData_orderBy {
   id
   date
   pairAddress
+  pair
+  pair__id
+  pair__token0Price
+  pair__token1Price
+  pair__reserve0
+  pair__reserve1
+  pair__totalSupply
+  pair__volumeToken0
+  pair__volumeToken1
+  pair__volumeUSD
+  pair__reserveETH
+  pair__reserveUSD
+  pair__liquidityProviderCount
   token0
   token0__id
   token0__symbol
@@ -680,7 +715,7 @@ input Pair_filter {
   reserveUSD_lte: BigDecimal
   reserveUSD_in: [BigDecimal!]
   reserveUSD_not_in: [BigDecimal!]
-  pairHourData_: PairHourData_filter
+  pairDayData_: PairDayData_filter
   LiquidityPositions_: LiquidityPosition_filter
   liquidityProviderCount: BigInt
   liquidityProviderCount_not: BigInt
@@ -720,7 +755,7 @@ enum Pair_orderBy {
   volumeUSD
   reserveETH
   reserveUSD
-  pairHourData
+  pairDayData
   LiquidityPositions
   liquidityProviderCount
 }

@@ -17,10 +17,15 @@ import { useAccount, useChainId } from 'wagmi';
 import { execute, LiquidityPositionsDocument, LiquidityPosition } from '@/subgraph';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowForwardIcon } from '@chakra-ui/icons';
+import { useRouter } from 'next/navigation';
+import getApy from '@/utils/getApy';
+import { get } from 'radash';
 
 export default function UserLiquiditesPannel() {
   const chainId = useChainId();
   const account = useAccount();
+  const router = useRouter();
+
   const { data: userLiquidites } = useQuery({
     queryKey: ['userLiquidites', account.address],
     queryFn: async (): Promise<LiquidityPosition[]> => {
@@ -38,19 +43,32 @@ export default function UserLiquiditesPannel() {
             <Thead>
               <Tr>
                 <Th>Pool Composition</Th>
-                <Th>Pool Balance</Th>
+                <Th>TVL</Th>
+                <Th>Volume(24h)</Th>
+                <Th>APY</Th>
                 <Th>My Shares</Th>
                 <Th>Action</Th>
               </Tr>
             </Thead>
             <Tbody>
               {userLiquidites.map((position, index) => (
-                <Tr key={index} marginTop="20px">
+                <Tr
+                  key={index}
+                  marginTop="20px"
+                  onClick={() => router.push('/pool/' + position.pair.id)}
+                  cursor={'pointer'}
+                >
                   <Td>
                     {position.pair.token0.symbol} / {position.pair.token1.symbol || 'unknown token'}
                   </Td>
+                  <Td>${(+position.pair.reserveUSD).toFixed(2) || 0}</Td>
+                  <Td>${(+get(position, 'pair.pairDayData[0].reserveUSD', '0')).toFixed(2)}</Td>
                   <Td>
-                    {position.pair.reserve0}/{position.pair.reserve1}
+                    {getApy(
+                      get(position, 'pair.pairDayData[0].reserveUSD', ''),
+                      get(position, 'pair.reserveUSD', '0')
+                    )}
+                    %
                   </Td>
                   <Td>
                     {position.pair.totalSupply == 0
@@ -60,11 +78,21 @@ export default function UserLiquiditesPannel() {
                   </Td>
                   <Td>
                     <HStack>
-                      <Button variant="link" size={'sm'} colorScheme="teal">
+                      <Button
+                        variant="link"
+                        size={'sm'}
+                        colorScheme="teal"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <Link href={`/pool/${position.pair.id}/add-liquidity`}>Add</Link>
                       </Button>
                       <Divider orientation="vertical" height={'10px'}></Divider>
-                      <Button variant="link" size={'sm'} colorScheme="teal">
+                      <Button
+                        variant="link"
+                        size={'sm'}
+                        colorScheme="teal"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <Link href={`/pool/${position.pair.id}/withdraw`}>withdraw</Link>
                       </Button>
                     </HStack>
