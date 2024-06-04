@@ -125,6 +125,8 @@ export function useSwap(view: SwapView) {
 
   // watch and update pair
   useEffect(() => {
+    setToken0AmountInput('')
+    setToken1AmountInput('')
     if (!token0 || !token1) {
       setPair(undefined);
       setTokenAllowance([new Decimal(0), new Decimal(0)]);
@@ -139,17 +141,28 @@ export function useSwap(view: SwapView) {
     if (!account.isConnected) return setAction(BtnAction.disconnect)
     if (!token0 || !token1 || !token0AmountInput || !token1AmountInput) return setAction(BtnAction.disable)
     if (+token0AmountInput === 0 || +token1AmountInput === 0) return setAction(BtnAction.disable)
+    if (priceImpact && +priceImpact >= 20) return setAction(BtnAction.disable)
     try {
-      if (token0Balance.lt(token0AmountInput)) return setAction(BtnAction.insufficient)
-      if (token1Balance.lt(token1AmountInput)) return setAction(BtnAction.insufficient)
+      if (tradeRoute?.tradeType === TradeType.EXACT_INPUT && token0Balance.lt(token0AmountInput)) return setAction(BtnAction.insufficient)
+      if (tradeRoute?.tradeType === TradeType.EXACT_OUTPUT && token1Balance.lt(token1AmountInput)) return setAction(BtnAction.insufficient)
     } catch (e) {
       return setAction(BtnAction.disable)
     }
-    if (tokenAllowance[0].lessThan(token0AmountInput || 0) || tokenAllowance[1].lessThan(token1AmountInput || 0)) {
+    if ((tradeRoute?.tradeType === TradeType.EXACT_INPUT && tokenAllowance[0].lessThan(token0AmountInput || 0)) || (tradeRoute?.tradeType === TradeType.EXACT_OUTPUT && tokenAllowance[1].lessThan(token1AmountInput || 0))) {
       return setAction(BtnAction.approve)
     }
     return setAction(BtnAction.available)
-  }, [account])
+  }, [account, tradeRoute, priceImpact])
+
+  useEffect(() => {
+    if (tradeRoute?.tradeType === TradeType.EXACT_INPUT) {
+      token0AmountInputHandler(token0AmountInput)
+
+    }
+    if (tradeRoute?.tradeType === TradeType.EXACT_OUTPUT) {
+      token1AmountInputHandler(token1AmountInput)
+    }
+  }, [slipage])
 
   async function approve() {
     let tokenForApprove = tokenAllowance[0].lessThan(token0AmountInput || 0) ? token0 : token1!;
@@ -211,11 +224,11 @@ export function useSwap(view: SwapView) {
       const result = Trade.bestTradeExactIn(
         await makePairs(token0, token1!, publicClient!),
         CurrencyAmount.fromRawAmount(
-          tokenConvert(token0),
+          token0,
           parseUnits(value, token0.decimals).toString()
           // JSBI.BigInt(+value * 10 ** token0.decimals)
         ),
-        tokenConvert(token1!), { maxNumResults: 1 }
+        token1!, { maxNumResults: 1 }
       );
 
       if (!result || !result.length) {
@@ -228,6 +241,7 @@ export function useSwap(view: SwapView) {
       setPriceImpact(result[0].priceImpact.toFixed())
       setToken1AmountInput(result[0].outputAmount.toFixed(6));
       setTradeRoute(result[0])
+      // const tradeRoute = result[0]
       setExchangeRate(result[0].executionPrice.toFixed())
       setMinOut(result[0].minimumAmountOut(new Percent(slipage, 100)).toFixed(6))
       setMaxIn('')
@@ -235,7 +249,6 @@ export function useSwap(view: SwapView) {
         return item.route.path.map(i => i.symbol).join('->')
       })
       setTradeRoutePath(path.join('->'))
-
     }
   }
   async function token1AmountInputHandler(value: string) {
@@ -248,9 +261,9 @@ export function useSwap(view: SwapView) {
 
       const result = Trade.bestTradeExactOut(
         await makePairs(token0, token1!, publicClient!),
-        tokenConvert(token0),
+        token0,
         CurrencyAmount.fromRawAmount(
-          tokenConvert(token1),
+          token1,
           parseUnits(value, token1.decimals).toString()
         ), {
         maxNumResults: 1

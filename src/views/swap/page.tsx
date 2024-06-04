@@ -28,7 +28,7 @@ import { useAccount, useChainId, usePublicClient, useWalletClient } from 'wagmi'
 import { Address, formatUnits, getAddress, parseUnits } from 'viem';
 import { useSwap, BtnAction, SwapView } from '@/hook/useSwap';
 import { getRouterContract } from '@/views/pool/getContract';
-import { Percent, Token } from '@/packages/swap-core';
+import { Percent, Token, TradeType } from '@/packages/swap-core';
 import { Router as SwapRouter } from '@/packages/swap-sdk';
 import { retry } from 'radash';
 import { useState } from 'react';
@@ -268,7 +268,12 @@ export default function Swap() {
           {swapData.minOut}
         </Text>
       </HStack>
-      <HStack fontSize={'small'} px="8px" py={1} color={'green'}>
+      <HStack
+        fontSize={'small'}
+        px="8px"
+        py={1}
+        color={swapData.priceImpact && +swapData.priceImpact >= 20 ? 'brand.500' : 'green'}
+      >
         <Text w="40%">PriceImpact</Text>
         <Text w="70%" textAlign={'right'}>
           {swapData.priceImpact ? swapData.priceImpact + '%' : '---'}
@@ -282,6 +287,11 @@ export default function Swap() {
           </Link>
         </Box>
       ) : null}
+      {swapData.priceImpact && +swapData.priceImpact >= 20 ? (
+        <Box textAlign={'center'} mt={2} fontSize={'x-small'} color={'brand.500'}>
+          <Text>This swap has a price impact of large than 20% !! </Text>
+        </Box>
+      ) : null}
       <Box mt={'1rem'} fontSize={16}>
         {swapData.action === BtnAction.approve ? (
           <Button
@@ -293,7 +303,7 @@ export default function Swap() {
             isLoading={loading}
           >
             Set Approve{' '}
-            {swapData.tokenAllowance[0].lessThan(swapData.token0AmountInput || 0)
+            {swapData.tradeRoute?.tradeType === TradeType.EXACT_INPUT
               ? swapData.token0.symbol
               : swapData.token1!.symbol}
           </Button>
