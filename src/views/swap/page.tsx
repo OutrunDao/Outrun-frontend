@@ -65,11 +65,17 @@ export default function Swap() {
   async function swap() {
     if (!swapData.token0 || !swapData.token1 || !account.address || !walletClient) return;
     setLoading(true);
-    const { methodName, args, value } = SwapRouter.swapCallParameters(swapData.tradeRoute!, {
-      allowedSlippage: new Percent(slippageTolerance, 100),
-      deadline: Math.floor(new Date().getTime() / 1000) + deadlineInput * 60,
-      recipient: account.address,
-    });
+    const isExactInput = swapData.tradeRoute?.tradeType === TradeType.EXACT_INPUT;
+    const { methodName, args, value } = SwapRouter.swapCallParameters(
+      isExactInput ? swapData.token0 : swapData.token1,
+      isExactInput ? swapData.token1 : swapData.token0,
+      swapData.tradeRoute!,
+      {
+        allowedSlippage: new Percent(slippageTolerance, 100),
+        deadline: Math.floor(new Date().getTime() / 1000) + deadlineInput * 60,
+        recipient: account.address,
+      }
+    );
     let toastCurrent = toast({
       status: 'loading',
       title: 'submiting transaction',
@@ -287,11 +293,11 @@ export default function Swap() {
           </Link>
         </Box>
       ) : null}
-      {swapData.priceImpact && +swapData.priceImpact >= 20 ? (
+      {/* {swapData.priceImpact && +swapData.priceImpact >= 20 ? (
         <Box textAlign={'center'} mt={2} fontSize={'x-small'} color={'brand.500'}>
           <Text>This swap has a price impact of large than 20% !! </Text>
         </Box>
-      ) : null}
+      ) : null} */}
       <Box mt={'1rem'} fontSize={16}>
         {swapData.action === BtnAction.approve ? (
           <Button
@@ -314,7 +320,11 @@ export default function Swap() {
             insufficient token{' '}
           </Button>
         ) : null}
-        {swapData.action === BtnAction.disconnect ? <w3m-button /> : null}
+        {swapData.action === BtnAction.disconnect ? (
+          <Button width={'100%'} size="lg" colorScheme="gray" variant="solid">
+            disconnected
+          </Button>
+        ) : null}
         {swapData.action === BtnAction.available ? (
           <Button
             width={'100%'}
@@ -331,7 +341,7 @@ export default function Swap() {
         ) : null}
         {swapData.action === BtnAction.disable ? (
           <Button width={'100%'} isDisabled size="lg" colorScheme="gray" variant="solid" rounded={'md'}>
-            swap
+            {swapData.priceImpact && +swapData.priceImpact >= 20 ? 'The price impact is too high!' : 'swap'}
           </Button>
         ) : null}
       </Box>

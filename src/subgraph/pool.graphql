@@ -16,6 +16,7 @@ query Pair($addr: Bytes) {
     }
     pairDayData {
       reserveUSD
+      dailyVolumeUSD
     }
     reserveUSD
     reserve0
@@ -39,6 +40,7 @@ query Pools($id: Bytes) {
     reserveUSD
     pairDayData {
       reserveUSD
+      dailyVolumeUSD
     }
   }
 }
@@ -65,6 +67,7 @@ query LiquidityPositions($user: String, $pair: String) {
       volumeUSD
       pairDayData {
         reserveUSD
+        dailyVolumeUSD
       }
     }
     user {

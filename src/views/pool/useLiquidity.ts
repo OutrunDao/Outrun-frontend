@@ -19,7 +19,7 @@ export default function useLiquidity() {
   const router = useRouter()
   async function addLiquidity(swapData: any) {
     if (!swapData.token0 || !swapData.token1 || !account.address || !walletClient) return;
-    const slippage = 0.05;
+    const slippage = 0.95;
     let execution = 'addLiquidity';
     let token0Input = parseUnits(swapData.token0AmountInput!, swapData.token0.decimals);
     let token1Input = parseUnits(swapData.token1AmountInput!, swapData.token1.decimals);
@@ -44,7 +44,7 @@ export default function useLiquidity() {
       to,
       deadline,
     ];
-    let config;
+    let config: any = { account };
     const [type, tokenA, tokenB, tokenAInput, tokenBInput, tokenAMin, tokenBMin] = tokenSwitch(
       swapData.token0,
       swapData.token1,
@@ -75,7 +75,9 @@ export default function useLiquidity() {
         duration: null,
         isClosable: true,
       });
+
       const tx = await getRouterContract(walletClient!).write[execution](args, config);
+
       toast.update(toastCurrent, {
         title: 'transaction submitted',
         description: "Waiting for block confirmation",
@@ -94,8 +96,10 @@ export default function useLiquidity() {
 
         duration: 10000
       })
-      const pairAddress = Pair.getAddress(tokenA as Token, tokenB as Token)
-      router.push('/pool/' + pairAddress)
+      if (data.status === 'success') {
+        const pairAddress = Pair.getAddress(tokenA as Token, tokenB as Token)
+        router.push('/pool/' + pairAddress)
+      }
     } catch (e: any) {
       toast.closeAll()
       toast({

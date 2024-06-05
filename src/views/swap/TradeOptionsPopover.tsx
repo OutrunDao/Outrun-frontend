@@ -16,6 +16,7 @@ import {
   RadioGroup,
   Text,
   Center,
+  useToast,
 } from '@chakra-ui/react';
 import { SettingsIcon } from '@chakra-ui/icons';
 
@@ -31,8 +32,10 @@ export const TradeOptionsPopover = ({
   const [slippageToleranceInput, setSlippageToleranceInput] = useState('');
   const [deadlineInput, setDeadlineInput] = useState('10');
   const firstFieldRef = React.useRef(null);
+  const toast = useToast();
   function onSlippageHandler(v: string) {
     setSlippageTolerance(v);
+    setSlippageToleranceInput('');
   }
   function onDeadlineHandler(v: string) {
     setDeadlineInput(v);
@@ -47,7 +50,21 @@ export const TradeOptionsPopover = ({
     }
   }
   function onCloseHandler() {
-    onSelect(slippageToleranceInput || slippageTolerance, deadlineInput);
+    if (slippageToleranceInput && +slippageToleranceInput > 50 && +slippageTolerance < 1)
+      return toast({
+        status: 'error',
+        description: 'the slippage tolerance input is large than 50% ',
+      });
+    if (slippageToleranceInput && isNaN(parseInt(slippageToleranceInput))) {
+      return toast({
+        status: 'error',
+        description: 'the slippage tolerance input must be integer ',
+      });
+    }
+    onSelect(
+      (slippageToleranceInput && parseInt(slippageToleranceInput).toString()) || slippageTolerance,
+      deadlineInput
+    );
     onClose();
   }
   return (

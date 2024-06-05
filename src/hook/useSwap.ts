@@ -127,6 +127,7 @@ export function useSwap(view: SwapView) {
   useEffect(() => {
     setToken0AmountInput('')
     setToken1AmountInput('')
+    resetData()
     if (!token0 || !token1) {
       setPair(undefined);
       setTokenAllowance([new Decimal(0), new Decimal(0)]);
@@ -143,14 +144,26 @@ export function useSwap(view: SwapView) {
     if (+token0AmountInput === 0 || +token1AmountInput === 0) return setAction(BtnAction.disable)
     if (priceImpact && +priceImpact >= 20) return setAction(BtnAction.disable)
     try {
-      if (tradeRoute?.tradeType === TradeType.EXACT_INPUT && token0Balance.lt(token0AmountInput)) return setAction(BtnAction.insufficient)
-      if (tradeRoute?.tradeType === TradeType.EXACT_OUTPUT && token1Balance.lt(token1AmountInput)) return setAction(BtnAction.insufficient)
+      if (view === SwapView.swap) {
+        if (tradeRoute?.tradeType === TradeType.EXACT_INPUT && token0Balance.lt(token0AmountInput)) return setAction(BtnAction.insufficient)
+        if (tradeRoute?.tradeType === TradeType.EXACT_OUTPUT && token1Balance.lt(token1AmountInput)) return setAction(BtnAction.insufficient)
+      } else {
+        if (token0Balance.lt(token0AmountInput)) return setAction(BtnAction.insufficient)
+        if (token1Balance.lt(token1AmountInput)) return setAction(BtnAction.insufficient)
+      }
     } catch (e) {
       return setAction(BtnAction.disable)
     }
-    if ((tradeRoute?.tradeType === TradeType.EXACT_INPUT && tokenAllowance[0].lessThan(token0AmountInput || 0)) || (tradeRoute?.tradeType === TradeType.EXACT_OUTPUT && tokenAllowance[1].lessThan(token1AmountInput || 0))) {
-      return setAction(BtnAction.approve)
+    if (view === SwapView.swap) {
+      if ((tradeRoute?.tradeType === TradeType.EXACT_INPUT && tokenAllowance[0].lessThan(token0AmountInput || 0)) || (tradeRoute?.tradeType === TradeType.EXACT_OUTPUT && tokenAllowance[1].lessThan(token1AmountInput || 0))) {
+        return setAction(BtnAction.approve)
+      }
+    } else {
+      if ((tokenAllowance[0].lessThan(token0AmountInput || 0)) || tokenAllowance[1].lessThan(token1AmountInput || 0)) {
+        return setAction(BtnAction.approve)
+      }
     }
+
     return setAction(BtnAction.available)
   }, [account, tradeRoute, priceImpact])
 
@@ -224,18 +237,16 @@ export function useSwap(view: SwapView) {
       const result = Trade.bestTradeExactIn(
         await makePairs(token0, token1!, publicClient!),
         CurrencyAmount.fromRawAmount(
-          token0,
+          tokenConvert(token0),
           parseUnits(value, token0.decimals).toString()
           // JSBI.BigInt(+value * 10 ** token0.decimals)
         ),
-        token1!, { maxNumResults: 1 }
+        tokenConvert(token1!), { maxNumResults: 1 }
       );
 
       if (!result || !result.length) {
         console.log('池子余额不够或不存在');
-        setPriceImpact('')
-        setTradeRoutePath('')
-        setExchangeRate('')
+        resetData()
         return setToken1AmountInput('');
       }      // setToken1AmountInput(trade.outputAmount.toSignificant(6));
       setPriceImpact(result[0].priceImpact.toFixed())
@@ -261,9 +272,9 @@ export function useSwap(view: SwapView) {
 
       const result = Trade.bestTradeExactOut(
         await makePairs(token0, token1!, publicClient!),
-        token0,
+        tokenConvert(token0),
         CurrencyAmount.fromRawAmount(
-          token1,
+          tokenConvert(token1),
           parseUnits(value, token1.decimals).toString()
         ), {
         maxNumResults: 1
@@ -271,9 +282,7 @@ export function useSwap(view: SwapView) {
       );
       if (!result || !result.length) {
         console.log('未找到兑换路径，池子余额不够或不存在');
-        setPriceImpact('')
-        setTradeRoutePath('')
-        setExchangeRate('')
+        resetData()
         return setToken0AmountInput('');
       }
       setExchangeRate(result[0].executionPrice.toFixed())
@@ -282,7 +291,6 @@ export function useSwap(view: SwapView) {
       setMaxIn(result[0].maximumAmountIn(new Percent(slipage, 100)).toFixed(6))
       setMinOut('')
       // setToken1AmountInput(result[0].minimumAmountOut(new Percent(5, 100)).toSignificant(6));
-      // console.log(result[0].inputAmount, result[0].outputAmount)
       setTradeRoute(result[0])
       let path = result.map(item => {
         return item.route.path.map(i => i.symbol).join('->')
@@ -291,6 +299,13 @@ export function useSwap(view: SwapView) {
     }
   }
 
+  function resetData() {
+    setPriceImpact('')
+    setTradeRoutePath('')
+    setExchangeRate('')
+    setMinOut('')
+    setTradeRoute(undefined)
+  }
   async function maxHandler(flag: number) {
     if (flag === 0) {
       return token0AmountInputHandler(token0Balance.toString())

@@ -26,7 +26,7 @@ import { BiMoneyWithdraw } from 'react-icons/bi';
 import shortenAddress from '@/utils/shortenAddress';
 import { execute, LiquidityPositionsDocument, LiquidityPosition } from '@/subgraph';
 import { useQuery } from '@tanstack/react-query';
-import { get } from 'radash';
+import { get, retry } from 'radash';
 import getApy from '@/utils/getApy';
 import { useEffect, useState } from 'react';
 import { Address, PublicClient, WalletClient, formatUnits, getContract } from 'viem';
@@ -81,21 +81,47 @@ export default function PoolDetail() {
 
   useEffect(() => {
     if (!publicClient || !account) return;
-    const contract = getPairContract(publicClient, pairAddress as Address);
-    contract.read.viewUnClaimedFee().then((r) => {
-      setUnclaimedAmount0(formatUnits(r[0]!, 18));
-      setUnclaimedAmount1(formatUnits(r[1]!, 18));
+    const contract = getPairContract(publicClient, pairAddress as Address, walletClient);
+    // @ts-ignore
+    contract.simulate.viewUnClaimedFee().then(({ result }) => {
+      setUnclaimedAmount0(formatUnits(result[0]!, 18));
+      setUnclaimedAmount1(formatUnits(result[1]!, 18));
     });
   }, [account, pairAddress, publicClient]);
 
   async function claimFeeHandler() {
     const contract = getPairContract(publicClient!, pairAddress as Address, walletClient);
-    toast({
+    let toastCurrent = toast({
       status: 'loading',
       description: 'submitting transaction',
+      duration: null,
     });
     // @ts-ignore
-    await contract.write.claimMakerFee([]);
+    const tx = await contract.write.claimMakerFee();
+    toast.update(toastCurrent, {
+      title: 'transaction submitted',
+      description: 'Waiting for block confirmation',
+      status: 'loading',
+    });
+
+    const data = await retry({ times: 20, delay: 5000 }, async () => {
+      return await publicClient!.getTransactionReceipt({
+        hash: tx as Address,
+      });
+    });
+    toast.update(toastCurrent, {
+      status: data.status === 'success' ? 'success' : 'error',
+      title: data.status === 'success' ? 'claim success' : 'claim fail',
+      description: '',
+      isClosable: true,
+
+      duration: 10000,
+    });
+    if (data.status === 'success') {
+      setUnclaimedAmount0('0');
+      setUnclaimedAmount1('0');
+    }
+    toast.closeAll();
   }
 
   return (
@@ -175,11 +201,19 @@ export default function PoolDetail() {
           <br />
           <Flex>
             <Box mr={100}> {get(userLiquidity, 'pair.token0.symbol')}</Box>
-            <Box>{(+unclaimedAmount0).toFixed(4)}</Box>
+            <Box>
+              {+unclaimedAmount0 > 0 && +unclaimedAmount0 < 0.001
+                ? '<0.0001'
+                : (+unclaimedAmount0).toFixed(4)}
+            </Box>
           </Flex>
           <Flex mt={2}>
             <Box mr={100}> {get(userLiquidity, 'pair.token1.symbol')}</Box>
-            <Box>{(+unclaimedAmount1).toFixed(4)}</Box>
+            <Box>
+              {+unclaimedAmount1 > 0 && +unclaimedAmount1 < 0.001
+                ? '<0.0001'
+                : (+unclaimedAmount1).toFixed(4)}
+            </Box>
           </Flex>
           <br />
           <Button
