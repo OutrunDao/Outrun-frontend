@@ -77,7 +77,6 @@ export function useSwap(view: SwapView) {
   const [exchangeRate, setExchangeRate] = useState('')
   const [slipage, setSlippage] = useState(2)
   const [minOut, setMinOut] = useState('')
-  const [maxIn, setMaxIn] = useState('')
   const [tokenAllowance, setTokenAllowance] = useState<Decimal[]>([new Decimal(0), new Decimal(0)]);
   const [pair, setPair] = useState<Pair>();
   const [loading, setLoading] = useState<boolean>(false);
@@ -155,7 +154,7 @@ export function useSwap(view: SwapView) {
       return setAction(BtnAction.disable)
     }
     if (view === SwapView.swap) {
-      if ((tradeRoute?.tradeType === TradeType.EXACT_INPUT && tokenAllowance[0].lessThan(token0AmountInput || 0)) || (tradeRoute?.tradeType === TradeType.EXACT_OUTPUT && tokenAllowance[1].lessThan(token1AmountInput || 0))) {
+      if (tokenAllowance[0].lessThan(token0AmountInput || 0)) {
         return setAction(BtnAction.approve)
       }
     } else {
@@ -229,7 +228,7 @@ export function useSwap(view: SwapView) {
   async function token0AmountInputHandler(value: string) {
     setToken0AmountInput(value);
     setToken1AmountInput('');
-    if (!pair || !token0 || isNaN(+value) || +value <= 0) return;
+    if (!value || !pair || !token0 || isNaN(+value) || +value <= 0) return;
     if (view === SwapView.addLiquidity) {
       const price = pair.priceOf(tokenConvert(token0));
       setToken1AmountInput((+price.toSignificant(6) * +value).toFixed(6));
@@ -245,17 +244,16 @@ export function useSwap(view: SwapView) {
       );
 
       if (!result || !result.length) {
-        console.log('池子余额不够或不存在');
+        // console.log('池子余额不够或不存在');
         resetData()
         return setToken1AmountInput('');
       }      // setToken1AmountInput(trade.outputAmount.toSignificant(6));
       setPriceImpact(result[0].priceImpact.toFixed())
-      setToken1AmountInput(result[0].outputAmount.toFixed(6));
+      setToken1AmountInput(result[0].outputAmount.toFixed(8));
       setTradeRoute(result[0])
       // const tradeRoute = result[0]
       setExchangeRate(result[0].executionPrice.toFixed())
       setMinOut(result[0].minimumAmountOut(new Percent(slipage, 100)).toFixed(6))
-      setMaxIn('')
       let path = result.map(item => {
         return item.route.path.map(i => i.symbol).join('->')
       })
@@ -264,7 +262,7 @@ export function useSwap(view: SwapView) {
   }
   async function token1AmountInputHandler(value: string) {
     setToken1AmountInput(value);
-    if (!pair || !token1 || isNaN(+value)) return;
+    if (!value || !pair || !token1 || isNaN(+value)) return;
     if (view === SwapView.addLiquidity) {
       const price = pair.priceOf(tokenConvert(token1));
       setToken0AmountInput((+price.toSignificant(6) * +value).toFixed(6));
@@ -280,16 +278,17 @@ export function useSwap(view: SwapView) {
         maxNumResults: 1
       }
       );
+      // console.log(result);
+
       if (!result || !result.length) {
-        console.log('未找到兑换路径，池子余额不够或不存在');
+        // console.log('未找到兑换路径，池子余额不够或不存在');
         resetData()
         return setToken0AmountInput('');
       }
       setExchangeRate(result[0].executionPrice.toFixed())
       setPriceImpact(result[0].priceImpact.toFixed())
-      setToken0AmountInput(result[0].inputAmount.toFixed(6));
-      setMaxIn(result[0].maximumAmountIn(new Percent(slipage, 100)).toFixed(6))
-      setMinOut('')
+      setToken0AmountInput(result[0].inputAmount.toFixed(8));
+      setMinOut(result[0].minimumAmountOut(new Percent(slipage, 100)).toFixed(6))
       // setToken1AmountInput(result[0].minimumAmountOut(new Percent(5, 100)).toSignificant(6));
       setTradeRoute(result[0])
       let path = result.map(item => {
@@ -326,7 +325,6 @@ export function useSwap(view: SwapView) {
       tradeRoute,
       tradeRoutePath,
       minOut,
-      maxIn,
       action,
       priceImpact,
       exchangeRate

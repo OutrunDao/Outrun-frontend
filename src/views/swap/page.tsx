@@ -25,12 +25,12 @@ import TokenSelect, { getToken } from '@/components/TokenSelect';
 import { ArrowDownIcon, ReactIcon, RepeatIcon } from '@chakra-ui/icons';
 import { TradeOptionsPopover } from './TradeOptionsPopover';
 import { useAccount, useChainId, usePublicClient, useWalletClient } from 'wagmi';
-import { Address, formatUnits, getAddress, parseUnits } from 'viem';
+import { Address, formatUnits, getAddress, parseEventLogs, parseUnits } from 'viem';
 import { useSwap, BtnAction, SwapView } from '@/hook/useSwap';
 import { getRouterContract } from '@/views/pool/getContract';
 import { Percent, Token, TradeType } from '@/packages/swap-core';
 import { Router as SwapRouter } from '@/packages/swap-sdk';
-import { retry } from 'radash';
+import { get, retry } from 'radash';
 import { useState } from 'react';
 const defaultSymbol = 'ETH';
 
@@ -58,8 +58,8 @@ export default function Swap() {
     if (!swapData.token0 || !swapData.token1) return;
     setToken0(swapData.token1);
     setToken1(swapData.token0);
-    token0AmountInputHandler(swapData.token1AmountInput);
-    // token1AmountInputHandler('');
+    token0AmountInputHandler('');
+    token1AmountInputHandler('');
   };
 
   async function swap() {
@@ -94,6 +94,53 @@ export default function Swap() {
           hash: tx as Address,
         });
       });
+      if (data.status === 'success') {
+        const logs = parseEventLogs({
+          abi: [
+            {
+              type: 'event',
+              name: 'Transfer',
+              inputs: [
+                {
+                  name: 'from',
+                  type: 'address',
+                  indexed: true,
+                  internalType: 'address',
+                },
+                {
+                  name: 'to',
+                  type: 'address',
+                  indexed: true,
+                  internalType: 'address',
+                },
+                {
+                  name: 'value',
+                  type: 'uint256',
+                  indexed: false,
+                  internalType: 'uint256',
+                },
+              ],
+              anonymous: false,
+            },
+          ],
+          logs: data.logs,
+          eventName: 'Transfer',
+        });
+        const spent = get(logs[0], 'args.value') as bigint;
+        const receive = get(logs[1], 'args.value') as bigint;
+        if (spent && receive) {
+          toast({
+            title: 'Swap finished',
+            status: 'success',
+            position: 'bottom',
+            description: `You have successfully swapped ${formatUnits(spent, swapData.token0.decimals)} ${
+              swapData.token0.symbol
+            } for ${formatUnits(receive, swapData.token1.decimals)} ${swapData.token1.symbol}`,
+            duration: null,
+            isClosable: true,
+          });
+        }
+      }
       toast.update(toastCurrent, {
         title: data.status === 'success' ? 'swap success' : 'swap failed',
         status: data.status === 'success' ? 'success' : 'error',
@@ -257,7 +304,7 @@ export default function Swap() {
         <Text w="70%" textAlign={'right'}>
           {swapData.pair ? (
             <>
-              1{swapData.pair.token0.symbol} = {swapData.exchangeRate} {swapData.pair.token1.symbol}
+              1{swapData.token0.symbol} = {swapData.exchangeRate} {swapData.token1!.symbol}
             </>
           ) : null}
         </Text>
@@ -285,12 +332,16 @@ export default function Swap() {
           {swapData.priceImpact ? swapData.priceImpact + '%' : '---'}
         </Text>
       </HStack>
-      {!swapData.pair && swapData.token0 && swapData.token1 ? (
+      {!swapData.tradeRoute &&
+      swapData.token0 &&
+      swapData.token1 &&
+      swapData.token0AmountInput &&
+      swapData.token1AmountInput ? (
         <Box textAlign={'center'} fontSize={'x-small'} color={'brand.500'}>
-          <Text>This pool is not exists yet, you can create pool </Text>
-          <Link href={`/pool/create`} textDecoration={'underline'}>
+          <Text>not enough liquidity or cannot find route in this pair </Text>
+          {/* <Link href={`/pool/create`} textDecoration={'underline'}>
             Here
-          </Link>
+          </Link> */}
         </Box>
       ) : null}
       {/* {swapData.priceImpact && +swapData.priceImpact >= 20 ? (
