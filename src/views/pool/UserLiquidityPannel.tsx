@@ -44,7 +44,7 @@ export default function UserLiquiditesPannel() {
               <Tr>
                 <Th>Pool Composition</Th>
                 <Th>TVL</Th>
-                <Th>Volume(24h)</Th>
+                <Th>Volume</Th>
                 <Th>APY</Th>
                 <Th>My Shares</Th>
                 <Th>Action</Th>
@@ -62,13 +62,9 @@ export default function UserLiquiditesPannel() {
                     {position.pair.token0.symbol} / {position.pair.token1.symbol || 'unknown token'}
                   </Td>
                   <Td>${(+position.pair.reserveUSD).toFixed(2) || 0}</Td>
-                  <Td>${(+get(position, 'pair.pairDayData[0].reserveUSD', '0')).toFixed(2)}</Td>
+                  <Td>${(+get(position, 'pair.volumeUSD', '0')).toFixed(2)}</Td>
                   <Td>
-                    {getApy(
-                      get(position, 'pair.pairDayData[0].reserveUSD', ''),
-                      get(position, 'pair.reserveUSD', '0')
-                    )}
-                    %
+                    {getApy(get(position, 'pair.volumeUSD', ''), get(position, 'pair.reserveUSD', '0'))}%
                   </Td>
                   <Td>
                     {position.pair.totalSupply == 0

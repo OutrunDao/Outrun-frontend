@@ -121,7 +121,7 @@ export default function PoolDetail() {
       setUnclaimedAmount0('0');
       setUnclaimedAmount1('0');
     }
-    toast.closeAll();
+    // toast.closeAll();
   }
 
   return (
@@ -159,10 +159,8 @@ export default function PoolDetail() {
               <StatNumber>${(+get(userLiquidity, 'pair.reserveUSD', '0')).toFixed(2) || 0}</StatNumber>
             </Stat>
             <Stat>
-              <StatLabel>Volume(24h)</StatLabel>
-              <StatNumber>
-                ${(+get(userLiquidity, 'pair.pairDayData[0].reserveUSD', '0')).toFixed(2)}
-              </StatNumber>
+              <StatLabel>Volume</StatLabel>
+              <StatNumber>${(+get(userLiquidity, 'pair.volumeUSD', '0')).toFixed(2)}</StatNumber>
             </Stat>
           </StatGroup>
           <StatGroup mt={6}>
@@ -170,7 +168,7 @@ export default function PoolDetail() {
               <StatLabel>APY</StatLabel>
               <StatNumber>
                 {getApy(
-                  get(userLiquidity, 'pair.pairDayData[0].reserveUSD', '0'),
+                  get(userLiquidity, 'pair.volumeUSD', '0'),
                   get(userLiquidity, 'pair.reserveUSD', '0')
                 )}
                 %

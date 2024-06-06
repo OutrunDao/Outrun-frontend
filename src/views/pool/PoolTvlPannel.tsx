@@ -48,7 +48,7 @@ export default function PoolTvlPannel() {
             <Tr>
               <Th>Pool Composition</Th>
               <Th>TVL</Th>
-              <Th>Volume(24h)</Th>
+              <Th>Volume</Th>
               <Th>APY</Th>
               <Th>Action</Th>
             </Tr>
@@ -61,8 +61,8 @@ export default function PoolTvlPannel() {
                       {pair.token0.symbol} / {pair.token1.symbol}
                     </Td>
                     <Td fontSize="16px">${(+pair.reserveUSD).toFixed(2)}</Td>
-                    <Td>${(+pair.pairDayData[0].reserveUSD).toFixed(2)}</Td>
-                    <Td>{getApy(pair.pairDayData[0].reserveUSD, pair.reserveUSD)}%</Td>
+                    <Td>${(+pair.volumeUSD).toFixed(2)}</Td>
+                    <Td>{getApy(pair.volumeUSD, pair.reserveUSD)}%</Td>
                     <Td>
                       <Button
                         variant="link"
