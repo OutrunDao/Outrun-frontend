@@ -9,11 +9,13 @@ import { getToken } from '@/components/TokenSelect';
 import { useEffect, useMemo, useState } from 'react';
 import { useToast } from '@chakra-ui/react';
 import Decimal from 'decimal.js-light';
-import { CurrencyAmount, Percent, V2_ROUTER_ADDRESSES } from '@/packages/swap-core';
+import { CurrencyAmount, Percent } from '@/packages/swap-core';
 import { TradeType } from '@/packages/swap-core';
 import { USDB, RUSD } from '@/packages/swap-core';
 import { LocalTokenAddress } from '@/contants/address';
-
+import { addressMap } from '@/contracts/addressMap';
+import getTokenContract from '@/contracts/get/erc20token';
+import useContract from './useContract';
 const defaultSymbol = 'ETH';
 
 export enum BtnAction {
@@ -83,19 +85,22 @@ export function useSwap(view: SwapView) {
   const [tradeRoute, setTradeRoute] = useState<Trade<Currency, Currency, TradeType>>()
   const [tradeRoutePath, setTradeRoutePath] = useState('')
   const [action, setAction] = useState<BtnAction>(BtnAction.disable)
+  const { write: writeContract } = useContract()
   const toast = useToast();
-
+  const V2_ROUTER_ADDRESSES = useMemo(() => {
+    return addressMap[chainId].SWAP_ROUTER
+  }, [chainId])
   const fetchAllowance = async () => {
     if (!account.address || !token0 || !token1) return;
     const allowance0 = token0.isNative
       ? new Decimal(9999999)
       : await (token0 as Token)
-        .allowance(account.address, getAddress(V2_ROUTER_ADDRESSES[chainId]), publicClient!)
+        .allowance(account.address, getAddress(V2_ROUTER_ADDRESSES), publicClient!)
         .catch(() => new Decimal(0));
     const allowance1 = token1.isNative
       ? new Decimal(9999999)
       : await (token1 as Token)
-        .allowance(account.address, getAddress(V2_ROUTER_ADDRESSES[chainId]), publicClient!)
+        .allowance(account.address, getAddress(V2_ROUTER_ADDRESSES), publicClient!)
         .catch(() => new Decimal(0));
     setTokenAllowance([allowance0, allowance1]);
   };
@@ -178,50 +183,35 @@ export function useSwap(view: SwapView) {
 
   async function approve() {
     let tokenForApprove = tokenAllowance[0].lessThan(token0AmountInput || 0) ? token0 : token1!;
-    let toastCurrent = toast({
-      status: 'loading',
-      title: 'submiting approve transaction',
-      description: 'please wait...',
-      duration: null,
-      isClosable: true,
-    });
     setLoading(true);
-    try {
-      if (tokenForApprove.isNative) return;
-      const tx = await tokenForApprove.approve(
-        getAddress(V2_ROUTER_ADDRESSES[chainId]),
-        // maxUint256,
-        parseUnits(
-          tokenForApprove.equals(token0) ? token0AmountInput!.toString() : token1AmountInput!.toString(),
-          tokenForApprove.decimals
-        ),
-        walletClient!
-      );
-      const result = await retry({
-        times: 20,
-        delay: 5000
-      }, async () => {
-        return await publicClient!.getTransactionReceipt({
-          hash: tx as Address
-        })
-      })
-      if (result.status === "success") {
-        fetchAllowance();
-      }
-      toast.update(toastCurrent, {
-        title: result.status === "success" ? 'Approve success' : "Approve failed",
-        status: result.status === 'success' ? 'success' : "error",
-        duration: 3000,
-      })
-    } catch (e: any) {
-      toast.update(toastCurrent, {
-        title: 'Approve failed',
-        description: e.message,
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
+    if (tokenForApprove.isNative) return;
+    // @ts-ignore
+    const data = await writeContract(getTokenContract(tokenForApprove.address as Address, publicClient!, walletClient), {
+      actionTitle: "Approve Token " + tokenForApprove.symbol
+    }, 'approve', [V2_ROUTER_ADDRESSES, parseUnits(
+      tokenForApprove.equals(token0) ? token0AmountInput!.toString() : token1AmountInput!.toString(),
+      tokenForApprove.decimals
+    )], {
+      account
+    })
+    // const tx = await tokenForApprove.approve(
+    //   getAddress(),
+    //   // maxUint256,
+
+    //   walletClient!
+    // );
+    // const result = await retry({
+    //   times: 20,
+    //   delay: 5000
+    // }, async () => {
+    //   return await publicClient!.getTransactionReceipt({
+    //     hash: tx as Address
+    //   })
+    // })
+    if (data && data.status === "success") {
+      fetchAllowance();
     }
+
     setLoading(false);
   }
 
@@ -255,7 +245,11 @@ export function useSwap(view: SwapView) {
       setExchangeRate(result[0].executionPrice.toFixed())
       setMinOut(result[0].minimumAmountOut(new Percent(slipage, 100)).toFixed(6))
       let path = result.map(item => {
-        return item.route.path.map(i => i.symbol).join('->')
+        return item.route.path.map((token, index) => {
+          if (index === 0) return token0.symbol
+          if (index === item.route.path.length - 1) return token1!.symbol
+          return token.symbol
+        }).join('->')
       })
       setTradeRoutePath(path.join('->'))
     }
@@ -292,7 +286,11 @@ export function useSwap(view: SwapView) {
       // setToken1AmountInput(result[0].minimumAmountOut(new Percent(5, 100)).toSignificant(6));
       setTradeRoute(result[0])
       let path = result.map(item => {
-        return item.route.path.map(i => i.symbol).join('->')
+        return item.route.path.map((token, index) => {
+          if (index === 0) return token0.symbol
+          if (index === item.route.path.length - 1) return token1!.symbol
+          return token.symbol
+        }).join('->')
       })
       setTradeRoutePath(path.join('->'))
     }

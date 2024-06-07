@@ -1,5 +1,6 @@
-import { Token } from './token';
-import { ChainId } from '..';
+import { Token } from '@/packages/swap-core/entities/token';
+import { ChainId } from './chains';
+
 /**
  * Known WETH9 implementation addresses, used in our implementation of Ether#wrapped
  */

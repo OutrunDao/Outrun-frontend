@@ -1,5 +1,5 @@
-import { Token } from './token';
-import { ChainId } from '..';
+import { Token } from '@/packages/swap-core/entities/token';
+import { ChainId } from './chains';
 /**
  * Blast usdt like coin: usdb
  */

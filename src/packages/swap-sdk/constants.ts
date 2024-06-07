@@ -1,10 +1,10 @@
-import { Percent, V2_FACTORY_ADDRESSES } from '@/packages/swap-core';
+import { Percent } from '@/packages/swap-core';
 import JSBI from 'jsbi';
 
-export const FACTORY_ADDRESS_MAP: { [chainId: number]: string } = V2_FACTORY_ADDRESSES;
+// export const FACTORY_ADDRESS_MAP: { [chainId: number]: string } = V2_FACTORY_ADDRESSES;
 
 // copy from \OutswapV1\src\libraries\OutswapV1Library.sol
-export const INIT_CODE_HASH = '0xf34369c1315f6c393c40a626058c08197d799d689082d5f891f9b12588b1ee2d';
+// export const INIT_CODE_HASH = '0xf34369c1315f6c393c40a626058c08197d799d689082d5f891f9b12588b1ee2d';
 
 export const MINIMUM_LIQUIDITY = JSBI.BigInt(1000);
 

@@ -1,6 +1,6 @@
 import { createPublicClient, PublicClient, http, getContract, Address } from 'viem';
 import { CurrencyAmount, Token } from '@/packages/swap-core';
-import { ChainId } from '@/packages/swap-core/chains';
+import { ChainId } from '@/contracts/chains';
 import invariant from 'tiny-invariant';
 import { Pair } from './entities/pair';
 import { erc20ABI } from './abis/ERC20';
@@ -57,7 +57,7 @@ export abstract class Fetcher {
     const parsedDecimals =
       typeof TOKEN_DECIMALS_CACHE?.[chainId]?.[address] === 'number'
         ? TOKEN_DECIMALS_CACHE[chainId][address]
-        : await erc20.read.decimals([]).then((decimals): number => {
+        : await erc20.read.decimals([]).then((decimals: number) => {
           // @ts-ignore
           TOKEN_DECIMALS_CACHE = {
             ...TOKEN_DECIMALS_CACHE,
@@ -85,6 +85,7 @@ export abstract class Fetcher {
   public static async fetchPairData(tokenA: Token, tokenB: Token, publicClient: PublicClient): Promise<Pair> {
     invariant(tokenA.chainId === tokenB.chainId, 'CHAIN_ID');
     const address = Pair.getAddress(tokenA, tokenB) as Address;
+
     const pairContract = getContract({
       abi: PairABI,
       address,

@@ -22,24 +22,25 @@ import {
   VStack,
 } from '@chakra-ui/react';
 import TokenSelect, { getToken } from '@/components/TokenSelect';
-import { ArrowDownIcon, ReactIcon, RepeatIcon } from '@chakra-ui/icons';
+import { RepeatIcon } from '@chakra-ui/icons';
 import { TradeOptionsPopover } from './TradeOptionsPopover';
 import { useAccount, useChainId, usePublicClient, useWalletClient } from 'wagmi';
 import { Address, formatUnits, getAddress, parseEventLogs, parseUnits } from 'viem';
 import { useSwap, BtnAction, SwapView } from '@/hook/useSwap';
-import { getRouterContract } from '@/views/pool/getContract';
 import { Percent, Token, TradeType } from '@/packages/swap-core';
 import { Router as SwapRouter } from '@/packages/swap-sdk';
 import { get, retry } from 'radash';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import useContract from '@/hook/useContract';
+import { ContractName } from '@/contracts/addressMap';
+import { BlockExplorers } from '@/contracts/chains';
 const defaultSymbol = 'ETH';
 
 export default function Swap() {
   const chainId = useChainId();
   const account = useAccount();
-  const publicClient = usePublicClient();
   const toast = useToast();
-  const { data: walletClient } = useWalletClient();
+  const { write: writeRouterContract, loading: routerContractLoading } = useContract();
   const {
     swapData,
     loading,
@@ -54,6 +55,9 @@ export default function Swap() {
   } = useSwap(SwapView.swap);
   const [slippageTolerance, setSlippageTolerance] = useState(2);
   const [deadlineInput, setDeadlineInput] = useState(10);
+  const blockExplore = useMemo(() => {
+    return BlockExplorers[chainId];
+  }, [chainId]);
   const onReverse = () => {
     if (!swapData.token0 || !swapData.token1) return;
     setToken0(swapData.token1);
@@ -63,12 +67,10 @@ export default function Swap() {
   };
 
   async function swap() {
-    if (!swapData.token0 || !swapData.token1 || !account.address || !walletClient) return;
-    setLoading(true);
-    const isExactInput = swapData.tradeRoute?.tradeType === TradeType.EXACT_INPUT;
+    if (!swapData.token0 || !swapData.token1 || !account.address) return;
     const { methodName, args, value } = SwapRouter.swapCallParameters(
-      isExactInput ? swapData.token0 : swapData.token1,
-      isExactInput ? swapData.token1 : swapData.token0,
+      swapData.token0,
+      swapData.token1,
       swapData.tradeRoute!,
       {
         allowedSlippage: new Percent(slippageTolerance, 100),
@@ -76,86 +78,76 @@ export default function Swap() {
         recipient: account.address,
       }
     );
-    let toastCurrent = toast({
-      status: 'loading',
-      title: 'submiting transaction',
-      description: 'please wait...',
-      duration: null,
-      isClosable: true,
-    });
-    try {
-      const tx = await getRouterContract(walletClient!).write[methodName](args, { value, account });
-      toast.update(toastCurrent, {
-        title: 'transaction submited',
-        description: 'Waiting for block confirmation',
+
+    const data = await writeRouterContract(
+      ContractName.SWAP_ROUTER,
+      {
+        actionTitle: 'Swap',
+      },
+      methodName,
+      args,
+      { value, account }
+    );
+    if (data && data.status === 'success') {
+      const logs = parseEventLogs({
+        abi: [
+          {
+            type: 'event',
+            name: 'Transfer',
+            inputs: [
+              {
+                name: 'from',
+                type: 'address',
+                indexed: true,
+                internalType: 'address',
+              },
+              {
+                name: 'to',
+                type: 'address',
+                indexed: true,
+                internalType: 'address',
+              },
+              {
+                name: 'value',
+                type: 'uint256',
+                indexed: false,
+                internalType: 'uint256',
+              },
+            ],
+            anonymous: false,
+          },
+        ],
+        logs: data.logs,
+        eventName: 'Transfer',
       });
-      const data = await retry({ times: 20, delay: 5000 }, async () => {
-        return await publicClient!.getTransactionReceipt({
-          hash: tx as Address,
+      const spent = get(logs[0], 'args.value') as bigint;
+      const receive = get(logs[logs.length - 1], 'args.value') as bigint;
+      if (spent && receive) {
+        toast({
+          title: 'Swap finished',
+          status: 'success',
+          position: 'bottom',
+          description: (
+            <>
+              {' '}
+              {`You have successfully swapped ${formatUnits(spent, swapData.token0.decimals)} ${
+                swapData.token0.symbol
+              } for ${formatUnits(receive, swapData.token1.decimals)} ${swapData.token1.symbol}`}
+              . view on{' '}
+              <Link
+                isExternal
+                href={blockExplore + '/tx/' + data.transactionHash}
+                textDecoration={'underline'}
+                colorScheme="teal"
+              >
+                BlastScan
+              </Link>
+            </>
+          ),
+          duration: null,
+          isClosable: true,
         });
-      });
-      if (data.status === 'success') {
-        const logs = parseEventLogs({
-          abi: [
-            {
-              type: 'event',
-              name: 'Transfer',
-              inputs: [
-                {
-                  name: 'from',
-                  type: 'address',
-                  indexed: true,
-                  internalType: 'address',
-                },
-                {
-                  name: 'to',
-                  type: 'address',
-                  indexed: true,
-                  internalType: 'address',
-                },
-                {
-                  name: 'value',
-                  type: 'uint256',
-                  indexed: false,
-                  internalType: 'uint256',
-                },
-              ],
-              anonymous: false,
-            },
-          ],
-          logs: data.logs,
-          eventName: 'Transfer',
-        });
-        const spent = get(logs[0], 'args.value') as bigint;
-        const receive = get(logs[1], 'args.value') as bigint;
-        if (spent && receive) {
-          toast({
-            title: 'Swap finished',
-            status: 'success',
-            position: 'bottom',
-            description: `You have successfully swapped ${formatUnits(spent, swapData.token0.decimals)} ${
-              swapData.token0.symbol
-            } for ${formatUnits(receive, swapData.token1.decimals)} ${swapData.token1.symbol}`,
-            duration: null,
-            isClosable: true,
-          });
-        }
       }
-      toast.update(toastCurrent, {
-        title: data.status === 'success' ? 'swap success' : 'swap failed',
-        status: data.status === 'success' ? 'success' : 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-    } catch (e: any) {
-      toast.closeAll();
-      toast({
-        title: 'swap failed',
-        description: e.message,
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
     }
     setLoading(false);
   }
@@ -332,11 +324,12 @@ export default function Swap() {
           {swapData.priceImpact ? swapData.priceImpact + '%' : '---'}
         </Text>
       </HStack>
-      {!swapData.tradeRoute &&
-      swapData.token0 &&
-      swapData.token1 &&
-      swapData.token0AmountInput &&
-      swapData.token1AmountInput ? (
+      {(!swapData.tradeRoute &&
+        swapData.token0 &&
+        swapData.token1 &&
+        swapData.token0AmountInput &&
+        swapData.token1AmountInput) ||
+      (!swapData.pair && swapData.token0 && swapData.token1) ? (
         <Box textAlign={'center'} fontSize={'x-small'} color={'brand.500'}>
           <Text>not enough liquidity or cannot find route in this pair </Text>
           {/* <Link href={`/pool/create`} textDecoration={'underline'}>

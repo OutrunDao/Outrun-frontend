@@ -10,3 +10,7 @@ export enum NativeCurrencyName {
   // Strings match input for CLI
   ETHER = 'ETH',
 }
+
+export const BlockExplorers = {
+  [ChainId.BLAST_SEPOLIA]: "https://testnet.blastscan.io"
+} as Record<number, string>

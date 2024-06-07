@@ -2,14 +2,12 @@ import { getAddress, getContractAddress, encodePacked, keccak256 } from 'viem';
 import { BigintIsh, CurrencyAmount, Percent, Price, sqrt, Token } from '@/packages/swap-core';
 import JSBI from 'jsbi';
 import invariant from 'tiny-invariant';
-
+import { initCodeHashMap } from '@/contracts/addressMap';
 import {
   _1000,
   _997,
   BASIS_POINTS,
-  FACTORY_ADDRESS_MAP,
   FIVE,
-  INIT_CODE_HASH,
   MINIMUM_LIQUIDITY,
   ONE,
   ONE_HUNDRED_PERCENT,
@@ -17,6 +15,7 @@ import {
   ZERO_PERCENT,
 } from '../constants';
 import { InsufficientInputAmountError, InsufficientReservesError } from '../errors';
+import { addressMap } from '@/contracts/addressMap';
 
 export const computePairAddress = ({
   factoryAddress,
@@ -29,7 +28,7 @@ export const computePairAddress = ({
 }): string => {
   const [token0, token1] = tokenA.sortsBefore(tokenB) ? [tokenA, tokenB] : [tokenB, tokenA]; // does safety checks
   return getContractAddress({
-    bytecodeHash: INIT_CODE_HASH,
+    bytecodeHash: initCodeHashMap[token0.chainId],
     from: getAddress(factoryAddress),
     opcode: 'CREATE2',
     salt: keccak256(
@@ -42,7 +41,7 @@ export class Pair {
   private readonly tokenAmounts: [CurrencyAmount<Token>, CurrencyAmount<Token>];
 
   public static getAddress(tokenA: Token, tokenB: Token): string {
-    const factoryAddress = FACTORY_ADDRESS_MAP[tokenA.chainId];
+    const factoryAddress = addressMap[tokenA.chainId].SWAP_FACTORY;
     return computePairAddress({ factoryAddress, tokenA, tokenB });
   }
 
@@ -199,9 +198,9 @@ export class Pair {
       : ZERO_PERCENT;
     const inputAmountAfterTax = percentAfterSellFees.greaterThan(ZERO_PERCENT)
       ? CurrencyAmount.fromRawAmount(
-          inputAmount.currency,
-          percentAfterSellFees.multiply(inputAmount).quotient // fraction.quotient will round down by itself, which is desired
-        )
+        inputAmount.currency,
+        percentAfterSellFees.multiply(inputAmount).quotient // fraction.quotient will round down by itself, which is desired
+      )
       : inputAmount;
 
     const inputAmountWithFeeAndAfterTax = JSBI.multiply(inputAmountAfterTax.quotient, _997);
@@ -221,9 +220,9 @@ export class Pair {
       : ZERO_PERCENT;
     const outputAmountAfterTax = percentAfterBuyFees.greaterThan(ZERO_PERCENT)
       ? CurrencyAmount.fromRawAmount(
-          outputAmount.currency,
-          outputAmount.multiply(percentAfterBuyFees).quotient // fraction.quotient will round down by itself, which is desired
-        )
+        outputAmount.currency,
+        outputAmount.multiply(percentAfterBuyFees).quotient // fraction.quotient will round down by itself, which is desired
+      )
       : outputAmount;
     if (JSBI.equal(outputAmountAfterTax.quotient, ZERO)) {
       throw new InsufficientInputAmountError();
@@ -287,9 +286,9 @@ export class Pair {
       : ZERO_PERCENT;
     const outputAmountBeforeTax = percentAfterBuyFees.greaterThan(ZERO_PERCENT)
       ? CurrencyAmount.fromRawAmount(
-          outputAmount.currency,
-          JSBI.add(outputAmount.divide(percentAfterBuyFees).quotient, ONE) // add 1 for rounding up
-        )
+        outputAmount.currency,
+        JSBI.add(outputAmount.divide(percentAfterBuyFees).quotient, ONE) // add 1 for rounding up
+      )
       : outputAmount;
 
     if (
@@ -324,9 +323,9 @@ export class Pair {
       : ZERO_PERCENT;
     const inputAmountBeforeTax = percentAfterSellFees.greaterThan(ZERO_PERCENT)
       ? CurrencyAmount.fromRawAmount(
-          inputAmount.currency,
-          JSBI.add(inputAmount.divide(percentAfterSellFees).quotient, ONE) // add 1 for rounding up
-        )
+        inputAmount.currency,
+        JSBI.add(inputAmount.divide(percentAfterSellFees).quotient, ONE) // add 1 for rounding up
+      )
       : inputAmount;
     return [
       inputAmountBeforeTax,

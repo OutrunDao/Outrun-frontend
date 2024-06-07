@@ -1,5 +1,5 @@
-import { Token } from './token';
-import { ChainId } from '..';
+import { Token } from '@/packages/swap-core/entities/token';
+import { ChainId } from './chains';
 /**
  * Known RETH implementation addresses, used in our implementation of Ether#wrapped
  */

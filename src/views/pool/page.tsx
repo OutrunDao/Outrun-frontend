@@ -2,44 +2,27 @@
 import Link from 'next/link';
 import {
   Box,
-  Icon,
-  Text,
   Heading,
-  IconButton,
-  Container,
   Button,
-  Input,
-  InputGroup,
   VStack,
-  Center,
-  Card,
-  CardBody,
-  useToast,
   Tabs,
   TabList,
   Tab,
   TabPanel,
   TabPanels,
-  Divider,
   HStack,
 } from '@chakra-ui/react';
-import TokenSelect, { getToken } from '@/components/TokenSelect';
-import { ArrowDownIcon } from '@chakra-ui/icons';
-import { useAccount, useChainId, usePublicClient, useWalletClient } from 'wagmi';
-import { Address, formatUnits, getAddress, parseUnits } from 'viem';
-import { getRouterContract } from './getContract';
+import { useChainId } from 'wagmi';
 import UserLiquiditesPannel from './UserLiquidityPannel';
 import PoolTvlPannel from './PoolTvlPannel';
-
-const defaultSymbol = 'WETH';
+import { useMemo } from 'react';
+import { addressMap } from '@/contracts/addressMap';
 
 const PoolIndex = () => {
   const chainId = useChainId();
-  const account = useAccount();
-  const publicClient = usePublicClient();
-  const toast = useToast();
-  const { data: walletClient } = useWalletClient();
-
+  const oreth_orusd = useMemo(() => {
+    return addressMap[chainId].ORETH_ORUSD;
+  }, [chainId]);
   return (
     <Box>
       <Box mt="100">
@@ -52,9 +35,7 @@ const PoolIndex = () => {
           <br />
           <HStack spacing={4}>
             <Button colorScheme="gray" rounded={4}>
-              <Link href={'/pool/0x5e6c8991e1bddeae585cbb1f0d8d94d7fcb22f2e/add-liquidity'}>
-                Add Liquidity
-              </Link>
+              <Link href={`/pool/${oreth_orusd}/add-liquidity`}>Add Liquidity</Link>
             </Button>
             <Button colorScheme="teal" rounded={4}>
               <Link href={'/pool/create'}>Create a Pool</Link>
@@ -66,7 +47,7 @@ const PoolIndex = () => {
       <br />
 
       <Tabs position="relative" variant="unstyled" colorScheme="pink">
-        <TabList>
+        <TabList mx={18}>
           <Tab _selected={{ color: 'white', bg: 'gray.500' }}>All Pools</Tab>
           <Tab _selected={{ color: 'white', bg: 'gray.500' }}>My Positions</Tab>
         </TabList>

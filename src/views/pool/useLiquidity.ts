@@ -1,7 +1,6 @@
 import { useRouter } from 'next/navigation';
 import { Address, formatUnits, getAddress, parseUnits } from 'viem';
 import { useToast } from '@chakra-ui/react';
-import { getRouterContract } from './getContract';
 import { Percent } from '@/packages/swap-core';
 import { useAccount, useChainId, usePublicClient, useWalletClient } from 'wagmi';
 import { useRef, useState } from 'react';
@@ -9,11 +8,14 @@ import { retry } from 'radash';
 import { Token } from '@/packages/swap-core';
 import tokenSwitch, { CurrencyPairType } from './tokenSwitch';
 import { Pair } from '@/packages/swap-sdk';
+import useContract from '@/hook/useContract';
+import { ContractName } from '@/contracts/addressMap';
 
 export default function useLiquidity() {
   const account = useAccount();
   const publicClient = usePublicClient();
   const toast = useToast();
+  const { write: routerContractWrite } = useContract()
   const { data: walletClient } = useWalletClient();
   const [loading, setLoading] = useState(false)
   const router = useRouter()
@@ -67,49 +69,16 @@ export default function useLiquidity() {
       args = [(tokenB as Token).address, tokenBInput!, tokenAInput!, tokenBMin!, tokenAMin!, to, deadline];
     }
     setLoading(true)
-    try {
-      let toastCurrent = toast({
-        status: 'loading',
-        title: 'submiting transaction',
-        description: 'please wait...',
-        duration: null,
-        isClosable: true,
-      });
 
-      const tx = await getRouterContract(walletClient!).write[execution](args, config);
-
-      toast.update(toastCurrent, {
-        title: 'transaction submitted',
-        description: "Waiting for block confirmation",
-        status: "loading"
-      })
-      const data = await retry({ times: 20, delay: 5000 }, async () => {
-        return await publicClient!.getTransactionReceipt({
-          hash: tx as Address,
-        });
-      });
-      toast.update(toastCurrent, {
-        status: data.status === 'success' ? "success" : "error",
-        title: data.status === 'success' ? 'Add liquidity success' : 'Add liquidity fail',
-        description: "",
-        isClosable: true,
-
-        duration: 10000
-      })
-      if (data.status === 'success') {
-        const pairAddress = Pair.getAddress(tokenA as Token, tokenB as Token)
-        router.push('/pool/' + pairAddress)
-      }
-    } catch (e: any) {
-      toast.closeAll()
-      toast({
-        title: 'transaction failed',
-        description: e.message,
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
+    const data = await routerContractWrite(ContractName.SWAP_ROUTER, {
+      actionTitle: "AddLiquidity"
+      // @ts-ignore
+    }, execution, args, config);
+    if (data && data.status === 'success') {
+      const pairAddress = Pair.getAddress(tokenA as Token, tokenB as Token)
+      router.push('/pool/' + pairAddress)
     }
+
     setLoading(false)
   }
 

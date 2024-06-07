@@ -2,7 +2,7 @@ import invariant from 'tiny-invariant'
 import { Currency } from './currency'
 import { NativeCurrency } from './nativeCurrency'
 import { Token } from './token'
-import { WETH9 } from './weth9'
+import { WETH9 } from '../../../contracts/weth9'
 import { Address, formatEther, PublicClient } from 'viem'
 import { getBalance } from 'viem/actions';
 

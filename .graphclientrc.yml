@@ -2,7 +2,7 @@ sources:
   - name: outrun
     handler:
       graphql:
-        endpoint: https://api.studio.thegraph.com/query/68891/outrun/0.1.28
+        endpoint: https://api.studio.thegraph.com/query/68891/outrun/0.1.30
   - name: outrunStake
     handler:
       graphql:
