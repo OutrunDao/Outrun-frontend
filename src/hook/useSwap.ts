@@ -137,8 +137,10 @@ export function useSwap(view: SwapView) {
 
 
   const submitButtonStatus = useMemo(() => {
-    if (!walletClient || !SUPPORTED_CHAINS.includes(walletClient.chain.id)) return BtnAction.disconnect;
-    if (!token0 || !token1 || !token0AmountInput || !token1AmountInput) return BtnAction.disable;
+    if (!chainId || !SUPPORTED_CHAINS.includes(chainId)) return BtnAction.disconnect;
+    if (!token0 || !token1 || !token0AmountInput || !token1AmountInput) {
+      return BtnAction.disable;
+    }
     try {
       if (view === SwapView.swap) {
         if (!tradeRoute) return BtnAction.disable
@@ -149,6 +151,8 @@ export function useSwap(view: SwapView) {
         if (token0Balance.lt(token0AmountInput) || token1Balance.lt(token1AmountInput)) return BtnAction.insufficient
       }
     } catch (e) {
+      console.log(e);
+
       return BtnAction.disable
     }
 

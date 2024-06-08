@@ -366,7 +366,6 @@ export default function Swap() {
             colorScheme="gray"
             variant="solid"
             onClick={swap}
-            isDisabled={!swapData.pair}
             isLoading={loading}
           >
             swap
