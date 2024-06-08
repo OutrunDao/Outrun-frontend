@@ -22,8 +22,8 @@ import { useSwap, BtnAction, SwapView } from '@/hook/useSwap';
 import useLiquidity from '../useLiquidity';
 import { execute, PairDocument, Pair as PairType } from '@/subgraph';
 import { useEffect } from 'react';
-import { Fetcher } from '@/packages/swap-sdk/fetcher';
 import { Token } from '@/packages/swap-core';
+import { useWeb3Modal } from '@web3modal/wagmi/react';
 
 const defaultSymbol = 'ETH';
 
@@ -31,8 +31,9 @@ export default function AddLiquidityPage() {
   const chainId = useChainId();
   const account = useAccount();
   const publicClient = usePublicClient();
+  const { open } = useWeb3Modal();
+
   const toast = useToast();
-  const { data: walletClient } = useWalletClient();
   const { pair: pairAddress } = useParams<{ pair: string }>();
   // const { param } = router.query;
   const { data: pairTarget } = useQuery({
@@ -52,12 +53,13 @@ export default function AddLiquidityPage() {
     setLoading,
     token0AmountInputHandler,
     token1AmountInputHandler,
-    approve,
+    approveTokens,
     maxHandler,
   } = useSwap(SwapView.addLiquidity);
   const { addLiquidity, loading: submitLoading } = useLiquidity();
 
   async function _addLiquidity() {
+    await approveTokens();
     addLiquidity(swapData);
   }
 
@@ -112,6 +114,7 @@ export default function AddLiquidityPage() {
               defaultSymbol={defaultSymbol}
               token={swapData.token0}
               tokenDisable={swapData.token1}
+              isDisabled
               chainId={chainId}
               onSelect={(token) => setToken0(token)}
             />
@@ -159,6 +162,7 @@ export default function AddLiquidityPage() {
             <TokenSelect
               chainId={chainId}
               tokenDisable={swapData.token0}
+              isDisabled
               token={swapData.token1}
               onSelect={(token) => setToken1(token)}
             />
@@ -198,37 +202,30 @@ export default function AddLiquidityPage() {
         <Text w="70%" textAlign={'right'}>
           {swapData.pair ? (
             <>
-              1{swapData.pair.token0.symbol} = {swapData.pair.token0Price.toFixed(6)}{' '}
-              {swapData.pair.token1.symbol}
+              1{swapData.token0.symbol} = {swapData.pair.token0Price.toFixed(6)} {swapData.token1!.symbol}
             </>
           ) : null}
         </Text>
       </HStack>
       <Box mt={'1rem'} fontSize={16}>
-        {swapData.action === BtnAction.approve ? (
-          <Button
-            width={'100%'}
-            mt={4}
-            size="lg"
-            variant="solid"
-            colorScheme="gray"
-            onClick={approve}
-            isLoading={loading}
-          >
-            Set Approve{' '}
-            {swapData.tokenAllowance[0].lessThan(swapData.token0AmountInput || 0)
-              ? swapData.token0.symbol
-              : swapData.token1!.symbol}
-          </Button>
-        ) : null}
-        {swapData.action === BtnAction.insufficient ? (
+        {swapData.submitButtonStatus === BtnAction.insufficient ? (
           <Button width={'100%'} mt={4} size="lg" variant="solid" colorScheme="gray">
             {' '}
             insufficient token{' '}
           </Button>
         ) : null}
-        {swapData.action === BtnAction.disconnect ? <w3m-button /> : null}
-        {swapData.action === BtnAction.available ? (
+        {swapData.submitButtonStatus === BtnAction.disconnect ? (
+          <Button
+            width={'100%'}
+            size="lg"
+            colorScheme="gray"
+            variant="solid"
+            onClick={() => open({ view: 'Connect' })}
+          >
+            connect to wallet
+          </Button>
+        ) : null}
+        {swapData.submitButtonStatus === BtnAction.available ? (
           <Button
             width={'100%'}
             mt={4}
@@ -241,7 +238,7 @@ export default function AddLiquidityPage() {
             add liquidity
           </Button>
         ) : null}
-        {swapData.action === BtnAction.disable ? (
+        {swapData.submitButtonStatus === BtnAction.disable ? (
           <Button width={'100%'} mt={4} disabled size="lg" isDisabled colorScheme="gray" variant="solid">
             add liquidity
           </Button>

@@ -4,17 +4,15 @@ import { useToast } from '@chakra-ui/react';
 import { Percent } from '@/packages/swap-core';
 import { useAccount, useChainId, usePublicClient, useWalletClient } from 'wagmi';
 import { useRef, useState } from 'react';
-import { retry } from 'radash';
 import { Token } from '@/packages/swap-core';
 import tokenSwitch, { CurrencyPairType } from './tokenSwitch';
 import { Pair } from '@/packages/swap-sdk';
 import useContract from '@/hook/useContract';
 import { ContractName } from '@/contracts/addressMap';
+import Decimal from 'decimal.js-light';
 
 export default function useLiquidity() {
   const account = useAccount();
-  const publicClient = usePublicClient();
-  const toast = useToast();
   const { write: routerContractWrite } = useContract()
   const { data: walletClient } = useWalletClient();
   const [loading, setLoading] = useState(false)
@@ -25,15 +23,12 @@ export default function useLiquidity() {
     let execution = 'addLiquidity';
     let token0Input = parseUnits(swapData.token0AmountInput!, swapData.token0.decimals);
     let token1Input = parseUnits(swapData.token1AmountInput!, swapData.token1.decimals);
-    let token0AmountMin = parseUnits(
-      (+swapData.token0AmountInput! * slippage).toString(),
-      swapData.token0.decimals
-    );
-    // 计算最小输出逻辑应该不对,待改
-    let token1AmountMin = parseUnits(
-      (+swapData.token1AmountInput! * slippage).toString(),
-      swapData.token1.decimals
-    );
+    let token0AmountMin = BigInt(
+      new Decimal(swapData.token0AmountInput).mul(slippage).times(new Decimal(10).pow(swapData.token0.decimals)).toString()
+    )
+    let token1AmountMin = BigInt(
+      new Decimal(swapData.token1AmountInput).mul(slippage).times(new Decimal(10).pow(swapData.token1.decimals)).toString()
+    )
     let deadline = Math.floor(Date.now() / 1000) + 60 * 10;
     let to = account.address;
     let args: (string | number | bigint)[] = [

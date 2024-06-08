@@ -3,7 +3,7 @@ import { ContractName } from '@/contracts/addressMap'
 import { Abi, Address, BaseError, ContractFunctionRevertedError, GetContractReturnType, WalletClient } from 'viem'
 import { useMemo, useState } from 'react';
 import { useToast } from '@chakra-ui/react';
-import { retry } from 'radash';
+import { get, retry } from 'radash';
 import getSwapRouter from '@/contracts/get/swapRouter';
 import getSwapFactory from '@/contracts/get/swapFactory';
 
@@ -49,6 +49,7 @@ export default function useContract() {
       const tx = await contract.write[action](request)
       toast.update(currentToast, {
         status: "loading",
+        title: options.actionTitle,
         description: "submitted success, waiting for block confirmations..."
       })
       const data = await retry({ times: 20, delay: 5000 }, async () => {
@@ -58,6 +59,7 @@ export default function useContract() {
       });
       toast.update(currentToast, {
         status: data.status === 'success' ? 'success' : "error",
+        title: options.actionTitle,
         description: data.status === 'success' ? 'block confirmed successful' : "block confirmed failed",
         duration: 10000,
         isClosable: true,
@@ -72,12 +74,14 @@ export default function useContract() {
       if (err instanceof BaseError) {
         const revertError = err.walk(err => err instanceof ContractFunctionRevertedError)
         if (revertError instanceof ContractFunctionRevertedError) {
-          const errorName = revertError.data?.errorName ?? ''
-          errMessage = errorName || errMessage
+          const errorName = get(revertError, 'data.errorName')
+          const errorReason = get(revertError, 'reason')
+          errMessage = `${errorName}: ${errorReason}` || errMessage
         }
       }
       toast.update(currentToast, {
         status: "error",
+        title: options.actionTitle,
         description: errMessage || "call contract failed",
         duration: 20000,
         isClosable: true

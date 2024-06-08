@@ -72,7 +72,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </Box>
         <Spacer />
         <Box>
-          <HStack>
+          <HStack mr={6}>
             <w3m-button />
           </HStack>
         </Box>

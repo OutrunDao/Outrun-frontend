@@ -18,16 +18,19 @@ import TokenSelect, { getToken } from '@/components/TokenSelect';
 import { useAccount, useChainId, usePublicClient, useWalletClient } from 'wagmi';
 import { Address, formatUnits, getAddress, parseUnits } from 'viem';
 import { useSwap, BtnAction, SwapView } from '@/hook/useSwap';
+import { useWeb3Modal } from '@web3modal/wagmi/react';
 import useLiquidity from '../useLiquidity';
+import { useMemo } from 'react';
+
 const defaultSymbol = 'ETH';
 
 export default function PoolCreate() {
-  const chainId = useChainId();
-  const account = useAccount();
+  const { open } = useWeb3Modal();
   const publicClient = usePublicClient();
   const toast = useToast();
+  const chainId = useChainId();
   const { data: walletClient } = useWalletClient();
-  const { addLiquidity } = useLiquidity();
+  const { addLiquidity, loading: submitLoading } = useLiquidity();
   const {
     swapData,
     loading,
@@ -36,13 +39,25 @@ export default function PoolCreate() {
     setLoading,
     token0AmountInputHandler,
     token1AmountInputHandler,
-    approve,
+    approveTokens,
     maxHandler,
   } = useSwap(SwapView.createPoll);
 
   async function createPool() {
+    await approveTokens();
     addLiquidity(swapData);
   }
+
+  const exchangeRate = useMemo(() => {
+    if (swapData.pair) return '';
+    try {
+      const result = (+swapData.token1AmountInput / +swapData.token0AmountInput).toFixed(2);
+      if (result === 'NaN') return '';
+      return result;
+    } catch (e) {
+      return '';
+    }
+  }, [swapData.token0AmountInput, swapData.token1AmountInput]);
 
   return (
     <Container
@@ -156,18 +171,18 @@ export default function PoolCreate() {
           </Center>
         </Flex>
       </Container>
-      {/* <br />
+      <br />
       <HStack fontSize={'small'} px="8px">
         <Text w="40%">Exchange rate</Text>
         <Text w="70%" textAlign={'right'}>
-          {swapData.pair ? (
+          {(swapData.pair || exchangeRate) && swapData.token0 && swapData.token1 ? (
             <>
-              1{swapData.pair.token0.symbol} = {swapData.pair.token0Price.toFixed(6)}{' '}
-              {swapData.pair.token1.symbol}
+              1{swapData.token0.symbol} ={' '}
+              {swapData.pair ? swapData.pair.token0Price.toFixed(6) : exchangeRate} {swapData.token1.symbol}
             </>
           ) : null}
         </Text>
-      </HStack> */}
+      </HStack>
       <br />
       {swapData.pair ? (
         <Box textAlign={'center'} fontSize={'x-small'} color={'brand.500'}>
@@ -181,29 +196,24 @@ export default function PoolCreate() {
         </Box>
       ) : null}
       <Box mt={'1rem'} fontSize={16}>
-        {swapData.action === BtnAction.approve ? (
-          <Button
-            width={'100%'}
-            size="lg"
-            colorScheme="gray"
-            variant="solid"
-            onClick={approve}
-            isLoading={loading}
-          >
-            Set Approve{' '}
-            {swapData.tokenAllowance[0].lessThan(swapData.token0AmountInput || 0)
-              ? swapData.token0.symbol
-              : swapData.token1!.symbol}
-          </Button>
-        ) : null}
-        {swapData.action === BtnAction.insufficient ? (
+        {swapData.submitButtonStatus === BtnAction.insufficient ? (
           <Button width={'100%'} size="lg" colorScheme="gray" variant="solid">
             {' '}
             insufficient token{' '}
           </Button>
         ) : null}
-        {swapData.action === BtnAction.disconnect ? <w3m-button /> : null}
-        {swapData.action === BtnAction.available ? (
+        {swapData.submitButtonStatus === BtnAction.disconnect ? (
+          <Button
+            width={'100%'}
+            size="lg"
+            colorScheme="gray"
+            variant="solid"
+            onClick={() => open({ view: 'Connect' })}
+          >
+            connect to wallet
+          </Button>
+        ) : null}
+        {swapData.submitButtonStatus === BtnAction.available ? (
           <Button
             width={'100%'}
             size="lg"
@@ -212,12 +222,12 @@ export default function PoolCreate() {
             variant="solid"
             isDisabled={!!swapData.pair}
             onClick={createPool}
-            isLoading={loading}
+            isLoading={loading || submitLoading}
           >
             create pool
           </Button>
         ) : null}
-        {swapData.action === BtnAction.disable ? (
+        {swapData.submitButtonStatus === BtnAction.disable ? (
           <Button width={'100%'} size="lg" colorScheme="gray" isDisabled variant="solid" rounded={'md'}>
             create pool
           </Button>

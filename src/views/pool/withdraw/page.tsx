@@ -32,14 +32,16 @@ import {
   LiquidityPosition,
   Pair as PairType,
 } from '@/subgraph';
-import React, { useEffect, useState } from 'react';
-import { Token, V2_ROUTER_ADDRESSES } from '@/packages/swap-core';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Token } from '@/packages/swap-core';
 import { chain, get, retry } from 'radash';
 import Decimal from 'decimal.js-light';
 import { formatUnits, parseEventLogs, parseUnits } from 'viem';
-import { getRouterContract } from '../getContract';
 import tokenSwitch, { CurrencyPairType } from '../tokenSwitch';
 import TransferEventAbi from './TransferEvent.abi.json';
+import getTokenContract from '@/contracts/get/erc20token';
+import useContract from '@/hook/useContract';
+import { ContractName, addressMap } from '@/contracts/addressMap';
 
 enum BtnAction {
   disconnect,
@@ -59,6 +61,7 @@ export default function WithdrawPage() {
   const publicClient = usePublicClient();
   const toast = useToast();
   const { data: walletClient } = useWalletClient();
+  const { write: writeContract } = useContract();
   const { pair: pairAddress } = useParams<{ pair: string }>();
   const [lpAmount, setLpAmount] = useState('');
   const [action, setAction] = useState(BtnAction.disconnect);
@@ -84,6 +87,9 @@ export default function WithdrawPage() {
     },
   });
   const [sliderValue, setSliderValue] = useState(100);
+  const V2_ROUTER_ADDRESSES = useMemo(() => {
+    return addressMap[chainId].SWAP_ROUTER;
+  }, [chainId]);
 
   useEffect(() => {
     if (!pairAddress || !pairTarget || !publicClient) return;
@@ -137,108 +143,69 @@ export default function WithdrawPage() {
     setLpAmount(value);
   }
   async function removeLiquidity() {
-    const token = new Token(chainId, get(userLiquidityPosition, '[0].pair.id'), 18);
-    const routerAddress = V2_ROUTER_ADDRESSES[chainId] as `0x${string}`;
-    let toastCurrent = toast({
-      status: 'loading',
-      title: 'submiting transaction',
-      description: 'please wait...',
-      duration: null,
-      isClosable: true,
-    });
+    if (!publicClient) return;
     setLoading(true);
-    try {
-      const allowrance = await token.allowance(account.address!, routerAddress, publicClient!);
-      if (allowrance.lt(lpAmount)) {
-        toast.update(toastCurrent, {
-          title: 'set approve lptoken first',
-          status: 'loading',
-        });
-        let tx = (await token.approve(
-          routerAddress,
-          parseUnits(lpAmount, 18),
-          walletClient!
-        )) as `0x${string}`;
-        let approveResult = await retry({ times: 20, delay: 5000 }, async () => {
-          return await publicClient?.getTransactionReceipt({
-            hash: tx,
-          });
-        });
-        toast.update(toastCurrent, {
-          status: approveResult?.status === 'success' ? 'success' : 'error',
-          title: approveResult?.status === 'success' ? 'approve success' : 'approve fail',
-          duration: approveResult?.status === 'success' ? null : 5000,
-        });
-        if (approveResult?.status !== 'success') return setLoading(false);
+    const tokenContract = getTokenContract(
+      get(userLiquidityPosition, '[0].pair.id'),
+      publicClient,
+      walletClient
+    );
+    await writeContract(
+      // @ts-ignore
+      tokenContract,
+      {
+        actionTitle: 'Approve Liquidity Token',
+      },
+      'approve',
+      [V2_ROUTER_ADDRESSES, parseUnits(lpAmount, 18)],
+      {
+        account,
       }
+    );
 
-      toast.update(toastCurrent, {
-        status: 'loading',
-        title: 'submiting transaction',
-        description: 'please wait...',
-      });
-      const router = getRouterContract(walletClient!);
-      const deadline = Math.floor(new Date().getTime() / 1000) + 10 * 60;
+    const deadline = Math.floor(new Date().getTime() / 1000) + 10 * 60;
 
-      const [type, tokenA, tokenB, tokenAMinAmount, tokenBMinAmount] = tokenSwitch(
-        token0!,
-        token1!,
-        parseUnits(new Decimal(token0Value).times(0.995).toString(), token0!.decimals),
-        parseUnits(new Decimal(token1Value).times(0.995).toString(), token1!.decimals)
-      );
-      let execute = 'removeLiquidity';
-      let liquidity = parseUnits(lpAmount, 18);
-      let to = account.address;
-      let args = [
-        token0!.address,
-        token1!.address,
-        liquidity,
-        tokenAMinAmount,
-        tokenBMinAmount,
-        to,
-        deadline,
-      ];
-      if (type === CurrencyPairType.EthAndToken) {
-        execute = 'removeLiquidityETH';
-        args = [(tokenB as Token).address, liquidity, tokenAMinAmount, tokenBMinAmount, to, deadline];
-      } else if (type === CurrencyPairType.EthAndUsdb) {
-        execute = 'removeLiquidityETHAndUSDB';
-        args = [liquidity, tokenAMinAmount, tokenBMinAmount, to, deadline];
-      } else if (type === CurrencyPairType.UsdbAndToken) {
-        execute = 'removeLiquidityUSDB';
-        args = [(tokenB as Token).address, liquidity, tokenAMinAmount, tokenBMinAmount, to, deadline];
+    const [type, tokenA, tokenB, tokenAMinAmount, tokenBMinAmount] = tokenSwitch(
+      token0!,
+      token1!,
+      parseUnits(new Decimal(token0Value).times(0.995).toString(), token0!.decimals),
+      parseUnits(new Decimal(token1Value).times(0.995).toString(), token1!.decimals)
+    );
+    let execute = 'removeLiquidity';
+    let liquidity = parseUnits(lpAmount, 18);
+    let to = account.address;
+    let args = [token0!.address, token1!.address, liquidity, tokenAMinAmount, tokenBMinAmount, to, deadline];
+    if (type === CurrencyPairType.EthAndToken) {
+      execute = 'removeLiquidityETH';
+      args = [(tokenB as Token).address, liquidity, tokenAMinAmount, tokenBMinAmount, to, deadline];
+    } else if (type === CurrencyPairType.EthAndUsdb) {
+      execute = 'removeLiquidityETHAndUSDB';
+      args = [liquidity, tokenAMinAmount, tokenBMinAmount, to, deadline];
+    } else if (type === CurrencyPairType.UsdbAndToken) {
+      execute = 'removeLiquidityUSDB';
+      args = [(tokenB as Token).address, liquidity, tokenAMinAmount, tokenBMinAmount, to, deadline];
+    }
+
+    // @ts-ignore
+    const data = await writeContract(
+      ContractName.SWAP_ROUTER,
+      {
+        actionTitle: 'Remove Liquidity',
+      },
+      execute,
+      // @ts-ignore
+      args,
+      {
+        account,
       }
-
-      const tx = await router.write[execute](args);
-      const result = await retry(
-        {
-          times: 20,
-          delay: 5000,
-        },
-        async () =>
-          await publicClient?.getTransactionReceipt({
-            hash: tx,
-          })
-      );
+    );
+    if (data && data.status === 'success') {
       console.log(
         parseEventLogs({
-          logs: result!.logs,
+          logs: data.logs,
           abi: TransferEventAbi,
         })
       );
-
-      toast.update(toastCurrent, {
-        status: result?.status === 'success' ? 'success' : 'error',
-        title: result?.status === 'success' ? 'success' : 'fail',
-        duration: 5000,
-      });
-    } catch (e: any) {
-      toast.update(toastCurrent, {
-        status: 'error',
-        title: 'fail',
-        description: e.message,
-        duration: 5000,
-      });
     }
     setLoading(false);
   }

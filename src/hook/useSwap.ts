@@ -1,21 +1,21 @@
 import { Fetcher } from '@/packages/swap-sdk/fetcher';
-import { all, map, retry, set } from 'radash';
+import { all, chain, debounce, map, retry, set } from 'radash';
 import { Native, Trade } from '@/packages/swap-sdk';
 import { useAccount, useChainId, usePublicClient, useWalletClient } from 'wagmi';
 import { Address, PublicClient, formatUnits, getAddress, maxUint256, parseUnits } from 'viem';
-import { Token, Currency } from '@/packages/swap-core';
+import { Token, Currency, TradeType } from '@/packages/swap-core';
 import { Pair } from '@/packages/swap-sdk';
 import { getToken } from '@/components/TokenSelect';
 import { useEffect, useMemo, useState } from 'react';
 import { useToast } from '@chakra-ui/react';
 import Decimal from 'decimal.js-light';
 import { CurrencyAmount, Percent } from '@/packages/swap-core';
-import { TradeType } from '@/packages/swap-core';
 import { USDB, RUSD } from '@/packages/swap-core';
 import { LocalTokenAddress } from '@/contants/address';
 import { addressMap } from '@/contracts/addressMap';
 import getTokenContract from '@/contracts/get/erc20token';
 import useContract from './useContract';
+import { SUPPORTED_CHAINS } from '@/contracts/chains';
 const defaultSymbol = 'ETH';
 
 export enum BtnAction {
@@ -71,238 +71,205 @@ export function useSwap(view: SwapView) {
   const { data: walletClient } = useWalletClient();
   const [token0, setToken0] = useState<Currency>(getToken(defaultSymbol, chainId)!);
   const [token1, setToken1] = useState<Currency>();
-  const [token0Balance, setToken0Balance] = useState<Decimal>(new Decimal(0));
-  const [token1Balance, setToken1Balance] = useState<Decimal>(new Decimal(0));
   const [token0AmountInput, setToken0AmountInput] = useState<string>('');
   const [token1AmountInput, setToken1AmountInput] = useState<string>('');
-  const [priceImpact, setPriceImpact] = useState('')
-  const [exchangeRate, setExchangeRate] = useState('')
+  const [routeNotExist, setRouteNotExist] = useState<boolean>(false);
   const [slipage, setSlippage] = useState(2)
-  const [minOut, setMinOut] = useState('')
-  const [tokenAllowance, setTokenAllowance] = useState<Decimal[]>([new Decimal(0), new Decimal(0)]);
+  const [token0Balance, setToken0Balance] = useState<Decimal>(new Decimal(0))
+  const [token1Balance, setToken1Balance] = useState<Decimal>(new Decimal(0))
   const [pair, setPair] = useState<Pair>();
   const [loading, setLoading] = useState<boolean>(false);
   const [tradeRoute, setTradeRoute] = useState<Trade<Currency, Currency, TradeType>>()
-  const [tradeRoutePath, setTradeRoutePath] = useState('')
-  const [action, setAction] = useState<BtnAction>(BtnAction.disable)
   const { write: writeContract } = useContract()
-  const toast = useToast();
   const V2_ROUTER_ADDRESSES = useMemo(() => {
     return addressMap[chainId].SWAP_ROUTER
   }, [chainId])
-  const fetchAllowance = async () => {
-    if (!account.address || !token0 || !token1) return;
-    const allowance0 = token0.isNative
-      ? new Decimal(9999999)
-      : await (token0 as Token)
-        .allowance(account.address, getAddress(V2_ROUTER_ADDRESSES), publicClient!)
-        .catch(() => new Decimal(0));
-    const allowance1 = token1.isNative
-      ? new Decimal(9999999)
-      : await (token1 as Token)
-        .allowance(account.address, getAddress(V2_ROUTER_ADDRESSES), publicClient!)
-        .catch(() => new Decimal(0));
-    setTokenAllowance([allowance0, allowance1]);
-  };
-  const fetchPair = async () => {
-    const pair = await retry({ times: 2, delay: 3000 }, () =>
-      Fetcher.fetchPairData(tokenConvert(token0), tokenConvert(token1!), publicClient!)
-    ).catch((e) => undefined);
-    setPair(pair);
-  };
-  // watch and update balance
   useEffect(() => {
-    const fetchBalance = async () => {
-      const balance0 =
-        !account.address || !token0
-          ? new Decimal(0)
-          : await token0.balanceOf(account.address, publicClient!).catch(() => new Decimal(0));
-      const balance1 =
-        !account.address || !token1
-          ? new Decimal(0)
-          : await token1.balanceOf(account.address, publicClient!).catch(() => new Decimal(0));
-      setToken0Balance(balance0);
-      setToken1Balance(balance1);
-    };
-    fetchBalance();
-  }, [token0, token1, account.address]);
+    async function _() {
+      if (!account.address || !token1 || !publicClient) return new Decimal(0);
+      return token1.balanceOf(account.address, publicClient).catch(() => new Decimal(0));
+    }
+    _().then(setToken1Balance)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chainId, account.address, token1?.name])
 
-  // watch and update pair
+  useEffect(() => {
+    async function _() {
+      if (!account.address || !token0 || !publicClient) return new Decimal(0);
+      return token0.balanceOf(account.address, publicClient).catch(() => new Decimal(0));
+    }
+    _().then(setToken0Balance)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chainId, account.address, token0.name])
+  useEffect(() => {
+    async function _fn() {
+      if (view === SwapView.swap || !token0 || !token1 || !publicClient) return;
+      return await retry({ times: 2, delay: 3000 }, () =>
+        Fetcher.fetchPairData(tokenConvert(token0), tokenConvert(token1), publicClient)
+      ).catch((e) => undefined);
+    }
+    _fn().then(setPair)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chainId, token0.name, token1?.name, view])
   useEffect(() => {
     setToken0AmountInput('')
     setToken1AmountInput('')
-    resetData()
-    if (!token0 || !token1) {
-      setPair(undefined);
-      setTokenAllowance([new Decimal(0), new Decimal(0)]);
-    } else {
-      fetchPair();
-      fetchAllowance();
-    }
-  }, [token0, token1]);
+    setTradeRoute(undefined)
+    setRouteNotExist(false)
+  }, [token0.name, token1?.name]);
 
-  // watch and update available action
-  useEffect(() => {
-    if (!account.isConnected) return setAction(BtnAction.disconnect)
-    if (!token0 || !token1 || !token0AmountInput || !token1AmountInput) return setAction(BtnAction.disable)
-    if (+token0AmountInput === 0 || +token1AmountInput === 0) return setAction(BtnAction.disable)
-    if (priceImpact && +priceImpact >= 20) return setAction(BtnAction.disable)
+  const priceImpact = useMemo(() => {
+    return tradeRoute && tradeRoute.priceImpact.toFixed()
+  }, [tradeRoute])
+  const exchangeRate = useMemo(() => {
+    return tradeRoute && tradeRoute.executionPrice.toFixed()
+  }, [tradeRoute])
+  const minimalReceive = useMemo(() => {
+    return tradeRoute && tradeRoute.minimumAmountOut(new Percent(slipage, 100)).toFixed(6)
+  }, [tradeRoute, slipage])
+  const tradeRoutePath = useMemo(() => {
+    return tradeRoute && tradeRoute.route.path.map((token, index) => {
+      if (index === 0) return token0.symbol
+      if (index === tradeRoute.route.path.length - 1) return token1!.symbol
+      return token.symbol
+    }).join(' -> ')
+  }, [tradeRoute, token0, token1])
+
+
+  const submitButtonStatus = useMemo(() => {
+    if (!walletClient || !SUPPORTED_CHAINS.includes(walletClient.chain.id)) return BtnAction.disconnect;
+    if (!token0 || !token1 || !token0AmountInput || !token1AmountInput) return BtnAction.disable;
     try {
       if (view === SwapView.swap) {
-        if (tradeRoute?.tradeType === TradeType.EXACT_INPUT && token0Balance.lt(token0AmountInput)) return setAction(BtnAction.insufficient)
-        if (tradeRoute?.tradeType === TradeType.EXACT_OUTPUT && token1Balance.lt(token1AmountInput)) return setAction(BtnAction.insufficient)
+        if (!tradeRoute) return BtnAction.disable
+        if (priceImpact && +priceImpact >= 20) return BtnAction.disable
+        if (tradeRoute.tradeType === TradeType.EXACT_INPUT && token0Balance.lt(token0AmountInput)) return BtnAction.insufficient
+        if (tradeRoute.tradeType === TradeType.EXACT_OUTPUT && token1Balance.lt(token1AmountInput)) return BtnAction.insufficient
       } else {
-        if (token0Balance.lt(token0AmountInput)) return setAction(BtnAction.insufficient)
-        if (token1Balance.lt(token1AmountInput)) return setAction(BtnAction.insufficient)
+        if (token0Balance.lt(token0AmountInput) || token1Balance.lt(token1AmountInput)) return BtnAction.insufficient
       }
     } catch (e) {
-      return setAction(BtnAction.disable)
-    }
-    if (view === SwapView.swap) {
-      if (tokenAllowance[0].lessThan(token0AmountInput || 0)) {
-        return setAction(BtnAction.approve)
-      }
-    } else {
-      if ((tokenAllowance[0].lessThan(token0AmountInput || 0)) || tokenAllowance[1].lessThan(token1AmountInput || 0)) {
-        return setAction(BtnAction.approve)
-      }
+      return BtnAction.disable
     }
 
-    return setAction(BtnAction.available)
-  }, [account, tradeRoute, priceImpact])
+    return BtnAction.available
+  }, [chainId, token0, token1, token0Balance, token1Balance, token0AmountInput, token1AmountInput, tradeRoute, view, priceImpact])
 
-  useEffect(() => {
-    if (tradeRoute?.tradeType === TradeType.EXACT_INPUT) {
-      token0AmountInputHandler(token0AmountInput)
 
-    }
-    if (tradeRoute?.tradeType === TradeType.EXACT_OUTPUT) {
-      token1AmountInputHandler(token1AmountInput)
-    }
-  }, [slipage])
 
-  async function approve() {
-    let tokenForApprove = tokenAllowance[0].lessThan(token0AmountInput || 0) ? token0 : token1!;
+  async function approveTokens() {
+    if (!account.address) return console.log('wallet account is not connected');
+    if (!token0 || !token1) return;
     setLoading(true);
-    if (tokenForApprove.isNative) return;
-    // @ts-ignore
-    const data = await writeContract(getTokenContract(tokenForApprove.address as Address, publicClient!, walletClient), {
-      actionTitle: "Approve Token " + tokenForApprove.symbol
-    }, 'approve', [V2_ROUTER_ADDRESSES, parseUnits(
-      tokenForApprove.equals(token0) ? token0AmountInput!.toString() : token1AmountInput!.toString(),
-      tokenForApprove.decimals
-    )], {
-      account
-    })
-    // const tx = await tokenForApprove.approve(
-    //   getAddress(),
-    //   // maxUint256,
+    try {
 
-    //   walletClient!
-    // );
-    // const result = await retry({
-    //   times: 20,
-    //   delay: 5000
-    // }, async () => {
-    //   return await publicClient!.getTransactionReceipt({
-    //     hash: tx as Address
-    //   })
-    // })
-    if (data && data.status === "success") {
-      fetchAllowance();
+      if (!token0.isNative) {
+        const allowanceToken0 = await (token0 as Token).allowance(account.address, getAddress(V2_ROUTER_ADDRESSES), publicClient!)
+        if (allowanceToken0.lessThan(token0AmountInput || 0)) {
+          // @ts-ignore
+          await writeContract(getTokenContract((token0 as Token).address, publicClient!, walletClient), {
+            actionTitle: "Approve Token " + token0.symbol
+          }, 'approve', [V2_ROUTER_ADDRESSES, parseUnits(
+            token0AmountInput!.toString(),
+            token0.decimals
+          )], {
+            account
+          })
+        }
+      }
+
+      if (view !== SwapView.swap) {
+        // check token1
+        if (!token1.isNative) {
+          const allowanceToken1 = await (token1 as Token).allowance(account.address, getAddress(V2_ROUTER_ADDRESSES), publicClient!)
+          if (allowanceToken1.lessThan(token1AmountInput || 0)) {
+            // @ts-ignore
+            await writeContract(getTokenContract((token1 as Token).address, publicClient!, walletClient), {
+              actionTitle: "Approve Token " + token1.symbol
+            }, 'approve', [V2_ROUTER_ADDRESSES, parseUnits(
+              token1AmountInput!.toString(),
+              token1.decimals
+            )], {
+              account
+            })
+          }
+        }
+      }
+    } catch (e) {
+
     }
-
     setLoading(false);
   }
+
+  async function setSwapDataWhenInput(tradeType: TradeType, value: string) {
+    setRouteNotExist(false)
+    if (view === SwapView.addLiquidity) {
+      if (pair) {
+        const price = pair.priceOf(tokenConvert(tradeType === TradeType.EXACT_INPUT ? token0! : token1!));
+        tradeType === TradeType.EXACT_INPUT ?
+          setToken1AmountInput((+price.toSignificant(6) * +value).toFixed(6)) :
+          setToken0AmountInput((+price.toSignificant(6) * +value).toFixed(6));
+      }
+      return
+    }
+    if (view === SwapView.swap) {
+      if (!publicClient) return;
+      if (tradeType === TradeType.EXACT_INPUT) {
+        const result = Trade.bestTradeExactIn(
+          await makePairs(token0, token1!, publicClient),
+          CurrencyAmount.fromRawAmount(
+            tokenConvert(token0),
+            parseUnits(value, token0.decimals).toString()
+          ),
+          tokenConvert(token1!), { maxNumResults: 1 }
+        );
+        if (!result || !result.length) {
+          setTradeRoute(undefined)
+          setRouteNotExist(true)
+          return setToken1AmountInput('');
+        }
+        setToken1AmountInput(result[0].outputAmount.toFixed(8));
+        setTradeRoute(result[0])
+      } else {
+        const result = Trade.bestTradeExactOut(
+          await makePairs(token0, token1!, publicClient!),
+          tokenConvert(token0),
+          CurrencyAmount.fromRawAmount(
+            tokenConvert(token1!),
+            parseUnits(value, token1!.decimals).toString()
+          ), {
+          maxNumResults: 1
+        }
+        );
+        if (!result || !result.length) {
+          setTradeRoute(undefined)
+          setRouteNotExist(true)
+          return setToken0AmountInput('');
+        }
+        setToken0AmountInput(result[0].inputAmount.toFixed(8));
+        setTradeRoute(result[0])
+      }
+    }
+
+  }
+  const debouncedSetSwapDataWhenInput = debounce({ delay: 500 }, setSwapDataWhenInput)
 
   async function token0AmountInputHandler(value: string) {
     setToken0AmountInput(value);
     setToken1AmountInput('');
-    if (!value || !pair || !token0 || isNaN(+value) || +value <= 0) return;
-    if (view === SwapView.addLiquidity) {
-      const price = pair.priceOf(tokenConvert(token0));
-      setToken1AmountInput((+price.toSignificant(6) * +value).toFixed(6));
-    } else if (view === SwapView.swap) {
-      const result = Trade.bestTradeExactIn(
-        await makePairs(token0, token1!, publicClient!),
-        CurrencyAmount.fromRawAmount(
-          tokenConvert(token0),
-          parseUnits(value, token0.decimals).toString()
-          // JSBI.BigInt(+value * 10 ** token0.decimals)
-        ),
-        tokenConvert(token1!), { maxNumResults: 1 }
-      );
-
-      if (!result || !result.length) {
-        // console.log('池子余额不够或不存在');
-        resetData()
-        return setToken1AmountInput('');
-      }      // setToken1AmountInput(trade.outputAmount.toSignificant(6));
-      setPriceImpact(result[0].priceImpact.toFixed())
-      setToken1AmountInput(result[0].outputAmount.toFixed(8));
-      setTradeRoute(result[0])
-      // const tradeRoute = result[0]
-      setExchangeRate(result[0].executionPrice.toFixed())
-      setMinOut(result[0].minimumAmountOut(new Percent(slipage, 100)).toFixed(6))
-      let path = result.map(item => {
-        return item.route.path.map((token, index) => {
-          if (index === 0) return token0.symbol
-          if (index === item.route.path.length - 1) return token1!.symbol
-          return token.symbol
-        }).join('->')
-      })
-      setTradeRoutePath(path.join('->'))
-    }
+    if (!value || !token0 || isNaN(+value) || +value <= 0) return;
+    if (!token1 || !publicClient) return;
+    debouncedSetSwapDataWhenInput.cancel();
+    debouncedSetSwapDataWhenInput(TradeType.EXACT_INPUT, value);
   }
   async function token1AmountInputHandler(value: string) {
     setToken1AmountInput(value);
-    if (!value || !pair || !token1 || isNaN(+value)) return;
-    if (view === SwapView.addLiquidity) {
-      const price = pair.priceOf(tokenConvert(token1));
-      setToken0AmountInput((+price.toSignificant(6) * +value).toFixed(6));
-    } else if (view === SwapView.swap) {
-
-      const result = Trade.bestTradeExactOut(
-        await makePairs(token0, token1!, publicClient!),
-        tokenConvert(token0),
-        CurrencyAmount.fromRawAmount(
-          tokenConvert(token1),
-          parseUnits(value, token1.decimals).toString()
-        ), {
-        maxNumResults: 1
-      }
-      );
-      // console.log(result);
-
-      if (!result || !result.length) {
-        // console.log('未找到兑换路径，池子余额不够或不存在');
-        resetData()
-        return setToken0AmountInput('');
-      }
-      setExchangeRate(result[0].executionPrice.toFixed())
-      setPriceImpact(result[0].priceImpact.toFixed())
-      setToken0AmountInput(result[0].inputAmount.toFixed(8));
-      setMinOut(result[0].minimumAmountOut(new Percent(slipage, 100)).toFixed(6))
-      // setToken1AmountInput(result[0].minimumAmountOut(new Percent(5, 100)).toSignificant(6));
-      setTradeRoute(result[0])
-      let path = result.map(item => {
-        return item.route.path.map((token, index) => {
-          if (index === 0) return token0.symbol
-          if (index === item.route.path.length - 1) return token1!.symbol
-          return token.symbol
-        }).join('->')
-      })
-      setTradeRoutePath(path.join('->'))
-    }
+    if (!value || !token1 || isNaN(+value)) return;
+    if (!token0 || !publicClient) return;
+    debouncedSetSwapDataWhenInput.cancel();
+    debouncedSetSwapDataWhenInput(TradeType.EXACT_OUTPUT, value);
   }
 
-  function resetData() {
-    setPriceImpact('')
-    setTradeRoutePath('')
-    setExchangeRate('')
-    setMinOut('')
-    setTradeRoute(undefined)
-  }
   async function maxHandler(flag: number) {
     if (flag === 0) {
       return token0AmountInputHandler(token0Balance.toString())
@@ -318,13 +285,13 @@ export function useSwap(view: SwapView) {
       token1Balance,
       token0AmountInput,
       token1AmountInput,
-      tokenAllowance,
       pair,
       tradeRoute,
       tradeRoutePath,
-      minOut,
-      action,
+      minimalReceive,
+      submitButtonStatus,
       priceImpact,
+      routeNotExist,
       exchangeRate
     },
     loading,
@@ -334,7 +301,7 @@ export function useSwap(view: SwapView) {
     setToken0AmountInput,
     setToken1AmountInput,
     setSlippage,
-    approve,
+    approveTokens,
     token0AmountInputHandler,
     token1AmountInputHandler,
     maxHandler

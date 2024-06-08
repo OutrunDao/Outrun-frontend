@@ -34,12 +34,16 @@ import { useMemo, useState } from 'react';
 import useContract from '@/hook/useContract';
 import { ContractName } from '@/contracts/addressMap';
 import { BlockExplorers } from '@/contracts/chains';
+import { useWeb3Modal } from '@web3modal/wagmi/react';
+
 const defaultSymbol = 'ETH';
 
 export default function Swap() {
   const chainId = useChainId();
   const account = useAccount();
   const toast = useToast();
+  const { open } = useWeb3Modal();
+
   const { write: writeRouterContract, loading: routerContractLoading } = useContract();
   const {
     swapData,
@@ -47,10 +51,10 @@ export default function Swap() {
     setToken0,
     setToken1,
     setLoading,
+    approveTokens,
     token0AmountInputHandler,
     token1AmountInputHandler,
     setSlippage,
-    approve,
     maxHandler,
   } = useSwap(SwapView.swap);
   const [slippageTolerance, setSlippageTolerance] = useState(2);
@@ -68,6 +72,7 @@ export default function Swap() {
 
   async function swap() {
     if (!swapData.token0 || !swapData.token1 || !account.address) return;
+    await approveTokens();
     const { methodName, args, value } = SwapRouter.swapCallParameters(
       swapData.token0,
       swapData.token1,
@@ -78,7 +83,7 @@ export default function Swap() {
         recipient: account.address,
       }
     );
-
+    setLoading(true);
     const data = await writeRouterContract(
       ContractName.SWAP_ROUTER,
       {
@@ -201,7 +206,6 @@ export default function Swap() {
               variant="main"
               size="lg"
               textAlign={'right'}
-              isDisabled={!swapData.pair}
               placeholder="Intput token amount"
               value={swapData.token0AmountInput}
               onChange={(e) => token0AmountInputHandler(e.target.value)}
@@ -265,7 +269,6 @@ export default function Swap() {
               variant="main"
               size="lg"
               textAlign={'right'}
-              isDisabled={!swapData.pair}
               placeholder="Output token amount"
               value={swapData.token1AmountInput}
               onChange={(e) => token1AmountInputHandler(e.target.value)}
@@ -294,7 +297,7 @@ export default function Swap() {
       <HStack fontSize={'small'} px="8px">
         <Text w="40%">Exchange rate</Text>
         <Text w="70%" textAlign={'right'}>
-          {swapData.pair ? (
+          {swapData.exchangeRate ? (
             <>
               1{swapData.token0.symbol} = {swapData.exchangeRate} {swapData.token1!.symbol}
             </>
@@ -310,7 +313,7 @@ export default function Swap() {
       <HStack fontSize={'small'} px="8px" py={1} color={'green'}>
         <Text w="40%">Minimal Receive</Text>
         <Text w="70%" textAlign={'right'}>
-          {swapData.minOut}
+          {swapData.minimalReceive}
         </Text>
       </HStack>
       <HStack
@@ -324,12 +327,7 @@ export default function Swap() {
           {swapData.priceImpact ? swapData.priceImpact + '%' : '---'}
         </Text>
       </HStack>
-      {(!swapData.tradeRoute &&
-        swapData.token0 &&
-        swapData.token1 &&
-        swapData.token0AmountInput &&
-        swapData.token1AmountInput) ||
-      (!swapData.pair && swapData.token0 && swapData.token1) ? (
+      {swapData.routeNotExist ? (
         <Box textAlign={'center'} fontSize={'x-small'} color={'brand.500'}>
           <Text>not enough liquidity or cannot find route in this pair </Text>
           {/* <Link href={`/pool/create`} textDecoration={'underline'}>
@@ -343,33 +341,24 @@ export default function Swap() {
         </Box>
       ) : null} */}
       <Box mt={'1rem'} fontSize={16}>
-        {swapData.action === BtnAction.approve ? (
-          <Button
-            width={'100%'}
-            size="lg"
-            colorScheme="gray"
-            variant="solid"
-            onClick={approve}
-            isLoading={loading}
-          >
-            Set Approve{' '}
-            {swapData.tradeRoute?.tradeType === TradeType.EXACT_INPUT
-              ? swapData.token0.symbol
-              : swapData.token1!.symbol}
-          </Button>
-        ) : null}
-        {swapData.action === BtnAction.insufficient ? (
+        {swapData.submitButtonStatus === BtnAction.insufficient ? (
           <Button width={'100%'} size="lg" colorScheme="gray" variant="solid">
             {' '}
             insufficient token{' '}
           </Button>
         ) : null}
-        {swapData.action === BtnAction.disconnect ? (
-          <Button width={'100%'} size="lg" colorScheme="gray" variant="solid">
-            disconnected
+        {swapData.submitButtonStatus === BtnAction.disconnect ? (
+          <Button
+            width={'100%'}
+            size="lg"
+            colorScheme="gray"
+            variant="solid"
+            onClick={() => open({ view: 'Connect' })}
+          >
+            connect to wallet
           </Button>
         ) : null}
-        {swapData.action === BtnAction.available ? (
+        {swapData.submitButtonStatus === BtnAction.available ? (
           <Button
             width={'100%'}
             size="lg"
@@ -383,7 +372,7 @@ export default function Swap() {
             swap
           </Button>
         ) : null}
-        {swapData.action === BtnAction.disable ? (
+        {swapData.submitButtonStatus === BtnAction.disable ? (
           <Button width={'100%'} isDisabled size="lg" colorScheme="gray" variant="solid" rounded={'md'}>
             {swapData.priceImpact && +swapData.priceImpact >= 20 ? 'The price impact is too high!' : 'swap'}
           </Button>
