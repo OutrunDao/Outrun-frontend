@@ -20,12 +20,12 @@ import { getMesh, ExecuteMeshFn, SubscribeMeshFn, MeshContext as BaseMeshContext
 import { MeshStore, FsStoreStorageAdapter } from '@graphql-mesh/store';
 import { path as pathModule } from '@graphql-mesh/cross-helpers';
 import { ImportFn } from '@graphql-mesh/types';
-import type { OutrunTypes } from './sources/outrun/types';
 import type { OutrunStakeTypes } from './sources/outrunStake/types';
 import type { StakeRusdTypes } from './sources/stakeRUSD/types';
+import type { OutrunTypes } from './sources/outrun/types';
 import * as importedModule$0 from "./sources/outrunStake/introspectionSchema";
-import * as importedModule$1 from "./sources/stakeRUSD/introspectionSchema";
-import * as importedModule$2 from "./sources/outrun/introspectionSchema";
+import * as importedModule$1 from "./sources/outrun/introspectionSchema";
+import * as importedModule$2 from "./sources/stakeRUSD/introspectionSchema";
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -74,10 +74,6 @@ export type Query = {
   withdrawYields: Array<WithdrawYield>;
   /** Access to subgraph metadata */
   _meta?: Maybe<_Meta_>;
-  setOutUSDBVault?: Maybe<SetOutUSDBVault>;
-  setOutUSDBVaults: Array<SetOutUSDBVault>;
-  stakeRUSD?: Maybe<StakeRUSD>;
-  stakeRUSDs: Array<StakeRUSD>;
   swapFactory?: Maybe<SwapFactory>;
   swapFactories: Array<SwapFactory>;
   token?: Maybe<Token>;
@@ -94,6 +90,10 @@ export type Query = {
   liquidityPositions: Array<LiquidityPosition>;
   bundle?: Maybe<Bundle>;
   bundles: Array<Bundle>;
+  setOutUSDBVault?: Maybe<SetOutUSDBVault>;
+  setOutUSDBVaults: Array<SetOutUSDBVault>;
+  stakeRUSD?: Maybe<StakeRUSD>;
+  stakeRUSDs: Array<StakeRUSD>;
 };
 
 
@@ -300,42 +300,6 @@ export type Query_metaArgs = {
 };
 
 
-export type QuerysetOutUSDBVaultArgs = {
-  id: Scalars['ID'];
-  block?: InputMaybe<Block_height>;
-  subgraphError?: _SubgraphErrorPolicy_;
-};
-
-
-export type QuerysetOutUSDBVaultsArgs = {
-  skip?: InputMaybe<Scalars['Int']>;
-  first?: InputMaybe<Scalars['Int']>;
-  orderBy?: InputMaybe<SetOutUSDBVault_orderBy>;
-  orderDirection?: InputMaybe<OrderDirection>;
-  where?: InputMaybe<SetOutUSDBVault_filter>;
-  block?: InputMaybe<Block_height>;
-  subgraphError?: _SubgraphErrorPolicy_;
-};
-
-
-export type QuerystakeRUSDArgs = {
-  id: Scalars['ID'];
-  block?: InputMaybe<Block_height>;
-  subgraphError?: _SubgraphErrorPolicy_;
-};
-
-
-export type QuerystakeRUSDsArgs = {
-  skip?: InputMaybe<Scalars['Int']>;
-  first?: InputMaybe<Scalars['Int']>;
-  orderBy?: InputMaybe<StakeRUSD_orderBy>;
-  orderDirection?: InputMaybe<OrderDirection>;
-  where?: InputMaybe<StakeRUSD_filter>;
-  block?: InputMaybe<Block_height>;
-  subgraphError?: _SubgraphErrorPolicy_;
-};
-
-
 export type QueryswapFactoryArgs = {
   id: Scalars['ID'];
   block?: InputMaybe<Block_height>;
@@ -479,6 +443,42 @@ export type QuerybundlesArgs = {
   subgraphError?: _SubgraphErrorPolicy_;
 };
 
+
+export type QuerysetOutUSDBVaultArgs = {
+  id: Scalars['ID'];
+  block?: InputMaybe<Block_height>;
+  subgraphError?: _SubgraphErrorPolicy_;
+};
+
+
+export type QuerysetOutUSDBVaultsArgs = {
+  skip?: InputMaybe<Scalars['Int']>;
+  first?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<SetOutUSDBVault_orderBy>;
+  orderDirection?: InputMaybe<OrderDirection>;
+  where?: InputMaybe<SetOutUSDBVault_filter>;
+  block?: InputMaybe<Block_height>;
+  subgraphError?: _SubgraphErrorPolicy_;
+};
+
+
+export type QuerystakeRUSDArgs = {
+  id: Scalars['ID'];
+  block?: InputMaybe<Block_height>;
+  subgraphError?: _SubgraphErrorPolicy_;
+};
+
+
+export type QuerystakeRUSDsArgs = {
+  skip?: InputMaybe<Scalars['Int']>;
+  first?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<StakeRUSD_orderBy>;
+  orderDirection?: InputMaybe<OrderDirection>;
+  where?: InputMaybe<StakeRUSD_filter>;
+  block?: InputMaybe<Block_height>;
+  subgraphError?: _SubgraphErrorPolicy_;
+};
+
 export type Subscription = {
   claimMaxGas?: Maybe<ClaimMaxGas>;
   claimMaxGas_collection: Array<ClaimMaxGas>;
@@ -504,10 +504,6 @@ export type Subscription = {
   withdrawYields: Array<WithdrawYield>;
   /** Access to subgraph metadata */
   _meta?: Maybe<_Meta_>;
-  setOutUSDBVault?: Maybe<SetOutUSDBVault>;
-  setOutUSDBVaults: Array<SetOutUSDBVault>;
-  stakeRUSD?: Maybe<StakeRUSD>;
-  stakeRUSDs: Array<StakeRUSD>;
   swapFactory?: Maybe<SwapFactory>;
   swapFactories: Array<SwapFactory>;
   token?: Maybe<Token>;
@@ -524,6 +520,10 @@ export type Subscription = {
   liquidityPositions: Array<LiquidityPosition>;
   bundle?: Maybe<Bundle>;
   bundles: Array<Bundle>;
+  setOutUSDBVault?: Maybe<SetOutUSDBVault>;
+  setOutUSDBVaults: Array<SetOutUSDBVault>;
+  stakeRUSD?: Maybe<StakeRUSD>;
+  stakeRUSDs: Array<StakeRUSD>;
 };
 
 
@@ -730,42 +730,6 @@ export type Subscription_metaArgs = {
 };
 
 
-export type SubscriptionsetOutUSDBVaultArgs = {
-  id: Scalars['ID'];
-  block?: InputMaybe<Block_height>;
-  subgraphError?: _SubgraphErrorPolicy_;
-};
-
-
-export type SubscriptionsetOutUSDBVaultsArgs = {
-  skip?: InputMaybe<Scalars['Int']>;
-  first?: InputMaybe<Scalars['Int']>;
-  orderBy?: InputMaybe<SetOutUSDBVault_orderBy>;
-  orderDirection?: InputMaybe<OrderDirection>;
-  where?: InputMaybe<SetOutUSDBVault_filter>;
-  block?: InputMaybe<Block_height>;
-  subgraphError?: _SubgraphErrorPolicy_;
-};
-
-
-export type SubscriptionstakeRUSDArgs = {
-  id: Scalars['ID'];
-  block?: InputMaybe<Block_height>;
-  subgraphError?: _SubgraphErrorPolicy_;
-};
-
-
-export type SubscriptionstakeRUSDsArgs = {
-  skip?: InputMaybe<Scalars['Int']>;
-  first?: InputMaybe<Scalars['Int']>;
-  orderBy?: InputMaybe<StakeRUSD_orderBy>;
-  orderDirection?: InputMaybe<OrderDirection>;
-  where?: InputMaybe<StakeRUSD_filter>;
-  block?: InputMaybe<Block_height>;
-  subgraphError?: _SubgraphErrorPolicy_;
-};
-
-
 export type SubscriptionswapFactoryArgs = {
   id: Scalars['ID'];
   block?: InputMaybe<Block_height>;
@@ -905,6 +869,42 @@ export type SubscriptionbundlesArgs = {
   orderBy?: InputMaybe<Bundle_orderBy>;
   orderDirection?: InputMaybe<OrderDirection>;
   where?: InputMaybe<Bundle_filter>;
+  block?: InputMaybe<Block_height>;
+  subgraphError?: _SubgraphErrorPolicy_;
+};
+
+
+export type SubscriptionsetOutUSDBVaultArgs = {
+  id: Scalars['ID'];
+  block?: InputMaybe<Block_height>;
+  subgraphError?: _SubgraphErrorPolicy_;
+};
+
+
+export type SubscriptionsetOutUSDBVaultsArgs = {
+  skip?: InputMaybe<Scalars['Int']>;
+  first?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<SetOutUSDBVault_orderBy>;
+  orderDirection?: InputMaybe<OrderDirection>;
+  where?: InputMaybe<SetOutUSDBVault_filter>;
+  block?: InputMaybe<Block_height>;
+  subgraphError?: _SubgraphErrorPolicy_;
+};
+
+
+export type SubscriptionstakeRUSDArgs = {
+  id: Scalars['ID'];
+  block?: InputMaybe<Block_height>;
+  subgraphError?: _SubgraphErrorPolicy_;
+};
+
+
+export type SubscriptionstakeRUSDsArgs = {
+  skip?: InputMaybe<Scalars['Int']>;
+  first?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<StakeRUSD_orderBy>;
+  orderDirection?: InputMaybe<OrderDirection>;
+  where?: InputMaybe<StakeRUSD_filter>;
   block?: InputMaybe<Block_height>;
   subgraphError?: _SubgraphErrorPolicy_;
 };
@@ -1933,202 +1933,6 @@ export type _SubgraphErrorPolicy_ =
   /** If the subgraph has indexing errors, data will be omitted. The default. */
   | 'deny';
 
-export type SetOutUSDBVault = {
-  id: Scalars['Bytes'];
-  outUSDBVault: Scalars['Bytes'];
-  blockNumber: Scalars['BigInt'];
-  blockTimestamp: Scalars['BigInt'];
-  transactionHash: Scalars['Bytes'];
-};
-
-export type SetOutUSDBVault_filter = {
-  id?: InputMaybe<Scalars['Bytes']>;
-  id_not?: InputMaybe<Scalars['Bytes']>;
-  id_gt?: InputMaybe<Scalars['Bytes']>;
-  id_lt?: InputMaybe<Scalars['Bytes']>;
-  id_gte?: InputMaybe<Scalars['Bytes']>;
-  id_lte?: InputMaybe<Scalars['Bytes']>;
-  id_in?: InputMaybe<Array<Scalars['Bytes']>>;
-  id_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
-  id_contains?: InputMaybe<Scalars['Bytes']>;
-  id_not_contains?: InputMaybe<Scalars['Bytes']>;
-  outUSDBVault?: InputMaybe<Scalars['Bytes']>;
-  outUSDBVault_not?: InputMaybe<Scalars['Bytes']>;
-  outUSDBVault_gt?: InputMaybe<Scalars['Bytes']>;
-  outUSDBVault_lt?: InputMaybe<Scalars['Bytes']>;
-  outUSDBVault_gte?: InputMaybe<Scalars['Bytes']>;
-  outUSDBVault_lte?: InputMaybe<Scalars['Bytes']>;
-  outUSDBVault_in?: InputMaybe<Array<Scalars['Bytes']>>;
-  outUSDBVault_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
-  outUSDBVault_contains?: InputMaybe<Scalars['Bytes']>;
-  outUSDBVault_not_contains?: InputMaybe<Scalars['Bytes']>;
-  blockNumber?: InputMaybe<Scalars['BigInt']>;
-  blockNumber_not?: InputMaybe<Scalars['BigInt']>;
-  blockNumber_gt?: InputMaybe<Scalars['BigInt']>;
-  blockNumber_lt?: InputMaybe<Scalars['BigInt']>;
-  blockNumber_gte?: InputMaybe<Scalars['BigInt']>;
-  blockNumber_lte?: InputMaybe<Scalars['BigInt']>;
-  blockNumber_in?: InputMaybe<Array<Scalars['BigInt']>>;
-  blockNumber_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
-  blockTimestamp?: InputMaybe<Scalars['BigInt']>;
-  blockTimestamp_not?: InputMaybe<Scalars['BigInt']>;
-  blockTimestamp_gt?: InputMaybe<Scalars['BigInt']>;
-  blockTimestamp_lt?: InputMaybe<Scalars['BigInt']>;
-  blockTimestamp_gte?: InputMaybe<Scalars['BigInt']>;
-  blockTimestamp_lte?: InputMaybe<Scalars['BigInt']>;
-  blockTimestamp_in?: InputMaybe<Array<Scalars['BigInt']>>;
-  blockTimestamp_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
-  transactionHash?: InputMaybe<Scalars['Bytes']>;
-  transactionHash_not?: InputMaybe<Scalars['Bytes']>;
-  transactionHash_gt?: InputMaybe<Scalars['Bytes']>;
-  transactionHash_lt?: InputMaybe<Scalars['Bytes']>;
-  transactionHash_gte?: InputMaybe<Scalars['Bytes']>;
-  transactionHash_lte?: InputMaybe<Scalars['Bytes']>;
-  transactionHash_in?: InputMaybe<Array<Scalars['Bytes']>>;
-  transactionHash_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
-  transactionHash_contains?: InputMaybe<Scalars['Bytes']>;
-  transactionHash_not_contains?: InputMaybe<Scalars['Bytes']>;
-  /** Filter for the block changed event. */
-  _change_block?: InputMaybe<BlockChangedFilter>;
-  and?: InputMaybe<Array<InputMaybe<SetOutUSDBVault_filter>>>;
-  or?: InputMaybe<Array<InputMaybe<SetOutUSDBVault_filter>>>;
-};
-
-export type SetOutUSDBVault_orderBy =
-  | 'id'
-  | 'outUSDBVault'
-  | 'blockNumber'
-  | 'blockTimestamp'
-  | 'transactionHash';
-
-export type StakeRUSD = {
-  id: Scalars['String'];
-  positionId: Scalars['BigInt'];
-  account: Scalars['Bytes'];
-  amountInRUSD: Scalars['BigInt'];
-  amountInPUSD: Scalars['BigInt'];
-  amountInRUY: Scalars['BigInt'];
-  deadline: Scalars['BigInt'];
-  blockNumber: Scalars['BigInt'];
-  blockTimestamp: Scalars['BigInt'];
-  transactionHash: Scalars['Bytes'];
-};
-
-export type StakeRUSD_filter = {
-  id?: InputMaybe<Scalars['String']>;
-  id_not?: InputMaybe<Scalars['String']>;
-  id_gt?: InputMaybe<Scalars['String']>;
-  id_lt?: InputMaybe<Scalars['String']>;
-  id_gte?: InputMaybe<Scalars['String']>;
-  id_lte?: InputMaybe<Scalars['String']>;
-  id_in?: InputMaybe<Array<Scalars['String']>>;
-  id_not_in?: InputMaybe<Array<Scalars['String']>>;
-  id_contains?: InputMaybe<Scalars['String']>;
-  id_contains_nocase?: InputMaybe<Scalars['String']>;
-  id_not_contains?: InputMaybe<Scalars['String']>;
-  id_not_contains_nocase?: InputMaybe<Scalars['String']>;
-  id_starts_with?: InputMaybe<Scalars['String']>;
-  id_starts_with_nocase?: InputMaybe<Scalars['String']>;
-  id_not_starts_with?: InputMaybe<Scalars['String']>;
-  id_not_starts_with_nocase?: InputMaybe<Scalars['String']>;
-  id_ends_with?: InputMaybe<Scalars['String']>;
-  id_ends_with_nocase?: InputMaybe<Scalars['String']>;
-  id_not_ends_with?: InputMaybe<Scalars['String']>;
-  id_not_ends_with_nocase?: InputMaybe<Scalars['String']>;
-  positionId?: InputMaybe<Scalars['BigInt']>;
-  positionId_not?: InputMaybe<Scalars['BigInt']>;
-  positionId_gt?: InputMaybe<Scalars['BigInt']>;
-  positionId_lt?: InputMaybe<Scalars['BigInt']>;
-  positionId_gte?: InputMaybe<Scalars['BigInt']>;
-  positionId_lte?: InputMaybe<Scalars['BigInt']>;
-  positionId_in?: InputMaybe<Array<Scalars['BigInt']>>;
-  positionId_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
-  account?: InputMaybe<Scalars['Bytes']>;
-  account_not?: InputMaybe<Scalars['Bytes']>;
-  account_gt?: InputMaybe<Scalars['Bytes']>;
-  account_lt?: InputMaybe<Scalars['Bytes']>;
-  account_gte?: InputMaybe<Scalars['Bytes']>;
-  account_lte?: InputMaybe<Scalars['Bytes']>;
-  account_in?: InputMaybe<Array<Scalars['Bytes']>>;
-  account_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
-  account_contains?: InputMaybe<Scalars['Bytes']>;
-  account_not_contains?: InputMaybe<Scalars['Bytes']>;
-  amountInRUSD?: InputMaybe<Scalars['BigInt']>;
-  amountInRUSD_not?: InputMaybe<Scalars['BigInt']>;
-  amountInRUSD_gt?: InputMaybe<Scalars['BigInt']>;
-  amountInRUSD_lt?: InputMaybe<Scalars['BigInt']>;
-  amountInRUSD_gte?: InputMaybe<Scalars['BigInt']>;
-  amountInRUSD_lte?: InputMaybe<Scalars['BigInt']>;
-  amountInRUSD_in?: InputMaybe<Array<Scalars['BigInt']>>;
-  amountInRUSD_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
-  amountInPUSD?: InputMaybe<Scalars['BigInt']>;
-  amountInPUSD_not?: InputMaybe<Scalars['BigInt']>;
-  amountInPUSD_gt?: InputMaybe<Scalars['BigInt']>;
-  amountInPUSD_lt?: InputMaybe<Scalars['BigInt']>;
-  amountInPUSD_gte?: InputMaybe<Scalars['BigInt']>;
-  amountInPUSD_lte?: InputMaybe<Scalars['BigInt']>;
-  amountInPUSD_in?: InputMaybe<Array<Scalars['BigInt']>>;
-  amountInPUSD_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
-  amountInRUY?: InputMaybe<Scalars['BigInt']>;
-  amountInRUY_not?: InputMaybe<Scalars['BigInt']>;
-  amountInRUY_gt?: InputMaybe<Scalars['BigInt']>;
-  amountInRUY_lt?: InputMaybe<Scalars['BigInt']>;
-  amountInRUY_gte?: InputMaybe<Scalars['BigInt']>;
-  amountInRUY_lte?: InputMaybe<Scalars['BigInt']>;
-  amountInRUY_in?: InputMaybe<Array<Scalars['BigInt']>>;
-  amountInRUY_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
-  deadline?: InputMaybe<Scalars['BigInt']>;
-  deadline_not?: InputMaybe<Scalars['BigInt']>;
-  deadline_gt?: InputMaybe<Scalars['BigInt']>;
-  deadline_lt?: InputMaybe<Scalars['BigInt']>;
-  deadline_gte?: InputMaybe<Scalars['BigInt']>;
-  deadline_lte?: InputMaybe<Scalars['BigInt']>;
-  deadline_in?: InputMaybe<Array<Scalars['BigInt']>>;
-  deadline_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
-  blockNumber?: InputMaybe<Scalars['BigInt']>;
-  blockNumber_not?: InputMaybe<Scalars['BigInt']>;
-  blockNumber_gt?: InputMaybe<Scalars['BigInt']>;
-  blockNumber_lt?: InputMaybe<Scalars['BigInt']>;
-  blockNumber_gte?: InputMaybe<Scalars['BigInt']>;
-  blockNumber_lte?: InputMaybe<Scalars['BigInt']>;
-  blockNumber_in?: InputMaybe<Array<Scalars['BigInt']>>;
-  blockNumber_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
-  blockTimestamp?: InputMaybe<Scalars['BigInt']>;
-  blockTimestamp_not?: InputMaybe<Scalars['BigInt']>;
-  blockTimestamp_gt?: InputMaybe<Scalars['BigInt']>;
-  blockTimestamp_lt?: InputMaybe<Scalars['BigInt']>;
-  blockTimestamp_gte?: InputMaybe<Scalars['BigInt']>;
-  blockTimestamp_lte?: InputMaybe<Scalars['BigInt']>;
-  blockTimestamp_in?: InputMaybe<Array<Scalars['BigInt']>>;
-  blockTimestamp_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
-  transactionHash?: InputMaybe<Scalars['Bytes']>;
-  transactionHash_not?: InputMaybe<Scalars['Bytes']>;
-  transactionHash_gt?: InputMaybe<Scalars['Bytes']>;
-  transactionHash_lt?: InputMaybe<Scalars['Bytes']>;
-  transactionHash_gte?: InputMaybe<Scalars['Bytes']>;
-  transactionHash_lte?: InputMaybe<Scalars['Bytes']>;
-  transactionHash_in?: InputMaybe<Array<Scalars['Bytes']>>;
-  transactionHash_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
-  transactionHash_contains?: InputMaybe<Scalars['Bytes']>;
-  transactionHash_not_contains?: InputMaybe<Scalars['Bytes']>;
-  /** Filter for the block changed event. */
-  _change_block?: InputMaybe<BlockChangedFilter>;
-  and?: InputMaybe<Array<InputMaybe<StakeRUSD_filter>>>;
-  or?: InputMaybe<Array<InputMaybe<StakeRUSD_filter>>>;
-};
-
-export type StakeRUSD_orderBy =
-  | 'id'
-  | 'positionId'
-  | 'account'
-  | 'amountInRUSD'
-  | 'amountInPUSD'
-  | 'amountInRUY'
-  | 'deadline'
-  | 'blockNumber'
-  | 'blockTimestamp'
-  | 'transactionHash';
-
 export type Bundle = {
   id: Scalars['Bytes'];
   ethPrice: Scalars['BigDecimal'];
@@ -3085,6 +2889,202 @@ export type User_orderBy =
   | 'liquidityPositions'
   | 'usdSwapped';
 
+export type SetOutUSDBVault = {
+  id: Scalars['Bytes'];
+  outUSDBVault: Scalars['Bytes'];
+  blockNumber: Scalars['BigInt'];
+  blockTimestamp: Scalars['BigInt'];
+  transactionHash: Scalars['Bytes'];
+};
+
+export type SetOutUSDBVault_filter = {
+  id?: InputMaybe<Scalars['Bytes']>;
+  id_not?: InputMaybe<Scalars['Bytes']>;
+  id_gt?: InputMaybe<Scalars['Bytes']>;
+  id_lt?: InputMaybe<Scalars['Bytes']>;
+  id_gte?: InputMaybe<Scalars['Bytes']>;
+  id_lte?: InputMaybe<Scalars['Bytes']>;
+  id_in?: InputMaybe<Array<Scalars['Bytes']>>;
+  id_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
+  id_contains?: InputMaybe<Scalars['Bytes']>;
+  id_not_contains?: InputMaybe<Scalars['Bytes']>;
+  outUSDBVault?: InputMaybe<Scalars['Bytes']>;
+  outUSDBVault_not?: InputMaybe<Scalars['Bytes']>;
+  outUSDBVault_gt?: InputMaybe<Scalars['Bytes']>;
+  outUSDBVault_lt?: InputMaybe<Scalars['Bytes']>;
+  outUSDBVault_gte?: InputMaybe<Scalars['Bytes']>;
+  outUSDBVault_lte?: InputMaybe<Scalars['Bytes']>;
+  outUSDBVault_in?: InputMaybe<Array<Scalars['Bytes']>>;
+  outUSDBVault_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
+  outUSDBVault_contains?: InputMaybe<Scalars['Bytes']>;
+  outUSDBVault_not_contains?: InputMaybe<Scalars['Bytes']>;
+  blockNumber?: InputMaybe<Scalars['BigInt']>;
+  blockNumber_not?: InputMaybe<Scalars['BigInt']>;
+  blockNumber_gt?: InputMaybe<Scalars['BigInt']>;
+  blockNumber_lt?: InputMaybe<Scalars['BigInt']>;
+  blockNumber_gte?: InputMaybe<Scalars['BigInt']>;
+  blockNumber_lte?: InputMaybe<Scalars['BigInt']>;
+  blockNumber_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  blockNumber_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  blockTimestamp?: InputMaybe<Scalars['BigInt']>;
+  blockTimestamp_not?: InputMaybe<Scalars['BigInt']>;
+  blockTimestamp_gt?: InputMaybe<Scalars['BigInt']>;
+  blockTimestamp_lt?: InputMaybe<Scalars['BigInt']>;
+  blockTimestamp_gte?: InputMaybe<Scalars['BigInt']>;
+  blockTimestamp_lte?: InputMaybe<Scalars['BigInt']>;
+  blockTimestamp_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  blockTimestamp_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  transactionHash?: InputMaybe<Scalars['Bytes']>;
+  transactionHash_not?: InputMaybe<Scalars['Bytes']>;
+  transactionHash_gt?: InputMaybe<Scalars['Bytes']>;
+  transactionHash_lt?: InputMaybe<Scalars['Bytes']>;
+  transactionHash_gte?: InputMaybe<Scalars['Bytes']>;
+  transactionHash_lte?: InputMaybe<Scalars['Bytes']>;
+  transactionHash_in?: InputMaybe<Array<Scalars['Bytes']>>;
+  transactionHash_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
+  transactionHash_contains?: InputMaybe<Scalars['Bytes']>;
+  transactionHash_not_contains?: InputMaybe<Scalars['Bytes']>;
+  /** Filter for the block changed event. */
+  _change_block?: InputMaybe<BlockChangedFilter>;
+  and?: InputMaybe<Array<InputMaybe<SetOutUSDBVault_filter>>>;
+  or?: InputMaybe<Array<InputMaybe<SetOutUSDBVault_filter>>>;
+};
+
+export type SetOutUSDBVault_orderBy =
+  | 'id'
+  | 'outUSDBVault'
+  | 'blockNumber'
+  | 'blockTimestamp'
+  | 'transactionHash';
+
+export type StakeRUSD = {
+  id: Scalars['String'];
+  positionId: Scalars['BigInt'];
+  account: Scalars['Bytes'];
+  amountInRUSD: Scalars['BigInt'];
+  amountInPUSD: Scalars['BigInt'];
+  amountInRUY: Scalars['BigInt'];
+  deadline: Scalars['BigInt'];
+  blockNumber: Scalars['BigInt'];
+  blockTimestamp: Scalars['BigInt'];
+  transactionHash: Scalars['Bytes'];
+};
+
+export type StakeRUSD_filter = {
+  id?: InputMaybe<Scalars['String']>;
+  id_not?: InputMaybe<Scalars['String']>;
+  id_gt?: InputMaybe<Scalars['String']>;
+  id_lt?: InputMaybe<Scalars['String']>;
+  id_gte?: InputMaybe<Scalars['String']>;
+  id_lte?: InputMaybe<Scalars['String']>;
+  id_in?: InputMaybe<Array<Scalars['String']>>;
+  id_not_in?: InputMaybe<Array<Scalars['String']>>;
+  id_contains?: InputMaybe<Scalars['String']>;
+  id_contains_nocase?: InputMaybe<Scalars['String']>;
+  id_not_contains?: InputMaybe<Scalars['String']>;
+  id_not_contains_nocase?: InputMaybe<Scalars['String']>;
+  id_starts_with?: InputMaybe<Scalars['String']>;
+  id_starts_with_nocase?: InputMaybe<Scalars['String']>;
+  id_not_starts_with?: InputMaybe<Scalars['String']>;
+  id_not_starts_with_nocase?: InputMaybe<Scalars['String']>;
+  id_ends_with?: InputMaybe<Scalars['String']>;
+  id_ends_with_nocase?: InputMaybe<Scalars['String']>;
+  id_not_ends_with?: InputMaybe<Scalars['String']>;
+  id_not_ends_with_nocase?: InputMaybe<Scalars['String']>;
+  positionId?: InputMaybe<Scalars['BigInt']>;
+  positionId_not?: InputMaybe<Scalars['BigInt']>;
+  positionId_gt?: InputMaybe<Scalars['BigInt']>;
+  positionId_lt?: InputMaybe<Scalars['BigInt']>;
+  positionId_gte?: InputMaybe<Scalars['BigInt']>;
+  positionId_lte?: InputMaybe<Scalars['BigInt']>;
+  positionId_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  positionId_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  account?: InputMaybe<Scalars['Bytes']>;
+  account_not?: InputMaybe<Scalars['Bytes']>;
+  account_gt?: InputMaybe<Scalars['Bytes']>;
+  account_lt?: InputMaybe<Scalars['Bytes']>;
+  account_gte?: InputMaybe<Scalars['Bytes']>;
+  account_lte?: InputMaybe<Scalars['Bytes']>;
+  account_in?: InputMaybe<Array<Scalars['Bytes']>>;
+  account_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
+  account_contains?: InputMaybe<Scalars['Bytes']>;
+  account_not_contains?: InputMaybe<Scalars['Bytes']>;
+  amountInRUSD?: InputMaybe<Scalars['BigInt']>;
+  amountInRUSD_not?: InputMaybe<Scalars['BigInt']>;
+  amountInRUSD_gt?: InputMaybe<Scalars['BigInt']>;
+  amountInRUSD_lt?: InputMaybe<Scalars['BigInt']>;
+  amountInRUSD_gte?: InputMaybe<Scalars['BigInt']>;
+  amountInRUSD_lte?: InputMaybe<Scalars['BigInt']>;
+  amountInRUSD_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  amountInRUSD_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  amountInPUSD?: InputMaybe<Scalars['BigInt']>;
+  amountInPUSD_not?: InputMaybe<Scalars['BigInt']>;
+  amountInPUSD_gt?: InputMaybe<Scalars['BigInt']>;
+  amountInPUSD_lt?: InputMaybe<Scalars['BigInt']>;
+  amountInPUSD_gte?: InputMaybe<Scalars['BigInt']>;
+  amountInPUSD_lte?: InputMaybe<Scalars['BigInt']>;
+  amountInPUSD_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  amountInPUSD_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  amountInRUY?: InputMaybe<Scalars['BigInt']>;
+  amountInRUY_not?: InputMaybe<Scalars['BigInt']>;
+  amountInRUY_gt?: InputMaybe<Scalars['BigInt']>;
+  amountInRUY_lt?: InputMaybe<Scalars['BigInt']>;
+  amountInRUY_gte?: InputMaybe<Scalars['BigInt']>;
+  amountInRUY_lte?: InputMaybe<Scalars['BigInt']>;
+  amountInRUY_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  amountInRUY_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  deadline?: InputMaybe<Scalars['BigInt']>;
+  deadline_not?: InputMaybe<Scalars['BigInt']>;
+  deadline_gt?: InputMaybe<Scalars['BigInt']>;
+  deadline_lt?: InputMaybe<Scalars['BigInt']>;
+  deadline_gte?: InputMaybe<Scalars['BigInt']>;
+  deadline_lte?: InputMaybe<Scalars['BigInt']>;
+  deadline_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  deadline_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  blockNumber?: InputMaybe<Scalars['BigInt']>;
+  blockNumber_not?: InputMaybe<Scalars['BigInt']>;
+  blockNumber_gt?: InputMaybe<Scalars['BigInt']>;
+  blockNumber_lt?: InputMaybe<Scalars['BigInt']>;
+  blockNumber_gte?: InputMaybe<Scalars['BigInt']>;
+  blockNumber_lte?: InputMaybe<Scalars['BigInt']>;
+  blockNumber_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  blockNumber_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  blockTimestamp?: InputMaybe<Scalars['BigInt']>;
+  blockTimestamp_not?: InputMaybe<Scalars['BigInt']>;
+  blockTimestamp_gt?: InputMaybe<Scalars['BigInt']>;
+  blockTimestamp_lt?: InputMaybe<Scalars['BigInt']>;
+  blockTimestamp_gte?: InputMaybe<Scalars['BigInt']>;
+  blockTimestamp_lte?: InputMaybe<Scalars['BigInt']>;
+  blockTimestamp_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  blockTimestamp_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  transactionHash?: InputMaybe<Scalars['Bytes']>;
+  transactionHash_not?: InputMaybe<Scalars['Bytes']>;
+  transactionHash_gt?: InputMaybe<Scalars['Bytes']>;
+  transactionHash_lt?: InputMaybe<Scalars['Bytes']>;
+  transactionHash_gte?: InputMaybe<Scalars['Bytes']>;
+  transactionHash_lte?: InputMaybe<Scalars['Bytes']>;
+  transactionHash_in?: InputMaybe<Array<Scalars['Bytes']>>;
+  transactionHash_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
+  transactionHash_contains?: InputMaybe<Scalars['Bytes']>;
+  transactionHash_not_contains?: InputMaybe<Scalars['Bytes']>;
+  /** Filter for the block changed event. */
+  _change_block?: InputMaybe<BlockChangedFilter>;
+  and?: InputMaybe<Array<InputMaybe<StakeRUSD_filter>>>;
+  or?: InputMaybe<Array<InputMaybe<StakeRUSD_filter>>>;
+};
+
+export type StakeRUSD_orderBy =
+  | 'id'
+  | 'positionId'
+  | 'account'
+  | 'amountInRUSD'
+  | 'amountInPUSD'
+  | 'amountInRUY'
+  | 'deadline'
+  | 'blockNumber'
+  | 'blockTimestamp'
+  | 'transactionHash';
+
 export type WithIndex<TObject> = TObject & Record<string, any>;
 export type ResolversObject<TObject> = WithIndex<TObject>;
 
@@ -3223,12 +3223,6 @@ export type ResolversTypes = ResolversObject<{
   _Block_: ResolverTypeWrapper<_Block_>;
   _Meta_: ResolverTypeWrapper<_Meta_>;
   _SubgraphErrorPolicy_: _SubgraphErrorPolicy_;
-  SetOutUSDBVault: ResolverTypeWrapper<SetOutUSDBVault>;
-  SetOutUSDBVault_filter: SetOutUSDBVault_filter;
-  SetOutUSDBVault_orderBy: SetOutUSDBVault_orderBy;
-  StakeRUSD: ResolverTypeWrapper<StakeRUSD>;
-  StakeRUSD_filter: StakeRUSD_filter;
-  StakeRUSD_orderBy: StakeRUSD_orderBy;
   Bundle: ResolverTypeWrapper<Bundle>;
   Bundle_filter: Bundle_filter;
   Bundle_orderBy: Bundle_orderBy;
@@ -3253,6 +3247,12 @@ export type ResolversTypes = ResolversObject<{
   User: ResolverTypeWrapper<User>;
   User_filter: User_filter;
   User_orderBy: User_orderBy;
+  SetOutUSDBVault: ResolverTypeWrapper<SetOutUSDBVault>;
+  SetOutUSDBVault_filter: SetOutUSDBVault_filter;
+  SetOutUSDBVault_orderBy: SetOutUSDBVault_orderBy;
+  StakeRUSD: ResolverTypeWrapper<StakeRUSD>;
+  StakeRUSD_filter: StakeRUSD_filter;
+  StakeRUSD_orderBy: StakeRUSD_orderBy;
 }>;
 
 /** Mapping between all available schema types and the resolvers parents */
@@ -3295,10 +3295,6 @@ export type ResolversParentTypes = ResolversObject<{
   WithdrawYield_filter: WithdrawYield_filter;
   _Block_: _Block_;
   _Meta_: _Meta_;
-  SetOutUSDBVault: SetOutUSDBVault;
-  SetOutUSDBVault_filter: SetOutUSDBVault_filter;
-  StakeRUSD: StakeRUSD;
-  StakeRUSD_filter: StakeRUSD_filter;
   Bundle: Bundle;
   Bundle_filter: Bundle_filter;
   LiquidityPosition: LiquidityPosition;
@@ -3315,6 +3311,10 @@ export type ResolversParentTypes = ResolversObject<{
   Token_filter: Token_filter;
   User: User;
   User_filter: User_filter;
+  SetOutUSDBVault: SetOutUSDBVault;
+  SetOutUSDBVault_filter: SetOutUSDBVault_filter;
+  StakeRUSD: StakeRUSD;
+  StakeRUSD_filter: StakeRUSD_filter;
 }>;
 
 export type entityDirectiveArgs = { };
@@ -3357,10 +3357,6 @@ export type QueryResolvers<ContextType = MeshContext, ParentType extends Resolve
   withdrawYield?: Resolver<Maybe<ResolversTypes['WithdrawYield']>, ParentType, ContextType, RequireFields<QuerywithdrawYieldArgs, 'id' | 'subgraphError'>>;
   withdrawYields?: Resolver<Array<ResolversTypes['WithdrawYield']>, ParentType, ContextType, RequireFields<QuerywithdrawYieldsArgs, 'skip' | 'first' | 'subgraphError'>>;
   _meta?: Resolver<Maybe<ResolversTypes['_Meta_']>, ParentType, ContextType, Partial<Query_metaArgs>>;
-  setOutUSDBVault?: Resolver<Maybe<ResolversTypes['SetOutUSDBVault']>, ParentType, ContextType, RequireFields<QuerysetOutUSDBVaultArgs, 'id' | 'subgraphError'>>;
-  setOutUSDBVaults?: Resolver<Array<ResolversTypes['SetOutUSDBVault']>, ParentType, ContextType, RequireFields<QuerysetOutUSDBVaultsArgs, 'skip' | 'first' | 'subgraphError'>>;
-  stakeRUSD?: Resolver<Maybe<ResolversTypes['StakeRUSD']>, ParentType, ContextType, RequireFields<QuerystakeRUSDArgs, 'id' | 'subgraphError'>>;
-  stakeRUSDs?: Resolver<Array<ResolversTypes['StakeRUSD']>, ParentType, ContextType, RequireFields<QuerystakeRUSDsArgs, 'skip' | 'first' | 'subgraphError'>>;
   swapFactory?: Resolver<Maybe<ResolversTypes['SwapFactory']>, ParentType, ContextType, RequireFields<QueryswapFactoryArgs, 'id' | 'subgraphError'>>;
   swapFactories?: Resolver<Array<ResolversTypes['SwapFactory']>, ParentType, ContextType, RequireFields<QueryswapFactoriesArgs, 'skip' | 'first' | 'subgraphError'>>;
   token?: Resolver<Maybe<ResolversTypes['Token']>, ParentType, ContextType, RequireFields<QuerytokenArgs, 'id' | 'subgraphError'>>;
@@ -3377,6 +3373,10 @@ export type QueryResolvers<ContextType = MeshContext, ParentType extends Resolve
   liquidityPositions?: Resolver<Array<ResolversTypes['LiquidityPosition']>, ParentType, ContextType, RequireFields<QueryliquidityPositionsArgs, 'skip' | 'first' | 'subgraphError'>>;
   bundle?: Resolver<Maybe<ResolversTypes['Bundle']>, ParentType, ContextType, RequireFields<QuerybundleArgs, 'id' | 'subgraphError'>>;
   bundles?: Resolver<Array<ResolversTypes['Bundle']>, ParentType, ContextType, RequireFields<QuerybundlesArgs, 'skip' | 'first' | 'subgraphError'>>;
+  setOutUSDBVault?: Resolver<Maybe<ResolversTypes['SetOutUSDBVault']>, ParentType, ContextType, RequireFields<QuerysetOutUSDBVaultArgs, 'id' | 'subgraphError'>>;
+  setOutUSDBVaults?: Resolver<Array<ResolversTypes['SetOutUSDBVault']>, ParentType, ContextType, RequireFields<QuerysetOutUSDBVaultsArgs, 'skip' | 'first' | 'subgraphError'>>;
+  stakeRUSD?: Resolver<Maybe<ResolversTypes['StakeRUSD']>, ParentType, ContextType, RequireFields<QuerystakeRUSDArgs, 'id' | 'subgraphError'>>;
+  stakeRUSDs?: Resolver<Array<ResolversTypes['StakeRUSD']>, ParentType, ContextType, RequireFields<QuerystakeRUSDsArgs, 'skip' | 'first' | 'subgraphError'>>;
 }>;
 
 export type SubscriptionResolvers<ContextType = MeshContext, ParentType extends ResolversParentTypes['Subscription'] = ResolversParentTypes['Subscription']> = ResolversObject<{
@@ -3403,10 +3403,6 @@ export type SubscriptionResolvers<ContextType = MeshContext, ParentType extends 
   withdrawYield?: SubscriptionResolver<Maybe<ResolversTypes['WithdrawYield']>, "withdrawYield", ParentType, ContextType, RequireFields<SubscriptionwithdrawYieldArgs, 'id' | 'subgraphError'>>;
   withdrawYields?: SubscriptionResolver<Array<ResolversTypes['WithdrawYield']>, "withdrawYields", ParentType, ContextType, RequireFields<SubscriptionwithdrawYieldsArgs, 'skip' | 'first' | 'subgraphError'>>;
   _meta?: SubscriptionResolver<Maybe<ResolversTypes['_Meta_']>, "_meta", ParentType, ContextType, Partial<Subscription_metaArgs>>;
-  setOutUSDBVault?: SubscriptionResolver<Maybe<ResolversTypes['SetOutUSDBVault']>, "setOutUSDBVault", ParentType, ContextType, RequireFields<SubscriptionsetOutUSDBVaultArgs, 'id' | 'subgraphError'>>;
-  setOutUSDBVaults?: SubscriptionResolver<Array<ResolversTypes['SetOutUSDBVault']>, "setOutUSDBVaults", ParentType, ContextType, RequireFields<SubscriptionsetOutUSDBVaultsArgs, 'skip' | 'first' | 'subgraphError'>>;
-  stakeRUSD?: SubscriptionResolver<Maybe<ResolversTypes['StakeRUSD']>, "stakeRUSD", ParentType, ContextType, RequireFields<SubscriptionstakeRUSDArgs, 'id' | 'subgraphError'>>;
-  stakeRUSDs?: SubscriptionResolver<Array<ResolversTypes['StakeRUSD']>, "stakeRUSDs", ParentType, ContextType, RequireFields<SubscriptionstakeRUSDsArgs, 'skip' | 'first' | 'subgraphError'>>;
   swapFactory?: SubscriptionResolver<Maybe<ResolversTypes['SwapFactory']>, "swapFactory", ParentType, ContextType, RequireFields<SubscriptionswapFactoryArgs, 'id' | 'subgraphError'>>;
   swapFactories?: SubscriptionResolver<Array<ResolversTypes['SwapFactory']>, "swapFactories", ParentType, ContextType, RequireFields<SubscriptionswapFactoriesArgs, 'skip' | 'first' | 'subgraphError'>>;
   token?: SubscriptionResolver<Maybe<ResolversTypes['Token']>, "token", ParentType, ContextType, RequireFields<SubscriptiontokenArgs, 'id' | 'subgraphError'>>;
@@ -3423,6 +3419,10 @@ export type SubscriptionResolvers<ContextType = MeshContext, ParentType extends 
   liquidityPositions?: SubscriptionResolver<Array<ResolversTypes['LiquidityPosition']>, "liquidityPositions", ParentType, ContextType, RequireFields<SubscriptionliquidityPositionsArgs, 'skip' | 'first' | 'subgraphError'>>;
   bundle?: SubscriptionResolver<Maybe<ResolversTypes['Bundle']>, "bundle", ParentType, ContextType, RequireFields<SubscriptionbundleArgs, 'id' | 'subgraphError'>>;
   bundles?: SubscriptionResolver<Array<ResolversTypes['Bundle']>, "bundles", ParentType, ContextType, RequireFields<SubscriptionbundlesArgs, 'skip' | 'first' | 'subgraphError'>>;
+  setOutUSDBVault?: SubscriptionResolver<Maybe<ResolversTypes['SetOutUSDBVault']>, "setOutUSDBVault", ParentType, ContextType, RequireFields<SubscriptionsetOutUSDBVaultArgs, 'id' | 'subgraphError'>>;
+  setOutUSDBVaults?: SubscriptionResolver<Array<ResolversTypes['SetOutUSDBVault']>, "setOutUSDBVaults", ParentType, ContextType, RequireFields<SubscriptionsetOutUSDBVaultsArgs, 'skip' | 'first' | 'subgraphError'>>;
+  stakeRUSD?: SubscriptionResolver<Maybe<ResolversTypes['StakeRUSD']>, "stakeRUSD", ParentType, ContextType, RequireFields<SubscriptionstakeRUSDArgs, 'id' | 'subgraphError'>>;
+  stakeRUSDs?: SubscriptionResolver<Array<ResolversTypes['StakeRUSD']>, "stakeRUSDs", ParentType, ContextType, RequireFields<SubscriptionstakeRUSDsArgs, 'skip' | 'first' | 'subgraphError'>>;
 }>;
 
 export interface BigDecimalScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['BigDecimal'], any> {
@@ -3581,29 +3581,6 @@ export type _Meta_Resolvers<ContextType = MeshContext, ParentType extends Resolv
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type SetOutUSDBVaultResolvers<ContextType = MeshContext, ParentType extends ResolversParentTypes['SetOutUSDBVault'] = ResolversParentTypes['SetOutUSDBVault']> = ResolversObject<{
-  id?: Resolver<ResolversTypes['Bytes'], ParentType, ContextType>;
-  outUSDBVault?: Resolver<ResolversTypes['Bytes'], ParentType, ContextType>;
-  blockNumber?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
-  blockTimestamp?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
-  transactionHash?: Resolver<ResolversTypes['Bytes'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-}>;
-
-export type StakeRUSDResolvers<ContextType = MeshContext, ParentType extends ResolversParentTypes['StakeRUSD'] = ResolversParentTypes['StakeRUSD']> = ResolversObject<{
-  id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  positionId?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
-  account?: Resolver<ResolversTypes['Bytes'], ParentType, ContextType>;
-  amountInRUSD?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
-  amountInPUSD?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
-  amountInRUY?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
-  deadline?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
-  blockNumber?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
-  blockTimestamp?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
-  transactionHash?: Resolver<ResolversTypes['Bytes'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-}>;
-
 export type BundleResolvers<ContextType = MeshContext, ParentType extends ResolversParentTypes['Bundle'] = ResolversParentTypes['Bundle']> = ResolversObject<{
   id?: Resolver<ResolversTypes['Bytes'], ParentType, ContextType>;
   ethPrice?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
@@ -3699,6 +3676,29 @@ export type UserResolvers<ContextType = MeshContext, ParentType extends Resolver
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
+export type SetOutUSDBVaultResolvers<ContextType = MeshContext, ParentType extends ResolversParentTypes['SetOutUSDBVault'] = ResolversParentTypes['SetOutUSDBVault']> = ResolversObject<{
+  id?: Resolver<ResolversTypes['Bytes'], ParentType, ContextType>;
+  outUSDBVault?: Resolver<ResolversTypes['Bytes'], ParentType, ContextType>;
+  blockNumber?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
+  blockTimestamp?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
+  transactionHash?: Resolver<ResolversTypes['Bytes'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type StakeRUSDResolvers<ContextType = MeshContext, ParentType extends ResolversParentTypes['StakeRUSD'] = ResolversParentTypes['StakeRUSD']> = ResolversObject<{
+  id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  positionId?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
+  account?: Resolver<ResolversTypes['Bytes'], ParentType, ContextType>;
+  amountInRUSD?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
+  amountInPUSD?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
+  amountInRUY?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
+  deadline?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
+  blockNumber?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
+  blockTimestamp?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
+  transactionHash?: Resolver<ResolversTypes['Bytes'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export type Resolvers<ContextType = MeshContext> = ResolversObject<{
   Query?: QueryResolvers<ContextType>;
   Subscription?: SubscriptionResolvers<ContextType>;
@@ -3720,8 +3720,6 @@ export type Resolvers<ContextType = MeshContext> = ResolversObject<{
   WithdrawYield?: WithdrawYieldResolvers<ContextType>;
   _Block_?: _Block_Resolvers<ContextType>;
   _Meta_?: _Meta_Resolvers<ContextType>;
-  SetOutUSDBVault?: SetOutUSDBVaultResolvers<ContextType>;
-  StakeRUSD?: StakeRUSDResolvers<ContextType>;
   Bundle?: BundleResolvers<ContextType>;
   LiquidityPosition?: LiquidityPositionResolvers<ContextType>;
   Pair?: PairResolvers<ContextType>;
@@ -3730,6 +3728,8 @@ export type Resolvers<ContextType = MeshContext> = ResolversObject<{
   SwapFactory?: SwapFactoryResolvers<ContextType>;
   Token?: TokenResolvers<ContextType>;
   User?: UserResolvers<ContextType>;
+  SetOutUSDBVault?: SetOutUSDBVaultResolvers<ContextType>;
+  StakeRUSD?: StakeRUSDResolvers<ContextType>;
 }>;
 
 export type DirectiveResolvers<ContextType = MeshContext> = ResolversObject<{
@@ -3738,7 +3738,7 @@ export type DirectiveResolvers<ContextType = MeshContext> = ResolversObject<{
   derivedFrom?: derivedFromDirectiveResolver<any, any, ContextType>;
 }>;
 
-export type MeshContext = OutrunStakeTypes.Context & StakeRusdTypes.Context & OutrunTypes.Context & BaseMeshContext;
+export type MeshContext = OutrunStakeTypes.Context & OutrunTypes.Context & StakeRusdTypes.Context & BaseMeshContext;
 
 
 import { fileURLToPath } from '@graphql-mesh/utils';
@@ -3750,10 +3750,10 @@ const importFn: ImportFn = <T>(moduleId: string) => {
     case ".graphclient/sources/outrunStake/introspectionSchema":
       return Promise.resolve(importedModule$0) as T;
     
-    case ".graphclient/sources/stakeRUSD/introspectionSchema":
+    case ".graphclient/sources/outrun/introspectionSchema":
       return Promise.resolve(importedModule$1) as T;
     
-    case ".graphclient/sources/outrun/introspectionSchema":
+    case ".graphclient/sources/stakeRUSD/introspectionSchema":
       return Promise.resolve(importedModule$2) as T;
     
     default:
