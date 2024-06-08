@@ -74,9 +74,9 @@ export default function useContract() {
       if (err instanceof BaseError) {
         const revertError = err.walk(err => err instanceof ContractFunctionRevertedError)
         if (revertError instanceof ContractFunctionRevertedError) {
-          const errorName = get(revertError, 'data.errorName')
-          const errorReason = get(revertError, 'reason')
-          errMessage = `${errorName}: ${errorReason}` || errMessage
+          const errorName = get(revertError, 'data.errorName', "Failed")
+          const errorReason = get(revertError, 'reason', errMessage)
+          errMessage = `${errorName}: ${errorReason}`
         }
       }
       toast.update(currentToast, {

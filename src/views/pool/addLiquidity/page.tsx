@@ -114,7 +114,6 @@ export default function AddLiquidityPage() {
               defaultSymbol={defaultSymbol}
               token={swapData.token0}
               tokenDisable={swapData.token1}
-              isDisabled
               chainId={chainId}
               onSelect={(token) => setToken0(token)}
             />
@@ -162,7 +161,6 @@ export default function AddLiquidityPage() {
             <TokenSelect
               chainId={chainId}
               tokenDisable={swapData.token0}
-              isDisabled
               token={swapData.token1}
               onSelect={(token) => setToken1(token)}
             />

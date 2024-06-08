@@ -57,7 +57,7 @@ export abstract class Fetcher {
     const parsedDecimals =
       typeof TOKEN_DECIMALS_CACHE?.[chainId]?.[address] === 'number'
         ? TOKEN_DECIMALS_CACHE[chainId][address]
-        : await erc20.read.decimals([]).then((decimals: number) => {
+        : await erc20.read.decimals([]).then((decimals: any) => {
           // @ts-ignore
           TOKEN_DECIMALS_CACHE = {
             ...TOKEN_DECIMALS_CACHE,

@@ -15,7 +15,7 @@ export const addressMap = {
     [ContractName.SWAP_ROUTER]: "0x4d821974783d88E4996241EcbBf62935180941a8",
     [ContractName.SWAP_FACTORY]: "0x01923F769C3B287A3C69a931736CAC02d6cF1fd6",
     [ContractName.MULTICALL]: "0xca11bde05977b3631167028862be2a173976ca11",
-    [ContractName.ORETH_ORUSD]: "0x5e6c8991e1bddeae585cbb1f0d8d94d7fcb22f2e"
+    [ContractName.ORETH_ORUSD]: "0x14c597edf2fa0b26bbc892dcafc7d84241815995"
   }
 } as Record<number, ContractAddressMap>
 
