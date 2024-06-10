@@ -6,7 +6,9 @@ export enum ContractName {
   SWAP_ROUTER = "SWAP_ROUTER",
   SWAP_FACTORY = "SWAP_FACTORY",
   ORETH_ORUSD = "ORETH_ORUSD",
-  MULTICALL = "MULTICALL"
+  MULTICALL = "MULTICALL",
+  ORETH = "ORETH",
+  ORUSD = "ORUSD"
 }
 type ContractAddressMap = Record<ContractName, `0x${string}`>
 
@@ -15,7 +17,9 @@ export const addressMap = {
     [ContractName.SWAP_ROUTER]: "0x4d821974783d88E4996241EcbBf62935180941a8",
     [ContractName.SWAP_FACTORY]: "0x01923F769C3B287A3C69a931736CAC02d6cF1fd6",
     [ContractName.MULTICALL]: "0xca11bde05977b3631167028862be2a173976ca11",
-    [ContractName.ORETH_ORUSD]: "0x14c597edf2fa0b26bbc892dcafc7d84241815995"
+    [ContractName.ORETH_ORUSD]: "0x14c597edf2fa0b26bbc892dcafc7d84241815995",
+    [ContractName.ORETH]: "0xF62f5dB01cb60d80219F478D5CDffB6398Cee9A5",
+    [ContractName.ORUSD]: "0xe04b19ed724A328C804e82e7196dcef18570bfae"
   }
 } as Record<number, ContractAddressMap>
 

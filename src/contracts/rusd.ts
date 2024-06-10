@@ -1,5 +1,6 @@
 import { Token } from '@/packages/swap-core/entities/token';
 import { ChainId } from './chains';
+import { addressMap } from './addressMap';
 /**
  * Blast usdt like coin: rusd
  */
@@ -7,7 +8,7 @@ export const RUSD: { [chainId: number]: Token } = {
   // blast testnet
   [ChainId.BLAST_SEPOLIA]: new Token(
     ChainId.BLAST_SEPOLIA,
-    '0xe04b19ed724A328C804e82e7196dcef18570bfae',
+    addressMap[ChainId.BLAST_SEPOLIA].ORUSD,
     18,
     'ORUSD',
     'Wrapped ORUSD'
@@ -15,7 +16,7 @@ export const RUSD: { [chainId: number]: Token } = {
   // blast mainnet
   [ChainId.BLAST]: new Token(
     ChainId.BLAST,
-    '0xe04b19ed724A328C804e82e7196dcef18570bfae',
+    addressMap[ChainId.BLAST_SEPOLIA].ORUSD,
     18,
     'ORUSD',
     'Wrapped ORUSD'

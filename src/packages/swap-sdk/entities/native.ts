@@ -1,5 +1,6 @@
 import invariant from 'tiny-invariant';
-import { Currency, Token, NativeCurrency, RETH } from '@/packages/swap-core';
+import { Currency, Token, NativeCurrency } from '@/packages/swap-core';
+import { RETH } from '@/contracts/reth'
 // import { WNATIVE, NATIVE } from '../constants'
 import { Address, PublicClient, formatEther } from 'viem';
 import { getBalance } from 'viem/actions';

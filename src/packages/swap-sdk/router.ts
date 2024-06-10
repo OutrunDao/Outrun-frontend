@@ -8,7 +8,7 @@ import {
 } from '@/packages/swap-core';
 import { Trade } from './entities';
 import invariant from 'tiny-invariant';
-import { USDB } from '@/packages/swap-core'
+import { USDB } from '@/contracts/usdb'
 
 
 /**
