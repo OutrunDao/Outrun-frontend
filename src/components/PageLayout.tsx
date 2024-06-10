@@ -23,50 +23,28 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </Flex>
         <Box ml={'60px'}>
           <HStack spacing={'40px'} fontSize={14}>
-            <Button
-              variant="link"
-              color={pathname === '/swap' ? 'brand.500' : 'grey.600'}
-              fontSize={14}
-              fontWeight={'normal'}
-              leftIcon={<Icon fontSize={16} as={IoSwapVertical}></Icon>}
-            >
-              <Link href={'/swap'}>Swap</Link>
+            <Button variant="link" color={pathname === '/swap' ? 'brand.500' : 'grey.600'} fontSize={14} fontWeight={'normal'} leftIcon={<Icon fontSize={16} as={IoSwapVertical}></Icon>}>
+              <Link href={'/swap'} prefetch={true}>
+                Swap
+              </Link>
             </Button>
-            <Button
-              variant="link"
-              color={pathname === '/pool' ? 'brand.500' : 'grey.600'}
-              fontSize={14}
-              fontWeight={'normal'}
-              leftIcon={<Icon fontSize={16} as={PiSwimmingPool}></Icon>}
-            >
-              <Link href={'/pool'}>Pool</Link>
+            <Button variant="link" color={pathname === '/pool' ? 'brand.500' : 'grey.600'} fontSize={14} fontWeight={'normal'} leftIcon={<Icon fontSize={16} as={PiSwimmingPool}></Icon>}>
+              <Link href={'/pool'} prefetch={true}>
+                Pool
+              </Link>
             </Button>
-            <Button
-              variant="link"
-              color={pathname === '/stake' ? 'brand.500' : 'grey.600'}
-              fontSize={14}
-              fontWeight={'normal'}
-              leftIcon={<Icon fontSize={16} as={GiMiner}></Icon>}
-            >
-              <Link href={'/stake'}>Stake</Link>
+            <Button variant="link" color={pathname === '/stake' ? 'brand.500' : 'grey.600'} fontSize={14} fontWeight={'normal'} leftIcon={<Icon fontSize={16} as={GiMiner}></Icon>}>
+              <Link href={'/stake'} prefetch={true}>
+                Stake
+              </Link>
             </Button>
-            <Button
-              variant="link"
-              color={pathname === '/position' ? 'brand.500' : 'grey.600'}
-              fontSize={14}
-              fontWeight={'normal'}
-              leftIcon={<Icon fontSize={16} as={RiCoinFill}></Icon>}
-            >
+            <Button variant="link" color={pathname === '/position' ? 'brand.500' : 'grey.600'} fontSize={14} fontWeight={'normal'} leftIcon={<Icon fontSize={16} as={RiCoinFill}></Icon>}>
               <Link href={'/position'}>Positions</Link>
             </Button>
-            <Button
-              variant="link"
-              color={pathname === '/launchpad' ? 'brand.500' : 'grey.600'}
-              fontSize={14}
-              fontWeight={'normal'}
-              leftIcon={<Icon fontSize={16} as={FaHotjar}></Icon>}
-            >
-              <Link href={'/launchpad'}>Launchpad</Link>
+            <Button variant="link" color={pathname === '/launchpad' ? 'brand.500' : 'grey.600'} fontSize={14} fontWeight={'normal'} leftIcon={<Icon fontSize={16} as={FaHotjar}></Icon>}>
+              <Link href={'/launchpad'} prefetch={true}>
+                Launchpad
+              </Link>
             </Button>
           </HStack>
         </Box>

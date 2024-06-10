@@ -1,17 +1,6 @@
 'use client';
 import Link from 'next/link';
-import {
-  Box,
-  Heading,
-  Button,
-  VStack,
-  Tabs,
-  TabList,
-  Tab,
-  TabPanel,
-  TabPanels,
-  HStack,
-} from '@chakra-ui/react';
+import { Box, Heading, Button, VStack, Tabs, TabList, Tab, TabPanel, TabPanels, HStack } from '@chakra-ui/react';
 import { useChainId } from 'wagmi';
 import UserLiquiditesPannel from './UserLiquidityPannel';
 import PoolTvlPannel from './PoolTvlPannel';
@@ -35,10 +24,14 @@ const PoolIndex = () => {
           <br />
           <HStack spacing={4}>
             <Button colorScheme="gray" rounded={4}>
-              <Link href={`/pool/${oreth_orusd}/add-liquidity`}>Add Liquidity</Link>
+              <Link href={`/pool/${oreth_orusd}/add-liquidity`} prefetch={true}>
+                Add Liquidity
+              </Link>
             </Button>
             <Button colorScheme="teal" rounded={4}>
-              <Link href={'/pool/create'}>Create a Pool</Link>
+              <Link href={'/pool/create'} prefetch={true}>
+                Create a Pool
+              </Link>
             </Button>
           </HStack>
         </VStack>
