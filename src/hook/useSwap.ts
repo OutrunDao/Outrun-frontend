@@ -23,7 +23,8 @@ export enum BtnAction {
   insufficient,
   disconnect,
   available,
-  approve
+  approve,
+  invalidPair
 }
 
 export enum SwapView {
@@ -150,9 +151,13 @@ export function useSwap(view: SwapView) {
 
   const submitButtonStatus = useMemo(() => {
     if (!chainId || !SUPPORTED_CHAINS.includes(chainId)) return BtnAction.disconnect;
+    if (view !== SwapView.swap && isTransformView) {
+      return BtnAction.invalidPair
+    }
     if (!token0 || !token1 || !token0AmountInput || !token1AmountInput) {
       return BtnAction.disable;
     }
+
     try {
       if (view === SwapView.swap) {
         if (!tradeRoute && !isTransformView) return BtnAction.disable

@@ -126,6 +126,7 @@ export default function Swap() {
           duration: null,
           isClosable: true,
         });
+
       await updateTokenBalance();
     } else {
       await approveTokens(addressMap[chainId].SWAP_ROUTER);

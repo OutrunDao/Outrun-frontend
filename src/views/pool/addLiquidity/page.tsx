@@ -127,6 +127,11 @@ export default function AddLiquidityPage() {
             add liquidity
           </Button>
         ) : null}
+        {swapData.submitButtonStatus === BtnAction.invalidPair ? (
+          <Button width={'100%'} size="lg" colorScheme="gray" isDisabled variant="solid" rounded={'md'}>
+            invalid pair
+          </Button>
+        ) : null}
       </Box>
     </Container>
   );

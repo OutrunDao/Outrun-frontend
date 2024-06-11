@@ -1,37 +1,12 @@
 'use client';
 
-import {
-  AbsoluteCenter,
-  Box,
-  Button,
-  Center,
-  Container,
-  Divider,
-  Flex,
-  HStack,
-  IconButton,
-  Input,
-  Slider,
-  SliderFilledTrack,
-  SliderMark,
-  SliderThumb,
-  SliderTrack,
-  Spacer,
-  Text,
-  useToast,
-} from '@chakra-ui/react';
+import { AbsoluteCenter, Box, Button, Center, Link, Container, Divider, Flex, HStack, IconButton, Input, Slider, SliderFilledTrack, SliderMark, SliderThumb, SliderTrack, Spacer, Text, useToast } from '@chakra-ui/react';
 import TokenSelect, { getToken } from '@/components/TokenSelect';
 import { useAccount, useChainId, usePublicClient, useWalletClient } from 'wagmi';
 import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'next/navigation';
 
-import {
-  execute,
-  PairDocument,
-  LiquidityPositionsDocument,
-  LiquidityPosition,
-  Pair as PairType,
-} from '@/subgraph';
+import { execute, PairDocument, LiquidityPositionsDocument, LiquidityPosition, Pair as PairType } from '@/subgraph';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Token } from '@/packages/swap-core';
 import { chain, get, retry } from 'radash';
@@ -42,6 +17,8 @@ import TransferEventAbi from './TransferEvent.abi.json';
 import getTokenContract from '@/contracts/get/erc20token';
 import useContract from '@/hook/useContract';
 import { ContractName, addressMap } from '@/contracts/addressMap';
+import parseTokenTransferLogs from '@/utils/parseTokenEvents';
+import { BlockExplorers } from '@/contracts/chains';
 
 enum BtnAction {
   disconnect,
@@ -73,41 +50,27 @@ export default function WithdrawPage() {
   const { data: pairTarget } = useQuery({
     queryKey: ['pairfind', pairAddress],
     queryFn: async (): Promise<PairType> => {
-      return execute(PairDocument, { addr: pairAddress }).then(
-        (res: { data: { pairs: PairType[] } }) => res.data.pairs[0]
-      );
+      return execute(PairDocument, { addr: pairAddress }).then((res: { data: { pairs: PairType[] } }) => res.data.pairs[0]);
     },
   });
   const { data: userLiquidityPosition } = useQuery({
     queryKey: ['userLiquidityPosition', account.address, pairAddress],
     queryFn: async (): Promise<LiquidityPosition[]> => {
-      return execute(LiquidityPositionsDocument, { user: account.address, pair: pairAddress }).then(
-        (res: { data: { liquidityPositions: LiquidityPosition[] } }) => res.data.liquidityPositions
-      );
+      return execute(LiquidityPositionsDocument, { user: account.address, pair: pairAddress }).then((res: { data: { liquidityPositions: LiquidityPosition[] } }) => res.data.liquidityPositions);
     },
   });
   const [sliderValue, setSliderValue] = useState(100);
   const V2_ROUTER_ADDRESSES = useMemo(() => {
     return addressMap[chainId].SWAP_ROUTER;
   }, [chainId]);
-
+  const blockExplore = useMemo(() => {
+    return BlockExplorers[chainId];
+  }, [chainId]);
   useEffect(() => {
     if (!pairAddress || !pairTarget || !publicClient) return;
-    const token0 = new Token(
-      chainId,
-      pairTarget.token0.id,
-      +pairTarget.token0.decimals,
-      pairTarget.token0.symbol,
-      pairTarget.token0.name
-    );
+    const token0 = new Token(chainId, pairTarget.token0.id, +pairTarget.token0.decimals, pairTarget.token0.symbol, pairTarget.token0.name);
     setToken0(token0);
-    const token1 = new Token(
-      chainId,
-      pairTarget.token1.id,
-      +pairTarget.token1.decimals,
-      pairTarget.token1.symbol,
-      pairTarget.token1.name
-    );
+    const token1 = new Token(chainId, pairTarget.token1.id, +pairTarget.token1.decimals, pairTarget.token1.symbol, pairTarget.token1.name);
     setToken1(token1);
   }, [pairTarget, chainId]);
   useEffect(() => {
@@ -127,14 +90,8 @@ export default function WithdrawPage() {
     } else {
       setAction(BtnAction.available);
     }
-    const token0Value = new Decimal(validWithdrawAmount)
-      .div(position.pair.totalSupply)
-      .times(position.pair.reserve0)
-      .toString();
-    const token1Value = new Decimal(validWithdrawAmount)
-      .div(position.pair.totalSupply)
-      .times(position.pair.reserve1)
-      .toString();
+    const token0Value = new Decimal(validWithdrawAmount).div(position.pair.totalSupply).times(position.pair.reserve0).toString();
+    const token1Value = new Decimal(validWithdrawAmount).div(position.pair.totalSupply).times(position.pair.reserve1).toString();
     setToken0Value(token0Value);
     setToken1Value(token1Value);
   }, [lpAmount]);
@@ -145,11 +102,7 @@ export default function WithdrawPage() {
   async function removeLiquidity() {
     if (!publicClient) return;
     setLoading(true);
-    const tokenContract = getTokenContract(
-      get(userLiquidityPosition, '[0].pair.id'),
-      publicClient,
-      walletClient
-    );
+    const tokenContract = getTokenContract(get(userLiquidityPosition, '[0].pair.id'), publicClient, walletClient);
     await writeContract(
       // @ts-ignore
       tokenContract,
@@ -165,12 +118,7 @@ export default function WithdrawPage() {
 
     const deadline = Math.floor(new Date().getTime() / 1000) + 10 * 60;
 
-    const [type, tokenA, tokenB, tokenAMinAmount, tokenBMinAmount] = tokenSwitch(
-      token0!,
-      token1!,
-      parseUnits(new Decimal(token0Value).times(0.995).toString(), token0!.decimals),
-      parseUnits(new Decimal(token1Value).times(0.995).toString(), token1!.decimals)
-    );
+    const [type, tokenA, tokenB, tokenAMinAmount, tokenBMinAmount] = tokenSwitch(token0!, token1!, parseUnits(new Decimal(token0Value).times(0.995).toString(), token0!.decimals), parseUnits(new Decimal(token1Value).times(0.995).toString(), token1!.decimals));
     let execute = 'removeLiquidity';
     let liquidity = parseUnits(lpAmount, 18);
     let to = account.address;
@@ -200,79 +148,66 @@ export default function WithdrawPage() {
       }
     );
     if (data && data.status === 'success') {
-      console.log(
-        parseEventLogs({
-          logs: data.logs,
-          abi: TransferEventAbi,
+      // console.log(data.logs);
+
+      const log = parseTokenTransferLogs(data.logs);
+      const adressSymbolMap = {
+        [token0!.address.toLocaleLowerCase()]: {
+          symbol: token0!.symbol,
+          decimal: token0?.decimals || 18,
+        },
+        [token1!.address.toLocaleLowerCase()]: {
+          symbol: token1!.symbol,
+          decimal: token1?.decimals || 18,
+        },
+      } as Record<string, { symbol: string; decimal: number }>;
+      const receivesText = Object.entries(log.to[account.address!])
+        .map((item) => {
+          return `${formatUnits(item[1], adressSymbolMap[item[0]].decimal)} ${adressSymbolMap[item[0]].symbol}`;
         })
-      );
+        .join(', ');
+      toast({
+        title: 'Withdraw finished',
+        status: 'success',
+        position: 'bottom',
+        description: (
+          <>
+            {' '}
+            {`You have successfully received ${receivesText}`}. view on
+            <Link isExternal href={blockExplore + '/tx/' + data.transactionHash} textDecoration={'underline'} colorScheme="teal">
+              BlastScan
+            </Link>
+          </>
+        ),
+        duration: null,
+        isClosable: true,
+      });
     }
     setLoading(false);
   }
 
   return (
-    <Container
-      w={'420px'}
-      borderStyle={'solid'}
-      borderWidth={'0.5px'}
-      borderRadius={'md'}
-      borderColor="gray.600"
-      boxShadow="xs"
-      rounded="md"
-      p={6}
-      mt="24"
-    >
+    <Container w={'420px'} borderStyle={'solid'} borderWidth={'0.5px'} borderRadius={'md'} borderColor="gray.600" boxShadow="xs" rounded="md" p={6} mt="24">
       <Center mb={'2rem'}>
         <Text fontSize="md">Liquidity Withdraw</Text>
       </Center>
-      <Container
-        borderColor="gray.600"
-        boxShadow="xs"
-        rounded="md"
-        borderWidth={'0.5px'}
-        borderStyle={'solid'}
-        padding="6px 0"
-        borderBottomRadius={'0'}
-      >
+      <Container borderColor="gray.600" boxShadow="xs" rounded="md" borderWidth={'0.5px'} borderStyle={'solid'} padding="6px 0" borderBottomRadius={'0'}>
         <Flex>
           <Center>
             <TokenSelect token={token0} isDisabled={true} chainId={chainId} onSelect={() => {}} />
           </Center>
           <Center width={'100%'}>
-            <Input
-              variant="main"
-              size="sm"
-              textAlign={'right'}
-              placeholder="0"
-              disabled
-              color={'#fff'}
-              value={token0Value}
-            />
+            <Input variant="main" size="sm" textAlign={'right'} placeholder="0" disabled color={'#fff'} value={token0Value} />
           </Center>
         </Flex>
       </Container>
-      <Container
-        borderColor="gray.600"
-        boxShadow="xs"
-        rounded="md"
-        borderWidth={'0.5px'}
-        borderStyle={'solid'}
-        padding="6px 0"
-        borderTopRadius={0}
-      >
+      <Container borderColor="gray.600" boxShadow="xs" rounded="md" borderWidth={'0.5px'} borderStyle={'solid'} padding="6px 0" borderTopRadius={0}>
         <Flex>
           <Center>
             <TokenSelect chainId={chainId} isDisabled={true} token={token1} onSelect={() => {}} />
           </Center>
           <Center width={'100%'}>
-            <Input
-              variant="main"
-              size="sm"
-              textAlign={'right'}
-              placeholder="0"
-              isDisabled
-              value={token1Value}
-            />
+            <Input variant="main" size="sm" textAlign={'right'} placeholder="0" isDisabled value={token1Value} />
           </Center>
         </Flex>
       </Container>
@@ -282,49 +217,20 @@ export default function WithdrawPage() {
           Input Your LP Token
         </AbsoluteCenter>
       </Box>
-      <Container
-        borderColor="gray.600"
-        boxShadow="xs"
-        rounded="md"
-        borderWidth={'0.5px'}
-        borderStyle={'solid'}
-        padding="6px 0"
-        borderTopRadius={0}
-      >
+      <Container borderColor="gray.600" boxShadow="xs" rounded="md" borderWidth={'0.5px'} borderStyle={'solid'} padding="6px 0" borderTopRadius={0}>
         <Flex>
           <Center textAlign={'center'} width={'180px'}>
             <Text mr="14px">OUTRUN-LP</Text>
             <Divider orientation="vertical" height={'20px'} />
           </Center>
           <Center width={'100%'}>
-            <Input
-              variant="main"
-              size="lg"
-              textAlign={'right'}
-              value={lpAmount}
-              placeholder="withdraw amount"
-              onChange={(e) => handleLpAmount(e.target.value)}
-            />
+            <Input variant="main" size="lg" textAlign={'right'} value={lpAmount} placeholder="withdraw amount" onChange={(e) => handleLpAmount(e.target.value)} />
           </Center>
         </Flex>
       </Container>
       <Center mt="16px">
-        <Slider
-          aria-label="slider-ex-4"
-          width={'98%'}
-          value={sliderValue}
-          onChange={(val) => setSliderValue(val)}
-        >
-          <SliderMark
-            value={sliderValue}
-            textAlign="center"
-            fontSize={'12px'}
-            bg="teal"
-            color="white"
-            mt="-8"
-            ml="-5"
-            w="12"
-          >
+        <Slider aria-label="slider-ex-4" width={'98%'} value={sliderValue} onChange={(val) => setSliderValue(val)}>
+          <SliderMark value={sliderValue} textAlign="center" fontSize={'12px'} bg="teal" color="white" mt="-8" ml="-5" w="12">
             {sliderValue}%
           </SliderMark>
           <SliderTrack bg="teal">
@@ -343,15 +249,7 @@ export default function WithdrawPage() {
       <Box mt={'1rem'} fontSize={16}>
         {action === BtnAction.disconnect ? <w3m-button /> : null}
         {action === BtnAction.available ? (
-          <Button
-            width={'100%'}
-            mt={4}
-            size="lg"
-            colorScheme="gray"
-            variant="solid"
-            onClick={removeLiquidity}
-            isLoading={loading}
-          >
+          <Button width={'100%'} mt={4} size="lg" colorScheme="gray" variant="solid" onClick={removeLiquidity} isLoading={loading}>
             remove liquidity
           </Button>
         ) : null}
