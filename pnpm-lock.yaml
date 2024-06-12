@@ -120,6 +120,9 @@ importers:
       '@graphprotocol/client-cli':
         specifier: ^3.0.0
         version: 3.0.0(@babel/core@7.24.0)(@envelop/core@3.0.6)(@graphql-mesh/cross-helpers@0.3.4(@graphql-tools/utils@9.2.1(graphql@16.8.1))(graphql@16.8.1)(react-native@0.73.5(@babel/core@7.24.0)(@babel/preset-env@7.24.0(@babel/core@7.24.0))(bufferutil@4.0.8)(encoding@0.1.13)(react@18.2.0)))(@graphql-mesh/store@0.93.1(@graphql-mesh/cross-helpers@0.3.4(@graphql-tools/utils@9.2.1(graphql@16.8.1))(graphql@16.8.1)(react-native@0.73.5(@babel/core@7.24.0)(@babel/preset-env@7.24.0(@babel/core@7.24.0))(bufferutil@4.0.8)(encoding@0.1.13)(react@18.2.0)))(@graphql-mesh/types@0.93.2)(@graphql-mesh/utils@0.93.2)(@graphql-tools/utils@9.2.1(graphql@16.8.1))(graphql@16.8.1)(tslib@2.6.2))(@graphql-mesh/types@0.93.2(@graphql-mesh/store@0.93.1)(@graphql-tools/utils@9.2.1(graphql@16.8.1))(graphql@16.8.1)(tslib@2.6.2))(@graphql-mesh/utils@0.97.5(@graphql-mesh/cross-helpers@0.3.4(@graphql-tools/utils@9.2.1(graphql@16.8.1))(graphql@16.8.1)(react-native@0.73.5(@babel/core@7.24.0)(@babel/preset-env@7.24.0(@babel/core@7.24.0))(bufferutil@4.0.8)(encoding@0.1.13)(react@18.2.0)))(@graphql-mesh/types@0.93.2)(@graphql-tools/utils@9.2.1(graphql@16.8.1))(graphql@16.8.1)(tslib@2.6.2))(@graphql-tools/delegate@10.0.4(graphql@16.8.1))(@graphql-tools/merge@9.0.3(graphql@16.8.1))(@graphql-tools/utils@9.2.1(graphql@16.8.1))(@graphql-tools/wrap@10.0.5(graphql@16.8.1))(@types/node@20.11.25)(bufferutil@4.0.8)(encoding@0.1.13)(graphql-tag@2.12.6(graphql@16.8.1))(graphql@16.8.1)(react-native@0.73.5(@babel/core@7.24.0)(@babel/preset-env@7.24.0(@babel/core@7.24.0))(bufferutil@4.0.8)(encoding@0.1.13)(react@18.2.0))
+      '@tanstack/react-query-devtools':
+        specifier: ^5.44.0
+        version: 5.44.0(@tanstack/react-query@5.25.0(react@18.2.0))(react@18.2.0)
       '@types/big.js':
         specifier: ^6.2.2
         version: 6.2.2
@@ -2923,6 +2926,15 @@ packages:
 
   '@tanstack/query-core@5.25.0':
     resolution: {integrity: sha512-vlobHP64HTuSE68lWF1mEhwSRC5Q7gaT+a/m9S+ItuN+ruSOxe1rFnR9j0ACWQ314BPhBEVKfBQ6mHL0OWfdbQ==}
+
+  '@tanstack/query-devtools@5.37.1':
+    resolution: {integrity: sha512-XcG4IIHIv0YQKrexTqo2zogQWR1Sz672tX2KsfE9kzB+9zhx44vRKH5si4WDILE1PIWQpStFs/NnrDQrBAUQpg==}
+
+  '@tanstack/react-query-devtools@5.44.0':
+    resolution: {integrity: sha512-dDch88aF36DBLVvrNvpI0dq19lp9pgWVzsEkYzqKcFb260glfhB/EiAT2mvURVM5lqtVQdMMktCsw7AB+Z6Htw==}
+    peerDependencies:
+      '@tanstack/react-query': ^5.44.0
+      react: ^18 || ^19
 
   '@tanstack/react-query@5.25.0':
     resolution: {integrity: sha512-u+n5R7mLO7RmeiIonpaCRVXNRWtZEef/aVZ/XGWRPa7trBIvGtzlfo0Ah7ZtnTYfrKEVwnZ/tzRCBcoiqJ/tFw==}
@@ -11500,6 +11512,14 @@ snapshots:
       tslib: 2.6.3
 
   '@tanstack/query-core@5.25.0': {}
+
+  '@tanstack/query-devtools@5.37.1': {}
+
+  '@tanstack/react-query-devtools@5.44.0(@tanstack/react-query@5.25.0(react@18.2.0))(react@18.2.0)':
+    dependencies:
+      '@tanstack/query-devtools': 5.37.1
+      '@tanstack/react-query': 5.25.0(react@18.2.0)
+      react: 18.2.0
 
   '@tanstack/react-query@5.25.0(react@18.2.0)':
     dependencies:

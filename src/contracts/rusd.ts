@@ -10,7 +10,7 @@ export const RUSD: { [chainId: number]: Token } = {
     ChainId.BLAST_SEPOLIA,
     addressMap[ChainId.BLAST_SEPOLIA].ORUSD,
     18,
-    'ORUSD',
+    'orUSD',
     'Wrapped ORUSD'
   ),
   // blast mainnet
@@ -18,7 +18,7 @@ export const RUSD: { [chainId: number]: Token } = {
     ChainId.BLAST,
     addressMap[ChainId.BLAST_SEPOLIA].ORUSD,
     18,
-    'ORUSD',
+    'orUSD',
     'Wrapped ORUSD'
   ),
 };

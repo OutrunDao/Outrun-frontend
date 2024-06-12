@@ -10,7 +10,7 @@ export const RETH: { [chainId: number]: Token } = {
     ChainId.BLAST_SEPOLIA,
     addressMap[ChainId.BLAST_SEPOLIA].ORETH,
     18,
-    'ORETH',
+    'orETH',
     'Wrapped Ether'
   ),
   // blast mainnet
@@ -18,7 +18,7 @@ export const RETH: { [chainId: number]: Token } = {
     ChainId.BLAST,
     '0xF62f5dB01cb60d80219F478D5CDffB6398Cee9A5',
     18,
-    'ORETH',
+    'orETH',
     'Wrapped Ether'
   ),
 };

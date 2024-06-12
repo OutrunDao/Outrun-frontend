@@ -16,6 +16,7 @@ import { SUPPORTED_CHAINS } from '@/contracts/chains';
 import { USDB } from '@/contracts/usdb';
 import { RUSD } from "@/contracts/rusd"
 import { RETH } from '@/contracts/reth'
+import { useQuery } from '@tanstack/react-query';
 const defaultSymbol = 'ETH';
 
 export enum BtnAction {
@@ -79,7 +80,13 @@ export function useSwap(view: SwapView) {
   const [token0Balance, setToken0Balance] = useState<Decimal>(new Decimal(0))
   const [token1Balance, setToken1Balance] = useState<Decimal>(new Decimal(0))
   const [tradeType, setTradeType] = useState<TradeType>(TradeType.EXACT_INPUT)
-  const [pair, setPair] = useState<Pair>();
+  const { data: pair } = useQuery({
+    queryKey: ['queryPair', chainId, token0.name, token1?.name, view],
+    queryFn: async (): Promise<Pair | null> => {
+      if (view === SwapView.swap || !token0 || !token1 || !publicClient) return null;
+      return await Fetcher.fetchPairData(tokenConvert(token0), tokenConvert(token1), publicClient).catch((e) => null);
+    }
+  })
   const [loading, setLoading] = useState<boolean>(false);
   const [tradeRoute, setTradeRoute] = useState<Trade<Currency, Currency, TradeType>>()
   const { write: writeContract } = useContract()
@@ -103,16 +110,7 @@ export function useSwap(view: SwapView) {
     _().then(setToken0Balance)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chainId, account.address, token0.name])
-  useEffect(() => {
-    async function _fn() {
-      if (view === SwapView.swap || !token0 || !token1 || !publicClient) return;
-      return await retry({ times: 2, delay: 3000 }, () =>
-        Fetcher.fetchPairData(tokenConvert(token0), tokenConvert(token1), publicClient)
-      ).catch((e) => undefined);
-    }
-    _fn().then(setPair)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chainId, token0.name, token1?.name, view])
+
   useEffect(() => {
     setToken0AmountInput('')
     setToken1AmountInput('')
@@ -231,7 +229,9 @@ export function useSwap(view: SwapView) {
     }
 
     if (view === SwapView.addLiquidity) {
-      if (pair) {
+      console.log('pair', pair);
+
+      if (pair && token0 && token1) {
         const price = pair.priceOf(tokenConvert(tradeType === TradeType.EXACT_INPUT ? token0! : token1!));
         tradeType === TradeType.EXACT_INPUT ?
           setToken1AmountInput((+price.toSignificant(6) * +value).toFixed(6)) :

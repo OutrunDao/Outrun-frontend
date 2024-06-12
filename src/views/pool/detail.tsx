@@ -1,24 +1,6 @@
 'use client';
 import { Link } from '@chakra-ui/next-js';
-import {
-  Center,
-  Container,
-  Box,
-  Heading,
-  Stat,
-  StatLabel,
-  StatNumber,
-  StatHelpText,
-  StatArrow,
-  StatGroup,
-  Grid,
-  GridItem,
-  Button,
-  Flex,
-  Spacer,
-  HStack,
-  useToast,
-} from '@chakra-ui/react';
+import { Center, Container, Box, Heading, Stat, StatLabel, StatNumber, StatHelpText, StatArrow, StatGroup, Grid, GridItem, Button, Flex, Spacer, HStack, useToast } from '@chakra-ui/react';
 import { useAccount, useChainId, usePublicClient } from 'wagmi';
 import { useParams } from 'next/navigation';
 import { AddIcon, ArrowBackIcon, ExternalLinkIcon, MinusIcon } from '@chakra-ui/icons';
@@ -70,9 +52,7 @@ export default function PoolDetail() {
   const { data: userLiquidity } = useQuery({
     queryKey: ['userLiquidity', account.address, pairAddress],
     queryFn: async (): Promise<LiquidityPosition> => {
-      return execute(LiquidityPositionsDocument, { user: account.address, pair: pairAddress }).then(
-        (res: { data: { liquidityPositions: LiquidityPosition[] } }) => res.data.liquidityPositions[0]
-      );
+      return execute(LiquidityPositionsDocument, { user: account.address, pair: pairAddress }).then((res: { data: { liquidityPositions: LiquidityPosition[] } }) => res.data.liquidityPositions[0]);
     },
   });
   const toast = useToast();
@@ -82,11 +62,15 @@ export default function PoolDetail() {
   useEffect(() => {
     if (!publicClient || !account) return;
     const contract = getPairContract(publicClient, pairAddress as Address, walletClient);
-    // @ts-ignore
-    contract.simulate.viewUnClaimedFee().then(({ result }) => {
-      setUnclaimedAmount0(formatUnits(result[0]!, 18));
-      setUnclaimedAmount1(formatUnits(result[1]!, 18));
-    });
+    contract.read
+      // @ts-ignore
+      .viewUnClaimedFee([], {
+        account,
+      })
+      .then((result) => {
+        setUnclaimedAmount0(formatUnits(result[0]!, 18));
+        setUnclaimedAmount1(formatUnits(result[1]!, 18));
+      });
   }, [account, pairAddress, publicClient]);
 
   async function claimFeeHandler() {
@@ -166,13 +150,7 @@ export default function PoolDetail() {
           <StatGroup mt={6}>
             <Stat>
               <StatLabel>APY</StatLabel>
-              <StatNumber>
-                {getApy(
-                  get(userLiquidity, 'pair.volumeUSD', '0'),
-                  get(userLiquidity, 'pair.reserveUSD', '0')
-                )}
-                %
-              </StatNumber>
+              <StatNumber>{getApy(get(userLiquidity, 'pair.volumeUSD', '0'), get(userLiquidity, 'pair.reserveUSD', '0'))}%</StatNumber>
             </Stat>
             <Stat>
               <StatLabel>Address</StatLabel>
@@ -199,29 +177,14 @@ export default function PoolDetail() {
           <br />
           <Flex>
             <Box mr={100}> {get(userLiquidity, 'pair.token0.symbol')}</Box>
-            <Box>
-              {+unclaimedAmount0 > 0 && +unclaimedAmount0 < 0.001
-                ? '<0.0001'
-                : (+unclaimedAmount0).toFixed(4)}
-            </Box>
+            <Box>{+unclaimedAmount0 > 0 && +unclaimedAmount0 < 0.001 ? '<0.0001' : (+unclaimedAmount0).toFixed(4)}</Box>
           </Flex>
           <Flex mt={2}>
             <Box mr={100}> {get(userLiquidity, 'pair.token1.symbol')}</Box>
-            <Box>
-              {+unclaimedAmount1 > 0 && +unclaimedAmount1 < 0.001
-                ? '<0.0001'
-                : (+unclaimedAmount1).toFixed(4)}
-            </Box>
+            <Box>{+unclaimedAmount1 > 0 && +unclaimedAmount1 < 0.001 ? '<0.0001' : (+unclaimedAmount1).toFixed(4)}</Box>
           </Flex>
           <br />
-          <Button
-            width={'100%'}
-            size={'sm'}
-            colorScheme="teal"
-            rounded={4}
-            isDisabled={+unclaimedAmount0 <= 0}
-            onClick={claimFeeHandler}
-          >
+          <Button width={'100%'} size={'sm'} colorScheme="teal" rounded={4} isDisabled={+unclaimedAmount0 <= 0} onClick={claimFeeHandler}>
             Claim
           </Button>
         </GridItem>
@@ -243,35 +206,16 @@ export default function PoolDetail() {
         <GridItem rowSpan={2} colSpan={2} borderStyle={'solid'} borderWidth={'0.1px'} px={8} py={4}>
           <Stat>
             <StatLabel>My Pool Balance </StatLabel>
-            <StatNumber>
-              $
-              {(
-                (+get(userLiquidity, 'liquidityTokenBalance', '0') /
-                  +get(userLiquidity, 'pair.totalSupply', '1')) *
-                +get(userLiquidity, 'pair.reserveUSD', '0')
-              ).toFixed(4)}
-            </StatNumber>
+            <StatNumber>${((+get(userLiquidity, 'liquidityTokenBalance', '0') / +get(userLiquidity, 'pair.totalSupply', '1')) * +get(userLiquidity, 'pair.reserveUSD', '0')).toFixed(4)}</StatNumber>
           </Stat>
           <br></br>
           <Flex>
             <Box mr={100}> {get(userLiquidity, 'pair.token0.symbol')}</Box>
-            <Box>
-              {(
-                (+get(userLiquidity, 'liquidityTokenBalance', '0') /
-                  +get(userLiquidity, 'pair.totalSupply', '1')) *
-                +get(userLiquidity, 'pair.reserve0', '0')
-              ).toFixed(4)}
-            </Box>
+            <Box>{((+get(userLiquidity, 'liquidityTokenBalance', '0') / +get(userLiquidity, 'pair.totalSupply', '1')) * +get(userLiquidity, 'pair.reserve0', '0')).toFixed(4)}</Box>
           </Flex>
           <Flex mt={2}>
             <Box mr={100}> {get(userLiquidity, 'pair.token1.symbol')}</Box>
-            <Box>
-              {(
-                (+get(userLiquidity, 'liquidityTokenBalance', '0') /
-                  +get(userLiquidity, 'pair.totalSupply', '1')) *
-                +get(userLiquidity, 'pair.reserve1', '0')
-              ).toFixed(4)}
-            </Box>
+            <Box>{((+get(userLiquidity, 'liquidityTokenBalance', '0') / +get(userLiquidity, 'pair.totalSupply', '1')) * +get(userLiquidity, 'pair.reserve1', '0')).toFixed(4)}</Box>
           </Flex>
         </GridItem>
       </Grid>
