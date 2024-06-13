@@ -10,8 +10,6 @@ import useLiquidity from '../useLiquidity';
 import { useMemo } from 'react';
 import { addressMap } from '@/contracts/addressMap';
 
-const defaultSymbol = 'ETH';
-
 export default function PoolCreate() {
   const { open } = useWeb3Modal();
   const publicClient = usePublicClient();
