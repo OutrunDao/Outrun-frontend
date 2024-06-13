@@ -1,7 +1,27 @@
 'use client';
 
-import { AbsoluteCenter, Box, Button, Center, Link, Container, Divider, Flex, HStack, IconButton, Input, Slider, SliderFilledTrack, SliderMark, SliderThumb, SliderTrack, Spacer, Text, useToast } from '@chakra-ui/react';
-import TokenSelect, { getToken } from '@/components/TokenSelect';
+import {
+  AbsoluteCenter,
+  Box,
+  Button,
+  Center,
+  Link,
+  Container,
+  Divider,
+  Flex,
+  HStack,
+  IconButton,
+  Input,
+  Slider,
+  SliderFilledTrack,
+  SliderMark,
+  SliderThumb,
+  SliderTrack,
+  Spacer,
+  Text,
+  useToast,
+} from '@chakra-ui/react';
+import TokenSelect from '@/components/TokenSelect';
 import { useAccount, useChainId, usePublicClient, useWalletClient } from 'wagmi';
 import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'next/navigation';
@@ -118,7 +138,12 @@ export default function WithdrawPage() {
 
     const deadline = Math.floor(new Date().getTime() / 1000) + 10 * 60;
 
-    const [type, tokenA, tokenB, tokenAMinAmount, tokenBMinAmount] = tokenSwitch(token0!, token1!, parseUnits(new Decimal(token0Value).times(0.995).toString(), token0!.decimals), parseUnits(new Decimal(token1Value).times(0.995).toString(), token1!.decimals));
+    const [type, tokenA, tokenB, tokenAMinAmount, tokenBMinAmount] = tokenSwitch(
+      token0!,
+      token1!,
+      parseUnits(new Decimal(token0Value).times(0.995).toString(), token0!.decimals),
+      parseUnits(new Decimal(token1Value).times(0.995).toString(), token1!.decimals)
+    );
     let execute = 'removeLiquidity';
     let liquidity = parseUnits(lpAmount, 18);
     let to = account.address;
@@ -194,7 +219,7 @@ export default function WithdrawPage() {
       <Container borderColor="gray.600" boxShadow="xs" rounded="md" borderWidth={'0.5px'} borderStyle={'solid'} padding="6px 0" borderBottomRadius={'0'}>
         <Flex>
           <Center>
-            <TokenSelect token={token0} isDisabled={true} chainId={chainId} onSelect={() => {}} />
+            <TokenSelect token={token0} isDisabled={true} onSelect={() => {}} />
           </Center>
           <Center width={'100%'}>
             <Input variant="main" size="sm" textAlign={'right'} placeholder="0" disabled color={'#fff'} value={token0Value} />
@@ -204,7 +229,7 @@ export default function WithdrawPage() {
       <Container borderColor="gray.600" boxShadow="xs" rounded="md" borderWidth={'0.5px'} borderStyle={'solid'} padding="6px 0" borderTopRadius={0}>
         <Flex>
           <Center>
-            <TokenSelect chainId={chainId} isDisabled={true} token={token1} onSelect={() => {}} />
+            <TokenSelect isDisabled={true} token={token1} onSelect={() => {}} />
           </Center>
           <Center width={'100%'}>
             <Input variant="main" size="sm" textAlign={'right'} placeholder="0" isDisabled value={token1Value} />

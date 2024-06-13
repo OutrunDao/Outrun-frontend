@@ -1,113 +1,54 @@
 'use client';
-import {
-  Button,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
-  useDisclosure,
-  Heading,
-  VStack,
-  Input,
-  Image,
-  Box,
-} from '@chakra-ui/react';
-import { tokenList } from '@/tokens/list';
+import { Button, Modal, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody, ModalCloseButton, useDisclosure, Heading, VStack, Input, Image, Box } from '@chakra-ui/react';
 import { ChevronDownIcon, QuestionIcon } from '@chakra-ui/icons';
-import { useEffect, useState } from 'react';
-import { TokenInfo } from '@uniswap/token-lists';
-import { Token } from '@/packages/swap-core';
-import { Native } from '@/packages/swap-sdk';
+import { useEffect, useMemo, useState } from 'react';
+import { Currency, Ether, Token } from '@/packages/swap-core';
 import { isAddress } from 'viem';
 import { fetchTokenByAddress } from '@/utils/erc20';
-import { usePublicClient } from 'wagmi';
-
-let tokensAdded = [] as TokenInfo[];
-
-function getTokenRaw(symbol: string | undefined, chainId: number, address?: string): TokenInfo | undefined {
-  if (!chainId || (!symbol && !address)) {
-    return undefined;
-  }
-  if (symbol === 'ETH') return undefined;
-  const list = tokenList.tokens.concat(tokensAdded);
-  return list.find(
-    (token) =>
-      ((token.symbol && token.symbol === symbol) || (token.address && token.address === address)) &&
-      token.chainId === chainId
-  );
-}
-
-export function getToken(symbol: string, chainId: number): Token | Native | undefined {
-  if (symbol === 'ETH') return Native.onChain(chainId);
-  const token = getTokenRaw(symbol, chainId);
-  if (!token) {
-    return undefined;
-  }
-  return new Token(token.chainId, token.address, token.decimals, token.symbol, token.name);
-}
+import { useChainId, usePublicClient } from 'wagmi';
+import { currencySelectList, CurrencySelectListType } from '@/contracts/currencys';
 
 export default function TokenSelect({
   onSelect,
-  defaultSymbol,
   isDisabled,
   token,
+  tokenList,
   tokenDisable,
-  chainId,
+  hiddenSearchInput,
 }: {
-  onSelect: (token: Token | Native) => void;
-  defaultSymbol?: string;
-  token?: Token | Native;
+  onSelect: (token: Currency) => void;
+  token?: Currency;
   isDisabled?: boolean;
-  tokenDisable?: Token | Native;
-  chainId: number;
+  tokenList?: CurrencySelectListType;
+  tokenDisable?: Currency;
+  hiddenSearchInput?: boolean;
 }) {
+  const chainId = useChainId();
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [tokenInfo, setTokenInfo] = useState<TokenInfo | undefined>(getTokenRaw(defaultSymbol, chainId));
-  const [isNative, setIsNative] = useState(defaultSymbol === 'ETH');
   const [searchValue, setSearchValue] = useState('');
-  const [list, setList] = useState<TokenInfo[]>(tokenList.tokens.concat(tokensAdded || []));
+  const [list, setList] = useState<(Ether | Token)[]>();
   const publicClient = usePublicClient();
-  function handleSelect(_token: TokenInfo) {
-    setTokenInfo(_token);
-    setIsNative(false);
-    onSelect(new Token(_token.chainId, _token.address, _token.decimals, _token.symbol, _token.name));
-    onClose();
-  }
-  function handleSelectNative() {
-    setTokenInfo(undefined);
-    setIsNative(true);
-    onSelect(Native.onChain(chainId));
-    onClose();
-  }
+  const tokenListOnChain = useMemo(() => {
+    return (tokenList || currencySelectList).map((i) => (i === Ether ? Ether.onChain(chainId) : (i as { [chainId: number]: Token })[chainId]));
+  }, [chainId]);
   useEffect(() => {
-    // console.log('token upate', token);
-
-    if (token) {
-      // @ts-ignore
-      setTokenInfo(getTokenRaw(token.symbol, chainId, token.address));
-    }
-  }, [token]);
+    setList(tokenListOnChain);
+  }, [tokenListOnChain]);
+  function handleSelect(token: Currency) {
+    onSelect(token);
+    onClose();
+  }
 
   async function onSearchHandler(value: string) {
     setSearchValue(value);
     value = value.trim().toLocaleLowerCase();
-    if (!value) return setList(tokenList.tokens.concat(tokensAdded || []));
+    if (!value) return setList(tokenListOnChain);
     if (isAddress(value)) {
       const { name, symbol, decimals } = await fetchTokenByAddress(value, publicClient!);
-      const newToken = {
-        symbol,
-        name,
-        decimals,
-        address: value,
-        chainId,
-      };
-      if (!tokensAdded.find((i) => i.address === newToken.address)) tokensAdded.push(newToken);
+      const newToken = new Token(chainId, value, decimals, symbol, name);
       setList([newToken]);
     } else {
-      setList(list.filter((i) => ~i.symbol.toLocaleLowerCase().indexOf(value)));
+      setList(list!.filter((i) => i.symbol && ~i.symbol.toLocaleLowerCase().indexOf(value)));
     }
   }
 
@@ -120,87 +61,45 @@ export default function TokenSelect({
         size="sm"
         bg={'transparent'}
         color={'#fff'}
+        opacity={'1 !important'}
         isDisabled={isDisabled}
         px={'10px'}
-        leftIcon={
-          tokenInfo && tokenInfo.logoURI ? (
-            <Image
-              src={tokenInfo.logoURI}
-              width={'15px'}
-              height={'15px'}
-              alt={tokenInfo.symbol}
-              style={{ marginLeft: '6px' }}
-            ></Image>
-          ) : (
-            <QuestionIcon></QuestionIcon>
-          )
-        }
+        // tokenInfo && tokenInfo.logoURI ? <Image src={tokenInfo.logoURI} width={'15px'} height={'15px'} alt={tokenInfo.symbol} style={{ marginLeft: '6px' }}></Image>
+        leftIcon={<QuestionIcon></QuestionIcon>}
         rightIcon={<ChevronDownIcon />}
       >
-        {tokenInfo ? tokenInfo.symbol : isNative ? 'ETH' : 'Select Token'}
+        {token ? token.symbol : 'Select Token'}
       </Button>
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
-        <ModalContent
-          mt={40}
-          bgColor={'#0d0703'}
-          borderColor={'#515151'}
-          borderWidth={'1px'}
-          color="#fff"
-          pb={10}
-        >
+        <ModalContent mt={40} bgColor={'#0d0703'} borderColor={'#515151'} borderWidth={'1px'} color="#fff" pb={10}>
           <ModalHeader>Select Token</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <Input
-              variant="outline"
-              color={'#fff'}
-              value={searchValue}
-              placeholder="Search Name or paste address"
-              size="md"
-              onChange={(e) => onSearchHandler(e.target.value)}
-            />
-            <Heading as="h5" size="md" mt={6}>
-              Token Name
-            </Heading>
+            {!hiddenSearchInput ? <Input variant="outline" color={'#fff'} value={searchValue} placeholder="Search Name or paste address" size="md" onChange={(e) => onSearchHandler(e.target.value)} /> : null}
+            {/* <Heading as="h5" size="md" mt={6}>
+              Token List
+            </Heading> */}
             <Box height={300} overflow={'scroll'} style={{ scrollbarWidth: 'none' }}>
               <VStack spacing={2} mt={4}>
-                <Button
-                  colorScheme="teal"
-                  justifyContent={'left'}
-                  variant="ghost"
-                  isDisabled={tokenDisable?.isNative}
-                  w={'100%'}
-                  leftIcon={<QuestionIcon></QuestionIcon>}
-                  onClick={() => handleSelectNative()}
-                >
-                  ETH
-                </Button>
-                {list.map((token) => {
-                  return (
-                    <Button
-                      colorScheme="teal"
-                      justifyContent={'left'}
-                      variant="ghost"
-                      w={'100%'}
-                      isDisabled={
-                        // @ts-ignore
-                        tokenDisable?.address === token.address
-                      }
-                      leftIcon={
-                        !token.logoURI ? (
-                          <QuestionIcon></QuestionIcon>
-                        ) : (
-                          <Image src={token.logoURI} width={'20px'} height={'20px'} alt={token.symbol} />
-                        )
-                      }
-                      key={token.address}
-                      onClick={() => handleSelect(token)}
-                    >
-                      {token.symbol}
-                    </Button>
-                  );
-                })}
+                {list &&
+                  list.length &&
+                  list.map((token) => {
+                    return (
+                      <Button
+                        colorScheme="teal"
+                        justifyContent={'left'}
+                        variant="ghost"
+                        w={'100%'}
+                        isDisabled={tokenDisable?.equals(token)}
+                        leftIcon={<QuestionIcon></QuestionIcon>}
+                        key={token.isNative ? 'eth' : token.address}
+                        onClick={() => handleSelect(token)}
+                      >
+                        {token.symbol}
+                      </Button>
+                    );
+                  })}
               </VStack>
             </Box>
           </ModalBody>

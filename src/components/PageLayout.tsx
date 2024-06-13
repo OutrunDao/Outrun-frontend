@@ -33,6 +33,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 Pool
               </Link>
             </Button>
+            <Button variant="link" color={['/mint-stake', '/mint-stake/stake', '/mint-stake/positions'].includes(pathname) ? 'brand.500' : 'grey.600'} fontSize={14} fontWeight={'normal'} leftIcon={<Icon fontSize={16} as={GiMiner}></Icon>}>
+              <Link href={'/mint-stake'} prefetch={true}>
+                Mint | Stake
+              </Link>
+            </Button>
             <Button variant="link" color={pathname === '/stake' ? 'brand.500' : 'grey.600'} fontSize={14} fontWeight={'normal'} leftIcon={<Icon fontSize={16} as={GiMiner}></Icon>}>
               <Link href={'/stake'} prefetch={true}>
                 Stake

@@ -1,15 +1,11 @@
 import { Currency } from '@/packages/swap-core';
 import { Native } from '@/packages/swap-sdk';
 import { Token } from '@/packages/swap-core';
-import { tokenList } from '@/tokens/list';
+import { USDB } from '@/contracts/usdb';
 
 function isTokenIsUSDB(token: Currency) {
   if (token.isNative) return false;
-  if (token.symbol !== 'USDB') return false;
-  let index = tokenList.tokens.findIndex(
-    (i) => i.chainId === token.chainId && token.address === i.address && i.symbol === 'USDB'
-  );
-  return index >= 0;
+  return token.equals(USDB[token.chainId])
 }
 
 export enum CurrencyPairType {

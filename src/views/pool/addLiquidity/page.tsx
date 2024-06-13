@@ -1,7 +1,7 @@
 'use client';
 
 import { Box, Button, Center, Container, Flex, HStack, IconButton, Input, Spacer, Text, useToast } from '@chakra-ui/react';
-import TokenSelect, { getToken } from '@/components/TokenSelect';
+import TokenSelect from '@/components/TokenSelect';
 import { useAccount, useChainId, usePublicClient, useWalletClient } from 'wagmi';
 import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'next/navigation';
@@ -32,7 +32,11 @@ export default function AddLiquidityPage() {
     },
   });
 
-  const { swapData, loading, setToken0, setToken1, setLoading, token0AmountInputHandler, token1AmountInputHandler, approveTokens, maxHandler } = useSwap(SwapView.addLiquidity);
+  const { swapData, loading, setToken0, setToken1, setLoading, token0AmountInputHandler, token1AmountInputHandler, approveTokens, maxHandler } = useSwap({
+    view: SwapView.addLiquidity,
+    fetchPair: true,
+    approve2Tokens: true,
+  });
   const { addLiquidity, loading: submitLoading } = useLiquidity();
 
   async function _addLiquidity() {
@@ -57,7 +61,7 @@ export default function AddLiquidityPage() {
       <Container borderColor="gray.600" boxShadow="xs" rounded="md" borderWidth={'0.5px'} borderStyle={'solid'} padding="6px 0" borderBottomRadius={'0'}>
         <Flex>
           <Center>
-            <TokenSelect defaultSymbol={defaultSymbol} token={swapData.token0} tokenDisable={swapData.token1} chainId={chainId} onSelect={(token) => setToken0(token)} />
+            <TokenSelect token={swapData.token0} tokenDisable={swapData.token1} onSelect={(token) => setToken0(token)} />
           </Center>
           <Center width={'100%'}>
             <Input variant="main" size="lg" textAlign={'right'} placeholder="Input token amount" value={swapData.token0AmountInput} onChange={(e) => token0AmountInputHandler(e.target.value)} />
@@ -77,7 +81,7 @@ export default function AddLiquidityPage() {
       <Container borderColor="gray.600" boxShadow="xs" rounded="md" borderWidth={'0.5px'} borderStyle={'solid'} padding="6px 0" borderTopRadius={0}>
         <Flex>
           <Center>
-            <TokenSelect chainId={chainId} tokenDisable={swapData.token0} token={swapData.token1} onSelect={(token) => setToken1(token)} />
+            <TokenSelect tokenDisable={swapData.token0} token={swapData.token1} onSelect={(token) => setToken1(token)} />
           </Center>
           <Center width={'100%'}>
             <Input variant="main" size="lg" textAlign={'right'} placeholder="token amount" value={swapData.token1AmountInput} onChange={(e) => token1AmountInputHandler(e.target.value)} />
@@ -100,7 +104,7 @@ export default function AddLiquidityPage() {
         <Text w="70%" textAlign={'right'}>
           {swapData.pair ? (
             <>
-              1{swapData.token0.symbol} = {swapData.pair.token0Price.toFixed(6)} {swapData.token1!.symbol}
+              1{swapData.token0!.symbol} = {swapData.pair.token0Price.toFixed(6)} {swapData.token1!.symbol}
             </>
           ) : null}
         </Text>

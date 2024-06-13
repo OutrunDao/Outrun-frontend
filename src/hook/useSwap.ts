@@ -5,7 +5,6 @@ import { useAccount, useChainId, usePublicClient, useWalletClient } from 'wagmi'
 import { Address, PublicClient, formatUnits, getAddress, maxUint256, parseUnits } from 'viem';
 import { Token, Currency, TradeType } from '@/packages/swap-core';
 import { Pair } from '@/packages/swap-sdk';
-import { getToken } from '@/components/TokenSelect';
 import { useEffect, useMemo, useState } from 'react';
 import Decimal from 'decimal.js-light';
 import { CurrencyAmount, Percent } from '@/packages/swap-core';
@@ -17,7 +16,6 @@ import { USDB } from '@/contracts/usdb';
 import { RUSD } from "@/contracts/rusd"
 import { RETH } from '@/contracts/reth'
 import { useQuery } from '@tanstack/react-query';
-const defaultSymbol = 'ETH';
 
 export enum BtnAction {
   disable,
@@ -31,7 +29,15 @@ export enum BtnAction {
 export enum SwapView {
   swap,
   addLiquidity,
-  createPoll
+  createPoll,
+  mint
+}
+
+export type SwapOptions = {
+  getTradeRoute?: boolean;
+  fetchPair?: boolean;
+  view: SwapView;
+  approve2Tokens?: boolean;
 }
 
 
@@ -66,12 +72,12 @@ async function makePairs(tokenA: Currency, tokenB: Currency, publicClient: Publi
   return pairs
 }
 
-export function useSwap(view: SwapView) {
+export function useSwap(swapOpts: SwapOptions) {
   const chainId = useChainId();
   const publicClient = usePublicClient();
   const account = useAccount();
   const { data: walletClient } = useWalletClient();
-  const [token0, setToken0] = useState<Currency>(getToken(defaultSymbol, chainId)!);
+  const [token0, setToken0] = useState<Currency>();
   const [token1, setToken1] = useState<Currency>();
   const [token0AmountInput, setToken0AmountInput] = useState<string>('');
   const [token1AmountInput, setToken1AmountInput] = useState<string>('');
@@ -81,9 +87,9 @@ export function useSwap(view: SwapView) {
   const [token1Balance, setToken1Balance] = useState<Decimal>(new Decimal(0))
   const [tradeType, setTradeType] = useState<TradeType>(TradeType.EXACT_INPUT)
   const { data: pair } = useQuery({
-    queryKey: ['queryPair', chainId, token0.name, token1?.name, view],
+    queryKey: ['queryPair', chainId, token0?.name, token1?.name, swapOpts.fetchPair],
     queryFn: async (): Promise<Pair | null> => {
-      if (view === SwapView.swap || !token0 || !token1 || !publicClient) return null;
+      if (swapOpts.fetchPair || !token0 || !token1 || !publicClient) return null;
       return await Fetcher.fetchPairData(tokenConvert(token0), tokenConvert(token1), publicClient).catch((e) => null);
     }
   })
@@ -109,14 +115,14 @@ export function useSwap(view: SwapView) {
     }
     _().then(setToken0Balance)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chainId, account.address, token0.name])
+  }, [chainId, account.address, token0?.name])
 
   useEffect(() => {
     setToken0AmountInput('')
     setToken1AmountInput('')
     setTradeRoute(undefined)
     setRouteNotExist(false)
-  }, [token0.name, token1?.name]);
+  }, [token0?.name, token1?.name]);
 
   const priceImpact = useMemo(() => {
     return tradeRoute && tradeRoute.priceImpact.toFixed()
@@ -129,7 +135,7 @@ export function useSwap(view: SwapView) {
   }, [tradeRoute, slipage])
   const tradeRoutePath = useMemo(() => {
     return tradeRoute && tradeRoute.route.path.map((token, index) => {
-      if (index === 0) return token0.symbol
+      if (index === 0) return token0?.symbol
       if (index === tradeRoute.route.path.length - 1) return token1!.symbol
       return token.symbol
     }).join(' -> ')
@@ -149,7 +155,7 @@ export function useSwap(view: SwapView) {
 
   const submitButtonStatus = useMemo(() => {
     if (!chainId || !SUPPORTED_CHAINS.includes(chainId)) return BtnAction.disconnect;
-    if (view !== SwapView.swap && isTransformView) {
+    if ([SwapView.addLiquidity, SwapView.createPoll].includes(swapOpts.view) && isTransformView) {
       return BtnAction.invalidPair
     }
     if (!token0 || !token1 || !token0AmountInput || !token1AmountInput) {
@@ -157,7 +163,7 @@ export function useSwap(view: SwapView) {
     }
 
     try {
-      if (view === SwapView.swap) {
+      if (swapOpts.view === SwapView.swap) {
         if (!tradeRoute && !isTransformView) return BtnAction.disable
         if (priceImpact && +priceImpact >= 20) return BtnAction.disable
         if (tradeType === TradeType.EXACT_INPUT && token0Balance.lt(token0AmountInput)) return BtnAction.insufficient
@@ -166,13 +172,11 @@ export function useSwap(view: SwapView) {
         if (token0Balance.lt(token0AmountInput) || token1Balance.lt(token1AmountInput)) return BtnAction.insufficient
       }
     } catch (e) {
-      console.log(e);
-
       return BtnAction.disable
     }
 
     return BtnAction.available
-  }, [chainId, token0, token1, token0Balance, token1Balance, token0AmountInput, token1AmountInput, tradeRoute, view, priceImpact])
+  }, [chainId, token0, token1, token0Balance, token1Balance, token0AmountInput, token1AmountInput, tradeRoute, swapOpts.view, priceImpact])
 
 
 
@@ -197,7 +201,7 @@ export function useSwap(view: SwapView) {
         }
       }
 
-      if (view !== SwapView.swap) {
+      if (swapOpts.approve2Tokens) {
         // check token1
         if (!token1.isNative) {
           const allowanceToken1 = await (token1 as Token).allowance(account.address, to, publicClient!)
@@ -228,9 +232,7 @@ export function useSwap(view: SwapView) {
       return
     }
 
-    if (view === SwapView.addLiquidity) {
-      console.log('pair', pair);
-
+    if (swapOpts.view === SwapView.addLiquidity) {
       if (pair && token0 && token1) {
         const price = pair.priceOf(tokenConvert(tradeType === TradeType.EXACT_INPUT ? token0! : token1!));
         tradeType === TradeType.EXACT_INPUT ?
@@ -239,14 +241,14 @@ export function useSwap(view: SwapView) {
       }
       return
     }
-    if (view === SwapView.swap) {
+    if (swapOpts.view === SwapView.swap) {
       if (!publicClient) return;
       if (tradeType === TradeType.EXACT_INPUT) {
         const result = Trade.bestTradeExactIn(
-          await makePairs(token0, token1!, publicClient),
+          await makePairs(token0!, token1!, publicClient),
           CurrencyAmount.fromRawAmount(
-            tokenConvert(token0),
-            parseUnits(value, token0.decimals).toString()
+            tokenConvert(token0!),
+            parseUnits(value, token0!.decimals).toString()
           ),
           tokenConvert(token1!), { maxNumResults: 1 }
         );
@@ -259,8 +261,8 @@ export function useSwap(view: SwapView) {
         setTradeRoute(result[0])
       } else {
         const result = Trade.bestTradeExactOut(
-          await makePairs(token0, token1!, publicClient!),
-          tokenConvert(token0),
+          await makePairs(token0!, token1!, publicClient!),
+          tokenConvert(token0!),
           CurrencyAmount.fromRawAmount(
             tokenConvert(token1!),
             parseUnits(value, token1!.decimals).toString()

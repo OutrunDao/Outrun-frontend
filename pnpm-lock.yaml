@@ -11,6 +11,9 @@ importers:
       '@chainlink/contracts':
         specifier: ^0.8.0
         version: 0.8.0(bufferutil@4.0.8)(ethers@5.7.2(bufferutil@4.0.8))
+      '@chakra-ui/anatomy':
+        specifier: ^2.2.2
+        version: 2.2.2
       '@chakra-ui/icons':
         specifier: ^2.1.1
         version: 2.1.1(@chakra-ui/system@2.6.2(@emotion/react@11.11.4(@types/react@18.2.64)(react@18.2.0))(@emotion/styled@11.11.0(@emotion/react@11.11.4(@types/react@18.2.64)(react@18.2.0))(@types/react@18.2.64)(react@18.2.0))(react@18.2.0))(react@18.2.0)
@@ -47,9 +50,6 @@ importers:
       '@tanstack/react-query':
         specifier: ^5.25.0
         version: 5.25.0(react@18.2.0)
-      '@uniswap/token-lists':
-        specifier: 1.0.0-beta.33
-        version: 1.0.0-beta.33
       '@wagmi/core':
         specifier: ^2.6.5
         version: 2.6.5(@tanstack/query-core@5.25.0)(@types/react@18.2.64)(bufferutil@4.0.8)(react@18.2.0)(typescript@5.4.2)(viem@2.7.22(bufferutil@4.0.8)(typescript@5.4.2)(zod@3.22.4))(zod@3.22.4)
@@ -3079,10 +3079,6 @@ packages:
 
   '@ungap/structured-clone@1.2.0':
     resolution: {integrity: sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==}
-
-  '@uniswap/token-lists@1.0.0-beta.33':
-    resolution: {integrity: sha512-JQkXcpRI3jFG8y3/CGC4TS8NkDgcxXaOQuYW8Qdvd6DcDiIyg2vVYCG9igFEzF0G6UvxgHkBKC7cWCgzZNYvQg==}
-    engines: {node: '>=10'}
 
   '@vue/compiler-core@3.4.21':
     resolution: {integrity: sha512-MjXawxZf2SbZszLPYxaFCjxfibYrzr3eYbKxwpLR9EQN+oaziSu3qKVbwBERj1IFIB8OLUewxB5m/BFzi613og==}
@@ -11670,8 +11666,6 @@ snapshots:
       eslint-visitor-keys: 3.4.3
 
   '@ungap/structured-clone@1.2.0': {}
-
-  '@uniswap/token-lists@1.0.0-beta.33': {}
 
   '@vue/compiler-core@3.4.21':
     dependencies:

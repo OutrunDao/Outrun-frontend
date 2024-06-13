@@ -8,7 +8,11 @@ export enum ContractName {
   ORETH_ORUSD = "ORETH_ORUSD",
   MULTICALL = "MULTICALL",
   ORETH = "ORETH",
-  ORUSD = "ORUSD"
+  ORUSD = "ORUSD",
+  OSUSD = "OSUSD",
+  RUY = "RUY",
+  REY = "REY",
+  OSETH = "OSETH"
 }
 type ContractAddressMap = Record<ContractName, `0x${string}`>
 
@@ -19,7 +23,11 @@ export const addressMap = {
     [ContractName.MULTICALL]: "0xca11bde05977b3631167028862be2a173976ca11",
     [ContractName.ORETH_ORUSD]: "0x523d550dFF0fd7FF7fc21DF6B2BB5CE6dFB5f3f0",
     [ContractName.ORETH]: "0xF62f5dB01cb60d80219F478D5CDffB6398Cee9A5",
-    [ContractName.ORUSD]: "0xe04b19ed724A328C804e82e7196dcef18570bfae"
+    [ContractName.ORUSD]: "0xe04b19ed724A328C804e82e7196dcef18570bfae",
+    [ContractName.OSUSD]: "0x989bAD96A66b9e87899E26Be20fB6f32B7432bB3",
+    [ContractName.REY]: "0x645fC1E82a6732196B30C1e8b708267B887ABfCC",
+    [ContractName.RUY]: "0xA1DC1c7cA6B714A6Bd88de75AD367E8DaecabdDc",
+    [ContractName.OSETH]: "0x294285577306bc14224510966DFb81002A5a3C6E"
   }
 } as Record<number, ContractAddressMap>
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { Box, Button, Center, Container, Flex, HStack, IconButton, Input, Link, Spacer, Text, useToast } from '@chakra-ui/react';
-import TokenSelect, { getToken } from '@/components/TokenSelect';
+import TokenSelect from '@/components/TokenSelect';
 import { useAccount, useChainId, usePublicClient, useWalletClient } from 'wagmi';
 import { Address, formatUnits, getAddress, parseUnits } from 'viem';
 import { useSwap, BtnAction, SwapView } from '@/hook/useSwap';
@@ -19,7 +19,10 @@ export default function PoolCreate() {
   const chainId = useChainId();
   const { data: walletClient } = useWalletClient();
   const { addLiquidity, loading: submitLoading } = useLiquidity();
-  const { swapData, loading, setToken0, setToken1, setLoading, token0AmountInputHandler, token1AmountInputHandler, approveTokens, maxHandler } = useSwap(SwapView.createPoll);
+  const { swapData, loading, setToken0, setToken1, setLoading, token0AmountInputHandler, token1AmountInputHandler, approveTokens, maxHandler } = useSwap({
+    view: SwapView.createPoll,
+    approve2Tokens: true,
+  });
 
   async function createPool() {
     await approveTokens(addressMap[chainId].SWAP_ROUTER);
@@ -45,10 +48,18 @@ export default function PoolCreate() {
       <Container borderColor="gray.600" boxShadow="xs" rounded="md" borderWidth={'0.5px'} borderStyle={'solid'} padding="6px 0" borderBottomRadius={'0'}>
         <Flex>
           <Center>
-            <TokenSelect defaultSymbol={defaultSymbol} token={swapData.token0} tokenDisable={swapData.token1} chainId={chainId} onSelect={(token) => setToken0(token)} />
+            <TokenSelect token={swapData.token0} tokenDisable={swapData.token1} onSelect={(token) => setToken0(token)} />
           </Center>
           <Center width={'100%'}>
-            <Input variant="main" size="lg" textAlign={'right'} isDisabled={!!swapData.pair} placeholder="token amount" value={swapData.token0AmountInput} onChange={(e) => token0AmountInputHandler(e.target.value)} />
+            <Input
+              variant="main"
+              size="lg"
+              textAlign={'right'}
+              isDisabled={!!swapData.pair}
+              placeholder="token amount"
+              value={swapData.token0AmountInput}
+              onChange={(e) => token0AmountInputHandler(e.target.value)}
+            />
           </Center>
         </Flex>
         <Flex>
@@ -65,10 +76,18 @@ export default function PoolCreate() {
       <Container borderColor="gray.600" boxShadow="xs" rounded="md" borderWidth={'0.5px'} borderStyle={'solid'} padding="6px 0" borderTopRadius={0}>
         <Flex>
           <Center>
-            <TokenSelect chainId={chainId} tokenDisable={swapData.token0} token={swapData.token1} onSelect={(token) => setToken1(token)} />
+            <TokenSelect tokenDisable={swapData.token0} token={swapData.token1} onSelect={(token) => setToken1(token)} />
           </Center>
           <Center width={'100%'}>
-            <Input variant="main" size="lg" textAlign={'right'} isDisabled={!!swapData.pair} placeholder="token amount" value={swapData.token1AmountInput} onChange={(e) => token1AmountInputHandler(e.target.value)} />
+            <Input
+              variant="main"
+              size="lg"
+              textAlign={'right'}
+              isDisabled={!!swapData.pair}
+              placeholder="token amount"
+              value={swapData.token1AmountInput}
+              onChange={(e) => token1AmountInputHandler(e.target.value)}
+            />
           </Center>
         </Flex>
         <Flex>
