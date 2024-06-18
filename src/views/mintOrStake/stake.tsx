@@ -29,12 +29,10 @@ import {
   VStack,
 } from '@chakra-ui/react';
 import TokenSelect from '@/components/TokenSelect';
-import { RepeatIcon } from '@chakra-ui/icons';
 import { useAccount, useChainId, usePublicClient, useWalletClient } from 'wagmi';
 import { Address, formatUnits, getAddress, parseEther, parseEventLogs, parseUnits } from 'viem';
 import { useSwap, BtnAction, SwapView } from '@/hook/useSwap';
 import { Currency, Ether, Percent, Token, TradeType } from '@/packages/swap-core';
-import { Router as SwapRouter } from '@/packages/swap-sdk';
 import { get, retry } from 'radash';
 import { useEffect, useMemo, useState } from 'react';
 import useContract from '@/hook/useContract';
@@ -49,6 +47,10 @@ import { RETH } from '@/contracts/reth';
 import { RUSD } from '@/contracts/rusd';
 import { OSETH } from '@/contracts/oseth';
 import { OSUSD } from '@/contracts/osusd';
+import { useQuery } from '@tanstack/react-query';
+import getOrethStake from '@/contracts/get/orethStakeManager';
+import getOrUsdStake from '@/contracts/get/orusdStakeManager';
+import Decimal from 'decimal.js-light';
 
 export default function Stake() {
   const chainId = useChainId();
@@ -62,6 +64,7 @@ export default function Stake() {
   const { write: writeContract, loading: routerContractLoading } = useContract();
   const { swapData, loading, setToken0, setToken1, setLoading, approveTokens, token0AmountInputHandler, updateTokenBalance, token1AmountInputHandler, setSlippage, maxHandler } = useSwap({
     view: SwapView.mint,
+    approve2Tokens: false,
   });
   const blockExplore = useMemo(() => {
     return BlockExplorers[chainId];
@@ -74,10 +77,43 @@ export default function Stake() {
       return 'Stake orUSD';
     }
   }, [swapData.token0, chainId]);
+  const yieldAmount = useMemo(() => {
+    if (!sliderValue || !swapData.token0AmountInput) return 0;
+    return new Decimal(sliderValue).mul(swapData.token0AmountInput).toString();
+  }, [sliderValue, swapData.token0AmountInput]);
+  const yieldTokenSymbol = useMemo(() => {
+    if (swapData.token0?.equals(RETH[chainId])) return 'REY';
+    if (swapData.token0?.equals(RUSD[chainId])) return 'RUY';
+    return '';
+  }, [swapData.token0]);
+  const { data: exchangeRate } = useQuery({
+    queryKey: ['calc-stake-exchangerate', swapData.token0, publicClient?.chain.id],
+    queryFn: async () => {
+      if (!publicClient) return 0;
+      if (swapData.token0?.equals(RETH[chainId])) {
+        let result = await getOrethStake(chainId, publicClient).read['calcOSETHAmount']([parseUnits('1', 18)]);
+        return formatUnits(result as bigint, 18);
+      }
+      if (swapData.token0?.equals(RUSD[chainId])) {
+        let result = await getOrUsdStake(chainId, publicClient).read['calcOSUSDAmount']([parseUnits('1', 18)]);
+        return formatUnits(result as bigint, 18);
+      }
+      return 0;
+    },
+  });
   useEffect(() => {
     setToken0(RETH[chainId]);
     setToken1(OSETH[chainId]);
   }, [chainId]);
+  useEffect(() => {
+    let output = '';
+    if (!swapData.token0AmountInput || isNaN(+swapData.token0AmountInput)) {
+      output = '';
+    } else if (exchangeRate) {
+      output = new Decimal(swapData.token0AmountInput).mul(exchangeRate).toString();
+    }
+    token1AmountInputHandler(output);
+  }, [swapData.token0AmountInput, exchangeRate]);
 
   function onSelectToken0(token: Currency) {
     setToken0(token);
@@ -88,90 +124,48 @@ export default function Stake() {
     }
   }
 
-  async function swap() {
+  async function stake() {
     if (!swapData.token0 || !swapData.token1 || !account.address) return;
     setLoading(true);
-    if (swapData.isTransformView) {
-      let data;
-      if (swapData.token0.isNative) {
-        // eth -> oreth
-        data = await writeContract(
-          // @ts-ignore
-          getORETH(chainId, publicClient!, walletClient),
-          {
-            actionTitle: title,
-          },
-          'deposit',
-          [],
-          {
-            account,
-            value: parseEther(swapData.token0AmountInput),
-          }
-        );
-      } else if (swapData.token1.isNative) {
-        await approveTokens(addressMap[chainId].ORETH);
-        // oreth=>eth
-        data = await writeContract(
-          // @ts-ignore
-          getORETH(chainId, publicClient!, walletClient),
-          {
-            actionTitle: title,
-          },
-          'withdraw',
-          [parseEther(swapData.token0AmountInput)],
-          {
-            account,
-          }
-        );
-      } else if (swapData.token0.equals(USDB[chainId])) {
-        // usdb -> orusd
-        await approveTokens(addressMap[chainId].ORUSD);
-        data = await writeContract(
-          // @ts-ignore
-          getORUSD(chainId, publicClient, walletClient),
-          {
-            actionTitle: title,
-          },
-          'deposit',
-          [parseUnits(swapData.token0AmountInput, 18)],
-          {
-            account,
-          }
-        );
-      } else {
-        // orusd -> usdb
-        await approveTokens(addressMap[chainId].ORUSD);
-        data = await writeContract(
-          // @ts-ignore
-          getORUSD(chainId, publicClient, walletClient),
-          {
-            actionTitle: title,
-          },
-          'withdraw',
-          [parseUnits(swapData.token0AmountInput, 18)],
-          {
-            account,
-          }
-        );
-      }
-      if (data && data.status === 'success')
-        toast({
-          title: title + ' finished',
-          status: 'success',
-          position: 'bottom',
-          description: (
-            <>
-              {`You have successfully swapped ${swapData.token0AmountInput} ${swapData.token0.symbol} for ${swapData.token0AmountInput} ${swapData.token1.symbol}`}. view on{' '}
-              <Link isExternal href={blockExplore + '/tx/' + data.transactionHash} textDecoration={'underline'} colorScheme="teal">
-                BlastScan
-              </Link>
-            </>
-          ),
-          duration: null,
-          isClosable: true,
+    let data;
+    if (swapData.token0.equals(RETH[chainId])) {
+      if (+swapData.token0AmountInput < 0.0001)
+        return toast({
+          title: 'mint stake amount 0.001 orETH',
+          status: 'error',
         });
-
-      await updateTokenBalance();
+      await approveTokens(addressMap[chainId].ORETH_STAKE);
+      data = await writeContract(
+        // @ts-ignore
+        getOrethStake(chainId, publicClient!, walletClient),
+        {
+          actionTitle: 'stake orEth',
+        },
+        'stake',
+        [parseUnits(swapData.token0AmountInput, 18), +sliderValue, account.address, account.address, account.address],
+        {
+          account,
+        }
+      );
+    } else {
+      if (+swapData.token0AmountInput < 1)
+        return toast({
+          title: 'mint stake amount 1 orUSD',
+          status: 'error',
+        });
+      await approveTokens(addressMap[chainId].ORUSD_STAKE);
+      data = await writeContract(
+        // @ts-ignore
+        getOrUsdStake(chainId, publicClient!, walletClient),
+        {
+          actionTitle: 'stake orUSD',
+        },
+        'stake',
+        [parseUnits(swapData.token0AmountInput, 18), +sliderValue, account.address, account.address, account.address],
+        {
+          account,
+        }
+      );
     }
 
     setLoading(false);
@@ -213,17 +207,12 @@ export default function Stake() {
             <TokenSelect hiddenSearchInput isDisabled tokenList={currencyStakePageSelectList2} token={swapData.token1} onSelect={() => {}} />
           </Center>
           <Center width={'100%'}>
-            <Input variant="main" size="lg" textAlign={'right'} placeholder="Output token amount" value={swapData.token1AmountInput} onChange={(e) => token1AmountInputHandler(e.target.value)} />
+            <Input variant="main" size="lg" readOnly textAlign={'right'} placeholder="Output token amount" value={swapData.token1AmountInput} />
           </Center>
         </Flex>
         <Flex>
           <Center ml={'14px'}>
             <Text fontSize={'xs'}>Balance: {swapData.token1Balance.toFixed(6)}</Text>
-            {swapData.token1Balance.gt(0) ? (
-              <Button colorScheme="teal" variant="link" size={'xs'} ml={'6px'} textDecoration={'underline'} onClick={() => maxHandler(1)}>
-                MAX
-              </Button>
-            ) : null}
           </Center>
         </Flex>
       </Container>
@@ -240,12 +229,12 @@ export default function Stake() {
             <Divider orientation="vertical" height={'20px'} />
           </Center>
           <Center width={'100%'}>
-            <Input variant="main" size="sm" readOnly textAlign={'right'} value={sliderValue} placeholder="withdraw amount" />
+            <Input variant="main" size="sm" textAlign={'right'} value={sliderValue} placeholder="withdraw amount" onChange={(e) => setSliderValue(+e.target.value)} />
           </Center>
         </Flex>
       </Container>
       <Center mt="16px">
-        <Slider aria-label="slider-ex-4" width={'98%'} value={sliderValue} onChange={(val) => setSliderValue(val)}>
+        <Slider aria-label="slider-ex-4" width={'98%'} value={sliderValue} onChange={(val) => setSliderValue(val)} min={7} max={365} step={1}>
           {/* <SliderMark value={7} mt="1" ml="-2.5" fontSize="sm">
             7
           </SliderMark>
@@ -268,22 +257,22 @@ export default function Stake() {
         </Slider>
       </Center>
       {/* <br /> */}
-      <Center>
+      {/* <Center>
         <Text fontSize={13} color="gray" my={2}>
           Your lock end date will be 2028年4月06日周四 GMT+8 08:00
         </Text>
-      </Center>
+      </Center> */}
       <HStack fontSize={'small'} px="8px" py={1} color={'brand.500'} fontWeight={'bold'}>
-        <Text w="40%">Earn Rewards</Text>
+        <Text w="40%">Received YieldToken</Text>
         <Text w="70%" textAlign={'right'}>
-          100 RUY
+          {yieldAmount} {yieldTokenSymbol}
         </Text>
       </HStack>
       {swapData.token0 && swapData.token1 ? (
         <HStack fontSize={'small'} px="8px" py={1} color={'green'}>
           <Text w="40%">Exchange Rate</Text>
           <Text w="70%" textAlign={'right'}>
-            1{swapData.token0!.symbol} = 1 {swapData.token1!.symbol}
+            1{swapData.token0!.symbol} = {exchangeRate} {swapData.token1!.symbol}
           </Text>
         </HStack>
       ) : null}
@@ -306,7 +295,7 @@ export default function Stake() {
           </Button>
         ) : null}
         {swapData.submitButtonStatus === BtnAction.available ? (
-          <Button width={'100%'} size="lg" margin={0} colorScheme="gray" variant="solid" onClick={swap} isLoading={loading}>
+          <Button width={'100%'} size="lg" margin={0} colorScheme="gray" variant="solid" onClick={stake} isLoading={loading}>
             {title}
           </Button>
         ) : null}

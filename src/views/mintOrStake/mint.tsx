@@ -161,14 +161,14 @@ export default function Mint() {
 
   return (
     <Container borderStyle={'solid'} borderWidth={'0.5px'} borderRadius={'md'} borderColor="gray.600" boxShadow="xs" rounded="md" p={6}>
-      <Flex mb={'4px'}>
+      {/* <Flex mb={'4px'}>
         <Center>
           <Text fontSize="sm" mb={2}>
             Mint Or Redeem Token
           </Text>
         </Center>
         <Spacer></Spacer>
-      </Flex>
+      </Flex> */}
       <Container borderColor="gray.600" boxShadow="xs" rounded="md" borderWidth={'0.5px'} borderStyle={'solid'} padding="6px 0" borderBottomRadius={'0'}>
         <Flex>
           <Center>
@@ -217,11 +217,11 @@ export default function Mint() {
         <Flex>
           <Center ml={'14px'}>
             <Text fontSize={'xs'}>Balance: {swapData.token1Balance.toFixed(6)}</Text>
-            {swapData.token1Balance.gt(0) ? (
+            {/* {swapData.token1Balance.gt(0) ? (
               <Button colorScheme="teal" variant="link" size={'xs'} ml={'6px'} textDecoration={'underline'} onClick={() => maxHandler(1)}>
                 MAX
               </Button>
-            ) : null}
+            ) : null} */}
           </Center>
         </Flex>
       </Container>

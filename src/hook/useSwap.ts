@@ -168,7 +168,10 @@ export function useSwap(swapOpts: SwapOptions) {
         if (priceImpact && +priceImpact >= 20) return BtnAction.disable
         if (tradeType === TradeType.EXACT_INPUT && token0Balance.lt(token0AmountInput)) return BtnAction.insufficient
         if (tradeType === TradeType.EXACT_OUTPUT && token1Balance.lt(token1AmountInput)) return BtnAction.insufficient
-      } else {
+      } else if (swapOpts.view === SwapView.mint) {
+        if (token0Balance.lt(token0AmountInput)) return BtnAction.insufficient
+      }
+      else {
         if (token0Balance.lt(token0AmountInput) || token1Balance.lt(token1AmountInput)) return BtnAction.insufficient
       }
     } catch (e) {

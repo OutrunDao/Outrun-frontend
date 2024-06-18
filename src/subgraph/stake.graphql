@@ -1,25 +1,25 @@
 query RethPosition($account: Bytes) {
-  stakeRETHs(first: 100, where: { account: $account }) {
-    id
+  stakeORETHs(first: 100, where: { account: $account }) {
     positionId
     account
-    amountInRETH
-    amountInPETH
+    amountInORETH
+    amountInOSETH
     amountInREY
     blockNumber
     blockTimestamp
     transactionHash
     deadline
+    status
   }
 }
 
 query RusdPosition($account: Bytes) {
-  stakeRUSDs(first: 100, where: { account: $account }) {
-    id
+  stakeORUSDs(first: 100, where: { account: $account }) {
     positionId
     account
-    amountInRUSD
-    amountInPUSD
+    status
+    amountInORUSD
+    amountInOSUSD
     amountInRUY
     deadline
   }

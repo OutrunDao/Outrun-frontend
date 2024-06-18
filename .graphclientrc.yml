@@ -2,15 +2,7 @@ sources:
   - name: outrun
     handler:
       graphql:
-        endpoint: https://api.studio.thegraph.com/query/68891/outrun/0.1.32
-  - name: outrunStake
-    handler:
-      graphql:
-        endpoint: https://api.studio.thegraph.com/query/64787/outstake/version/latest
-  - name: stakeRUSD
-    handler:
-      graphql:
-        endpoint: https://api.studio.thegraph.com/query/64787/stake-rusd-manage/version/latest
+        endpoint: https://api.studio.thegraph.com/query/68891/outrun/0.1.35
 documents:
-  - ./src/subgraph/query.graphql
+  - ./src/subgraph/stake.graphql
   - ./src/subgraph/pool.graphql

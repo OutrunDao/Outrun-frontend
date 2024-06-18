@@ -19,8 +19,6 @@ import getORETH from '@/contracts/get/oreth';
 import { USDB } from '@/contracts/usdb';
 import getORUSD from '@/contracts/get/orusd';
 
-const defaultSymbol = 'ETH';
-
 export default function Swap() {
   const chainId = useChainId();
   const account = useAccount();

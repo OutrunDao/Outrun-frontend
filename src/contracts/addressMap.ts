@@ -5,6 +5,8 @@ type AddressMap = { [chainId: number]: string };
 export enum ContractName {
   SWAP_ROUTER = "SWAP_ROUTER",
   SWAP_FACTORY = "SWAP_FACTORY",
+  ORETH_STAKE = 'ORETH_STAKE',
+  ORUSD_STAKE = 'ORUSD_STAKE',
   ORETH_ORUSD = "ORETH_ORUSD",
   MULTICALL = "MULTICALL",
   ORETH = "ORETH",
@@ -27,7 +29,9 @@ export const addressMap = {
     [ContractName.OSUSD]: "0x989bAD96A66b9e87899E26Be20fB6f32B7432bB3",
     [ContractName.REY]: "0x645fC1E82a6732196B30C1e8b708267B887ABfCC",
     [ContractName.RUY]: "0xA1DC1c7cA6B714A6Bd88de75AD367E8DaecabdDc",
-    [ContractName.OSETH]: "0x294285577306bc14224510966DFb81002A5a3C6E"
+    [ContractName.OSETH]: "0x294285577306bc14224510966DFb81002A5a3C6E",
+    [ContractName.ORETH_STAKE]: "0x7F5b6C208D2F426F17caae9db9331B9CB7a4a0CF",
+    [ContractName.ORUSD_STAKE]: "0xC138764f11D922a4dB7bc4A83fD9bA10F7cfCDe1"
   }
 } as Record<number, ContractAddressMap>
 

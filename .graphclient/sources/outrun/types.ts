@@ -787,6 +787,10 @@ export type Query = {
   liquidityPositions: Array<LiquidityPosition>;
   bundle?: Maybe<Bundle>;
   bundles: Array<Bundle>;
+  stakeORETH?: Maybe<StakeORETH>;
+  stakeORETHs: Array<StakeORETH>;
+  stakeORUSD?: Maybe<StakeORUSD>;
+  stakeORUSDs: Array<StakeORUSD>;
   /** Access to subgraph metadata */
   _meta?: Maybe<_Meta_>;
 };
@@ -936,9 +940,301 @@ export type QuerybundlesArgs = {
 };
 
 
+export type QuerystakeORETHArgs = {
+  id: Scalars['ID'];
+  block?: InputMaybe<Block_height>;
+  subgraphError?: _SubgraphErrorPolicy_;
+};
+
+
+export type QuerystakeORETHsArgs = {
+  skip?: InputMaybe<Scalars['Int']>;
+  first?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<StakeORETH_orderBy>;
+  orderDirection?: InputMaybe<OrderDirection>;
+  where?: InputMaybe<StakeORETH_filter>;
+  block?: InputMaybe<Block_height>;
+  subgraphError?: _SubgraphErrorPolicy_;
+};
+
+
+export type QuerystakeORUSDArgs = {
+  id: Scalars['ID'];
+  block?: InputMaybe<Block_height>;
+  subgraphError?: _SubgraphErrorPolicy_;
+};
+
+
+export type QuerystakeORUSDsArgs = {
+  skip?: InputMaybe<Scalars['Int']>;
+  first?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<StakeORUSD_orderBy>;
+  orderDirection?: InputMaybe<OrderDirection>;
+  where?: InputMaybe<StakeORUSD_filter>;
+  block?: InputMaybe<Block_height>;
+  subgraphError?: _SubgraphErrorPolicy_;
+};
+
+
 export type Query_metaArgs = {
   block?: InputMaybe<Block_height>;
 };
+
+export type StakeORETH = {
+  id: Scalars['Bytes'];
+  positionId: Scalars['BigInt'];
+  account: Scalars['Bytes'];
+  amountInORETH: Scalars['BigDecimal'];
+  amountInOSETH: Scalars['BigDecimal'];
+  amountInREY: Scalars['BigDecimal'];
+  status: Scalars['BigInt'];
+  deadline: Scalars['BigInt'];
+  blockNumber: Scalars['BigInt'];
+  blockTimestamp: Scalars['BigInt'];
+  transactionHash: Scalars['Bytes'];
+};
+
+export type StakeORETH_filter = {
+  id?: InputMaybe<Scalars['Bytes']>;
+  id_not?: InputMaybe<Scalars['Bytes']>;
+  id_gt?: InputMaybe<Scalars['Bytes']>;
+  id_lt?: InputMaybe<Scalars['Bytes']>;
+  id_gte?: InputMaybe<Scalars['Bytes']>;
+  id_lte?: InputMaybe<Scalars['Bytes']>;
+  id_in?: InputMaybe<Array<Scalars['Bytes']>>;
+  id_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
+  id_contains?: InputMaybe<Scalars['Bytes']>;
+  id_not_contains?: InputMaybe<Scalars['Bytes']>;
+  positionId?: InputMaybe<Scalars['BigInt']>;
+  positionId_not?: InputMaybe<Scalars['BigInt']>;
+  positionId_gt?: InputMaybe<Scalars['BigInt']>;
+  positionId_lt?: InputMaybe<Scalars['BigInt']>;
+  positionId_gte?: InputMaybe<Scalars['BigInt']>;
+  positionId_lte?: InputMaybe<Scalars['BigInt']>;
+  positionId_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  positionId_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  account?: InputMaybe<Scalars['Bytes']>;
+  account_not?: InputMaybe<Scalars['Bytes']>;
+  account_gt?: InputMaybe<Scalars['Bytes']>;
+  account_lt?: InputMaybe<Scalars['Bytes']>;
+  account_gte?: InputMaybe<Scalars['Bytes']>;
+  account_lte?: InputMaybe<Scalars['Bytes']>;
+  account_in?: InputMaybe<Array<Scalars['Bytes']>>;
+  account_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
+  account_contains?: InputMaybe<Scalars['Bytes']>;
+  account_not_contains?: InputMaybe<Scalars['Bytes']>;
+  amountInORETH?: InputMaybe<Scalars['BigDecimal']>;
+  amountInORETH_not?: InputMaybe<Scalars['BigDecimal']>;
+  amountInORETH_gt?: InputMaybe<Scalars['BigDecimal']>;
+  amountInORETH_lt?: InputMaybe<Scalars['BigDecimal']>;
+  amountInORETH_gte?: InputMaybe<Scalars['BigDecimal']>;
+  amountInORETH_lte?: InputMaybe<Scalars['BigDecimal']>;
+  amountInORETH_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+  amountInORETH_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+  amountInOSETH?: InputMaybe<Scalars['BigDecimal']>;
+  amountInOSETH_not?: InputMaybe<Scalars['BigDecimal']>;
+  amountInOSETH_gt?: InputMaybe<Scalars['BigDecimal']>;
+  amountInOSETH_lt?: InputMaybe<Scalars['BigDecimal']>;
+  amountInOSETH_gte?: InputMaybe<Scalars['BigDecimal']>;
+  amountInOSETH_lte?: InputMaybe<Scalars['BigDecimal']>;
+  amountInOSETH_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+  amountInOSETH_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+  amountInREY?: InputMaybe<Scalars['BigDecimal']>;
+  amountInREY_not?: InputMaybe<Scalars['BigDecimal']>;
+  amountInREY_gt?: InputMaybe<Scalars['BigDecimal']>;
+  amountInREY_lt?: InputMaybe<Scalars['BigDecimal']>;
+  amountInREY_gte?: InputMaybe<Scalars['BigDecimal']>;
+  amountInREY_lte?: InputMaybe<Scalars['BigDecimal']>;
+  amountInREY_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+  amountInREY_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+  status?: InputMaybe<Scalars['BigInt']>;
+  status_not?: InputMaybe<Scalars['BigInt']>;
+  status_gt?: InputMaybe<Scalars['BigInt']>;
+  status_lt?: InputMaybe<Scalars['BigInt']>;
+  status_gte?: InputMaybe<Scalars['BigInt']>;
+  status_lte?: InputMaybe<Scalars['BigInt']>;
+  status_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  status_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  deadline?: InputMaybe<Scalars['BigInt']>;
+  deadline_not?: InputMaybe<Scalars['BigInt']>;
+  deadline_gt?: InputMaybe<Scalars['BigInt']>;
+  deadline_lt?: InputMaybe<Scalars['BigInt']>;
+  deadline_gte?: InputMaybe<Scalars['BigInt']>;
+  deadline_lte?: InputMaybe<Scalars['BigInt']>;
+  deadline_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  deadline_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  blockNumber?: InputMaybe<Scalars['BigInt']>;
+  blockNumber_not?: InputMaybe<Scalars['BigInt']>;
+  blockNumber_gt?: InputMaybe<Scalars['BigInt']>;
+  blockNumber_lt?: InputMaybe<Scalars['BigInt']>;
+  blockNumber_gte?: InputMaybe<Scalars['BigInt']>;
+  blockNumber_lte?: InputMaybe<Scalars['BigInt']>;
+  blockNumber_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  blockNumber_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  blockTimestamp?: InputMaybe<Scalars['BigInt']>;
+  blockTimestamp_not?: InputMaybe<Scalars['BigInt']>;
+  blockTimestamp_gt?: InputMaybe<Scalars['BigInt']>;
+  blockTimestamp_lt?: InputMaybe<Scalars['BigInt']>;
+  blockTimestamp_gte?: InputMaybe<Scalars['BigInt']>;
+  blockTimestamp_lte?: InputMaybe<Scalars['BigInt']>;
+  blockTimestamp_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  blockTimestamp_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  transactionHash?: InputMaybe<Scalars['Bytes']>;
+  transactionHash_not?: InputMaybe<Scalars['Bytes']>;
+  transactionHash_gt?: InputMaybe<Scalars['Bytes']>;
+  transactionHash_lt?: InputMaybe<Scalars['Bytes']>;
+  transactionHash_gte?: InputMaybe<Scalars['Bytes']>;
+  transactionHash_lte?: InputMaybe<Scalars['Bytes']>;
+  transactionHash_in?: InputMaybe<Array<Scalars['Bytes']>>;
+  transactionHash_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
+  transactionHash_contains?: InputMaybe<Scalars['Bytes']>;
+  transactionHash_not_contains?: InputMaybe<Scalars['Bytes']>;
+  /** Filter for the block changed event. */
+  _change_block?: InputMaybe<BlockChangedFilter>;
+  and?: InputMaybe<Array<InputMaybe<StakeORETH_filter>>>;
+  or?: InputMaybe<Array<InputMaybe<StakeORETH_filter>>>;
+};
+
+export type StakeORETH_orderBy =
+  | 'id'
+  | 'positionId'
+  | 'account'
+  | 'amountInORETH'
+  | 'amountInOSETH'
+  | 'amountInREY'
+  | 'status'
+  | 'deadline'
+  | 'blockNumber'
+  | 'blockTimestamp'
+  | 'transactionHash';
+
+export type StakeORUSD = {
+  id: Scalars['Bytes'];
+  positionId: Scalars['BigInt'];
+  account: Scalars['Bytes'];
+  amountInORUSD: Scalars['BigDecimal'];
+  amountInOSUSD: Scalars['BigDecimal'];
+  amountInRUY: Scalars['BigDecimal'];
+  deadline: Scalars['BigInt'];
+  status: Scalars['BigInt'];
+  blockNumber: Scalars['BigInt'];
+  blockTimestamp: Scalars['BigInt'];
+  transactionHash: Scalars['Bytes'];
+};
+
+export type StakeORUSD_filter = {
+  id?: InputMaybe<Scalars['Bytes']>;
+  id_not?: InputMaybe<Scalars['Bytes']>;
+  id_gt?: InputMaybe<Scalars['Bytes']>;
+  id_lt?: InputMaybe<Scalars['Bytes']>;
+  id_gte?: InputMaybe<Scalars['Bytes']>;
+  id_lte?: InputMaybe<Scalars['Bytes']>;
+  id_in?: InputMaybe<Array<Scalars['Bytes']>>;
+  id_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
+  id_contains?: InputMaybe<Scalars['Bytes']>;
+  id_not_contains?: InputMaybe<Scalars['Bytes']>;
+  positionId?: InputMaybe<Scalars['BigInt']>;
+  positionId_not?: InputMaybe<Scalars['BigInt']>;
+  positionId_gt?: InputMaybe<Scalars['BigInt']>;
+  positionId_lt?: InputMaybe<Scalars['BigInt']>;
+  positionId_gte?: InputMaybe<Scalars['BigInt']>;
+  positionId_lte?: InputMaybe<Scalars['BigInt']>;
+  positionId_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  positionId_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  account?: InputMaybe<Scalars['Bytes']>;
+  account_not?: InputMaybe<Scalars['Bytes']>;
+  account_gt?: InputMaybe<Scalars['Bytes']>;
+  account_lt?: InputMaybe<Scalars['Bytes']>;
+  account_gte?: InputMaybe<Scalars['Bytes']>;
+  account_lte?: InputMaybe<Scalars['Bytes']>;
+  account_in?: InputMaybe<Array<Scalars['Bytes']>>;
+  account_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
+  account_contains?: InputMaybe<Scalars['Bytes']>;
+  account_not_contains?: InputMaybe<Scalars['Bytes']>;
+  amountInORUSD?: InputMaybe<Scalars['BigDecimal']>;
+  amountInORUSD_not?: InputMaybe<Scalars['BigDecimal']>;
+  amountInORUSD_gt?: InputMaybe<Scalars['BigDecimal']>;
+  amountInORUSD_lt?: InputMaybe<Scalars['BigDecimal']>;
+  amountInORUSD_gte?: InputMaybe<Scalars['BigDecimal']>;
+  amountInORUSD_lte?: InputMaybe<Scalars['BigDecimal']>;
+  amountInORUSD_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+  amountInORUSD_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+  amountInOSUSD?: InputMaybe<Scalars['BigDecimal']>;
+  amountInOSUSD_not?: InputMaybe<Scalars['BigDecimal']>;
+  amountInOSUSD_gt?: InputMaybe<Scalars['BigDecimal']>;
+  amountInOSUSD_lt?: InputMaybe<Scalars['BigDecimal']>;
+  amountInOSUSD_gte?: InputMaybe<Scalars['BigDecimal']>;
+  amountInOSUSD_lte?: InputMaybe<Scalars['BigDecimal']>;
+  amountInOSUSD_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+  amountInOSUSD_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+  amountInRUY?: InputMaybe<Scalars['BigDecimal']>;
+  amountInRUY_not?: InputMaybe<Scalars['BigDecimal']>;
+  amountInRUY_gt?: InputMaybe<Scalars['BigDecimal']>;
+  amountInRUY_lt?: InputMaybe<Scalars['BigDecimal']>;
+  amountInRUY_gte?: InputMaybe<Scalars['BigDecimal']>;
+  amountInRUY_lte?: InputMaybe<Scalars['BigDecimal']>;
+  amountInRUY_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+  amountInRUY_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+  deadline?: InputMaybe<Scalars['BigInt']>;
+  deadline_not?: InputMaybe<Scalars['BigInt']>;
+  deadline_gt?: InputMaybe<Scalars['BigInt']>;
+  deadline_lt?: InputMaybe<Scalars['BigInt']>;
+  deadline_gte?: InputMaybe<Scalars['BigInt']>;
+  deadline_lte?: InputMaybe<Scalars['BigInt']>;
+  deadline_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  deadline_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  status?: InputMaybe<Scalars['BigInt']>;
+  status_not?: InputMaybe<Scalars['BigInt']>;
+  status_gt?: InputMaybe<Scalars['BigInt']>;
+  status_lt?: InputMaybe<Scalars['BigInt']>;
+  status_gte?: InputMaybe<Scalars['BigInt']>;
+  status_lte?: InputMaybe<Scalars['BigInt']>;
+  status_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  status_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  blockNumber?: InputMaybe<Scalars['BigInt']>;
+  blockNumber_not?: InputMaybe<Scalars['BigInt']>;
+  blockNumber_gt?: InputMaybe<Scalars['BigInt']>;
+  blockNumber_lt?: InputMaybe<Scalars['BigInt']>;
+  blockNumber_gte?: InputMaybe<Scalars['BigInt']>;
+  blockNumber_lte?: InputMaybe<Scalars['BigInt']>;
+  blockNumber_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  blockNumber_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  blockTimestamp?: InputMaybe<Scalars['BigInt']>;
+  blockTimestamp_not?: InputMaybe<Scalars['BigInt']>;
+  blockTimestamp_gt?: InputMaybe<Scalars['BigInt']>;
+  blockTimestamp_lt?: InputMaybe<Scalars['BigInt']>;
+  blockTimestamp_gte?: InputMaybe<Scalars['BigInt']>;
+  blockTimestamp_lte?: InputMaybe<Scalars['BigInt']>;
+  blockTimestamp_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  blockTimestamp_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+  transactionHash?: InputMaybe<Scalars['Bytes']>;
+  transactionHash_not?: InputMaybe<Scalars['Bytes']>;
+  transactionHash_gt?: InputMaybe<Scalars['Bytes']>;
+  transactionHash_lt?: InputMaybe<Scalars['Bytes']>;
+  transactionHash_gte?: InputMaybe<Scalars['Bytes']>;
+  transactionHash_lte?: InputMaybe<Scalars['Bytes']>;
+  transactionHash_in?: InputMaybe<Array<Scalars['Bytes']>>;
+  transactionHash_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
+  transactionHash_contains?: InputMaybe<Scalars['Bytes']>;
+  transactionHash_not_contains?: InputMaybe<Scalars['Bytes']>;
+  /** Filter for the block changed event. */
+  _change_block?: InputMaybe<BlockChangedFilter>;
+  and?: InputMaybe<Array<InputMaybe<StakeORUSD_filter>>>;
+  or?: InputMaybe<Array<InputMaybe<StakeORUSD_filter>>>;
+};
+
+export type StakeORUSD_orderBy =
+  | 'id'
+  | 'positionId'
+  | 'account'
+  | 'amountInORUSD'
+  | 'amountInOSUSD'
+  | 'amountInRUY'
+  | 'deadline'
+  | 'status'
+  | 'blockNumber'
+  | 'blockTimestamp'
+  | 'transactionHash';
 
 export type Subscription = {
   swapFactory?: Maybe<SwapFactory>;
@@ -957,6 +1253,10 @@ export type Subscription = {
   liquidityPositions: Array<LiquidityPosition>;
   bundle?: Maybe<Bundle>;
   bundles: Array<Bundle>;
+  stakeORETH?: Maybe<StakeORETH>;
+  stakeORETHs: Array<StakeORETH>;
+  stakeORUSD?: Maybe<StakeORUSD>;
+  stakeORUSDs: Array<StakeORUSD>;
   /** Access to subgraph metadata */
   _meta?: Maybe<_Meta_>;
 };
@@ -1101,6 +1401,42 @@ export type SubscriptionbundlesArgs = {
   orderBy?: InputMaybe<Bundle_orderBy>;
   orderDirection?: InputMaybe<OrderDirection>;
   where?: InputMaybe<Bundle_filter>;
+  block?: InputMaybe<Block_height>;
+  subgraphError?: _SubgraphErrorPolicy_;
+};
+
+
+export type SubscriptionstakeORETHArgs = {
+  id: Scalars['ID'];
+  block?: InputMaybe<Block_height>;
+  subgraphError?: _SubgraphErrorPolicy_;
+};
+
+
+export type SubscriptionstakeORETHsArgs = {
+  skip?: InputMaybe<Scalars['Int']>;
+  first?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<StakeORETH_orderBy>;
+  orderDirection?: InputMaybe<OrderDirection>;
+  where?: InputMaybe<StakeORETH_filter>;
+  block?: InputMaybe<Block_height>;
+  subgraphError?: _SubgraphErrorPolicy_;
+};
+
+
+export type SubscriptionstakeORUSDArgs = {
+  id: Scalars['ID'];
+  block?: InputMaybe<Block_height>;
+  subgraphError?: _SubgraphErrorPolicy_;
+};
+
+
+export type SubscriptionstakeORUSDsArgs = {
+  skip?: InputMaybe<Scalars['Int']>;
+  first?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<StakeORUSD_orderBy>;
+  orderDirection?: InputMaybe<OrderDirection>;
+  where?: InputMaybe<StakeORUSD_filter>;
   block?: InputMaybe<Block_height>;
   subgraphError?: _SubgraphErrorPolicy_;
 };
@@ -1404,6 +1740,14 @@ export type _SubgraphErrorPolicy_ =
   bundle: InContextSdkMethod<Query['bundle'], QuerybundleArgs, MeshContext>,
   /** null **/
   bundles: InContextSdkMethod<Query['bundles'], QuerybundlesArgs, MeshContext>,
+  /** null **/
+  stakeORETH: InContextSdkMethod<Query['stakeORETH'], QuerystakeORETHArgs, MeshContext>,
+  /** null **/
+  stakeORETHs: InContextSdkMethod<Query['stakeORETHs'], QuerystakeORETHsArgs, MeshContext>,
+  /** null **/
+  stakeORUSD: InContextSdkMethod<Query['stakeORUSD'], QuerystakeORUSDArgs, MeshContext>,
+  /** null **/
+  stakeORUSDs: InContextSdkMethod<Query['stakeORUSDs'], QuerystakeORUSDsArgs, MeshContext>,
   /** Access to subgraph metadata **/
   _meta: InContextSdkMethod<Query['_meta'], Query_metaArgs, MeshContext>
   };
@@ -1445,6 +1789,14 @@ export type _SubgraphErrorPolicy_ =
   bundle: InContextSdkMethod<Subscription['bundle'], SubscriptionbundleArgs, MeshContext>,
   /** null **/
   bundles: InContextSdkMethod<Subscription['bundles'], SubscriptionbundlesArgs, MeshContext>,
+  /** null **/
+  stakeORETH: InContextSdkMethod<Subscription['stakeORETH'], SubscriptionstakeORETHArgs, MeshContext>,
+  /** null **/
+  stakeORETHs: InContextSdkMethod<Subscription['stakeORETHs'], SubscriptionstakeORETHsArgs, MeshContext>,
+  /** null **/
+  stakeORUSD: InContextSdkMethod<Subscription['stakeORUSD'], SubscriptionstakeORUSDArgs, MeshContext>,
+  /** null **/
+  stakeORUSDs: InContextSdkMethod<Subscription['stakeORUSDs'], SubscriptionstakeORUSDsArgs, MeshContext>,
   /** Access to subgraph metadata **/
   _meta: InContextSdkMethod<Subscription['_meta'], Subscription_metaArgs, MeshContext>
   };
