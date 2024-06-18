@@ -41,12 +41,6 @@ importers:
       '@graphql-mesh/utils':
         specifier: ^0.97.5
         version: 0.97.5(@graphql-mesh/cross-helpers@0.3.4(@graphql-tools/utils@9.2.1(graphql@16.8.1))(graphql@16.8.1)(react-native@0.73.5(@babel/core@7.24.0)(@babel/preset-env@7.24.0(@babel/core@7.24.0))(bufferutil@4.0.8)(encoding@0.1.13)(react@18.2.0)))(@graphql-mesh/types@0.93.2)(@graphql-tools/utils@9.2.1(graphql@16.8.1))(graphql@16.8.1)(tslib@2.6.2)
-      '@metamask/providers':
-        specifier: ^16.0.0
-        version: 16.0.0
-      '@supabase/supabase-js':
-        specifier: ^2.39.7
-        version: 2.39.7(bufferutil@4.0.8)
       '@tanstack/react-query':
         specifier: ^5.25.0
         version: 5.25.0(react@18.2.0)
@@ -77,15 +71,6 @@ importers:
       jsbi:
         specifier: ^4.3.0
         version: 4.3.0
-      mobx:
-        specifier: ^6.12.3
-        version: 6.12.3
-      mobx-react:
-        specifier: ^9.1.1
-        version: 9.1.1(mobx@6.12.3)(react-dom@18.2.0(react@18.2.0))(react-native@0.73.5(@babel/core@7.24.0)(@babel/preset-env@7.24.0(@babel/core@7.24.0))(bufferutil@4.0.8)(encoding@0.1.13)(react@18.2.0))(react@18.2.0)
-      mobx-react-lite:
-        specifier: ^4.0.7
-        version: 4.0.7(mobx@6.12.3)(react-dom@18.2.0(react@18.2.0))(react-native@0.73.5(@babel/core@7.24.0)(@babel/preset-env@7.24.0(@babel/core@7.24.0))(bufferutil@4.0.8)(encoding@0.1.13)(react@18.2.0))(react@18.2.0)
       next:
         specifier: 14.2.3
         version: 14.2.3(@babel/core@7.24.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -2406,17 +2391,9 @@ packages:
     resolution: {integrity: sha512-dwZPq8wx9yV3IX2caLi9q9xZBw2XeIoYqdyihDDDpuHVCEiqadJLwqM3zy+uwf6F1QYQ65A8aOMQg1Uw7LMLNg==}
     engines: {node: '>=16.0.0'}
 
-  '@metamask/json-rpc-middleware-stream@6.0.2':
-    resolution: {integrity: sha512-jtyx3PRfc1kqoLpYveIVQNwsxYKefc64/LCl9h9Da1m3nUKEvypbYuXSIwi237qvOjKmNHQKsDOZg6f4uBf62Q==}
-    engines: {node: '>=16.0.0'}
-
   '@metamask/object-multiplex@1.3.0':
     resolution: {integrity: sha512-czcQeVYdSNtabd+NcYQnrM69MciiJyd1qvKH8WM2Id3C0ZiUUX5Xa/MK+/VUk633DBhVOwdNzAKIQ33lGyA+eQ==}
     engines: {node: '>=12.0.0'}
-
-  '@metamask/object-multiplex@2.0.0':
-    resolution: {integrity: sha512-+ItrieVZie3j2LfYE0QkdW3dsEMfMEp419IGx1zyeLqjRZ14iQUPRO0H6CGgfAAoC0x6k2PfCAGRwJUA9BMrqA==}
-    engines: {node: ^16.20 || ^18.16 || >=20}
 
   '@metamask/onboarding@1.0.1':
     resolution: {integrity: sha512-FqHhAsCI+Vacx2qa5mAFcWNSrTcVGMNjzxVgaX8ECSny/BJ9/vgXP9V7WF/8vb9DltPeQkxr+Fnfmm6GHfmdTQ==}
@@ -2428,10 +2405,6 @@ packages:
   '@metamask/providers@10.2.1':
     resolution: {integrity: sha512-p2TXw2a1Nb8czntDGfeIYQnk4LLVbd5vlcb3GY//lylYlKdSqp+uUTegCvxiFblRDOT68jsY8Ib1VEEzVUOolA==}
     engines: {node: '>=14.0.0'}
-
-  '@metamask/providers@16.0.0':
-    resolution: {integrity: sha512-zqZpn7Tg+QuvhL9x1WYCdXjFclZrMR2LOU2a3kHVFms5pOfizzFApB492VFgHuv/5xKohSxDkhXpAZ/TNGmM4g==}
-    engines: {node: ^18.18 || >=20}
 
   '@metamask/rpc-errors@6.2.1':
     resolution: {integrity: sha512-VTgWkjWLzb0nupkFl1duQi9Mk8TGT9rsdnQg6DeRrYEFxtFOh0IF8nAwxM/4GWqDl6uIB06lqUBgUrAVWl62Bw==}
@@ -2899,28 +2872,6 @@ packages:
   '@stablelib/x25519@1.0.3':
     resolution: {integrity: sha512-KnTbKmUhPhHavzobclVJQG5kuivH+qDLpe84iRqX3CLrKp881cF160JvXJ+hjn1aMyCwYOKeIZefIH/P5cJoRw==}
 
-  '@supabase/functions-js@2.1.5':
-    resolution: {integrity: sha512-BNzC5XhCzzCaggJ8s53DP+WeHHGT/NfTsx2wUSSGKR2/ikLFQTBCDzMvGz/PxYMqRko/LwncQtKXGOYp1PkPaw==}
-
-  '@supabase/gotrue-js@2.62.2':
-    resolution: {integrity: sha512-AP6e6W9rQXFTEJ7sTTNYQrNf0LCcnt1hUW+RIgUK+Uh3jbWvcIST7wAlYyNZiMlS9+PYyymWQ+Ykz/rOYSO0+A==}
-
-  '@supabase/node-fetch@2.6.15':
-    resolution: {integrity: sha512-1ibVeYUacxWYi9i0cf5efil6adJ9WRyZBLivgjs+AUpewx1F3xPi7gLgaASI2SmIQxPoCEjAsLAzKPgMJVgOUQ==}
-    engines: {node: 4.x || >=6.0.0}
-
-  '@supabase/postgrest-js@1.9.2':
-    resolution: {integrity: sha512-I6yHo8CC9cxhOo6DouDMy9uOfW7hjdsnCxZiaJuIVZm1dBGTFiQPgfMa9zXCamEWzNyWRjZvupAUuX+tqcl5Sw==}
-
-  '@supabase/realtime-js@2.9.3':
-    resolution: {integrity: sha512-lAp50s2n3FhGJFq+wTSXLNIDPw5Y0Wxrgt44eM5nLSA3jZNUUP3Oq2Ccd1CbZdVntPCWLZvJaU//pAd2NE+QnQ==}
-
-  '@supabase/storage-js@2.5.5':
-    resolution: {integrity: sha512-OpLoDRjFwClwc2cjTJZG8XviTiQH4Ik8sCiMK5v7et0MDu2QlXjCAW3ljxJB5+z/KazdMOTnySi+hysxWUPu3w==}
-
-  '@supabase/supabase-js@2.39.7':
-    resolution: {integrity: sha512-1vxsX10Uhc2b+Dv9pRjBjHfqmw2N2h1PyTg9LEfICR3x2xwE24By1MGCjDZuzDKH5OeHCsf4it6K8KRluAAEXA==}
-
   '@swc/counter@0.1.3':
     resolution: {integrity: sha512-e2BR4lsJkkRlKZ/qCHPw9ZaSxc0MVUd7gtbtaB7aMvHeJVYe8sOB8DBZkP2DtISHGSku9sCK6T6cnY0CtXrOCQ==}
 
@@ -3012,9 +2963,6 @@ packages:
 
   '@types/parse-json@4.0.2':
     resolution: {integrity: sha512-dISoDXWWQwUquiKsyZ4Ng+HX2KsPL7LyHKHQwgGFEA3IaKac4Obd+h2a/a6waisAoepJlBcx9paWqjA8/HVjCw==}
-
-  '@types/phoenix@1.6.4':
-    resolution: {integrity: sha512-B34A7uot1Cv0XtaHRYDATltAdKx0BvVKNgYNqE4WjtPUa4VQJM7kxeXcVKaH+KS+kCmZ+6w+QaUdcljiheiBJA==}
 
   '@types/prop-types@15.7.11':
     resolution: {integrity: sha512-ga8y9v9uyeiLdpKddhxYQkxNDrfvuPrlFb0N1qnZZByvcElJaXthF1UhvCh9TLWJBEHeNtdnbysW7Y6Uq8CVng==}
@@ -4362,10 +4310,6 @@ packages:
     resolution: {integrity: sha512-qknp5o5rj2J9CRKfVB8KJr+uXQlrojNZzdESUPhKYLXf97TPcGf6qWWKmpsNNtUyOdzFhab1ON0jzouNxHHvow==}
     engines: {node: '>=12.0.0'}
 
-  extension-port-stream@3.0.0:
-    resolution: {integrity: sha512-an2S5quJMiy5bnZKEf6AkfH/7r8CzHvhchU40gxN+OM6HPhe7Z9T1FUychcf2M9PpPOO0Hf7BAEfJkw2TDIBDw==}
-    engines: {node: '>=12.0.0'}
-
   extract-files@11.0.0:
     resolution: {integrity: sha512-FuoE1qtbJ4bBVvv94CC7s0oTnKUGvQs+Rjf1L2SJFfS+HTVVjhPFtehPdQ0JiGPqVNfSSZvL5yzHHQq2Z4WNhQ==}
     engines: {node: ^12.20 || >= 14.13}
@@ -5527,35 +5471,6 @@ packages:
 
   mlly@1.6.1:
     resolution: {integrity: sha512-vLgaHvaeunuOXHSmEbZ9izxPx3USsk8KCQ8iC+aTlp5sKRSoZvwhHh5L9VbKSaVC6sJDqbyohIS76E2VmHIPAA==}
-
-  mobx-react-lite@4.0.7:
-    resolution: {integrity: sha512-RjwdseshK9Mg8On5tyJZHtGD+J78ZnCnRaxeQDSiciKVQDUbfZcXhmld0VMxAwvcTnPEHZySGGewm467Fcpreg==}
-    peerDependencies:
-      mobx: ^6.9.0
-      react: ^16.8.0 || ^17 || ^18
-      react-dom: '*'
-      react-native: '*'
-    peerDependenciesMeta:
-      react-dom:
-        optional: true
-      react-native:
-        optional: true
-
-  mobx-react@9.1.1:
-    resolution: {integrity: sha512-gVV7AdSrAAxqXOJ2bAbGa5TkPqvITSzaPiiEkzpW4rRsMhSec7C2NBCJYILADHKp2tzOAIETGRsIY0UaCV5aEw==}
-    peerDependencies:
-      mobx: ^6.9.0
-      react: ^16.8.0 || ^17 || ^18
-      react-dom: '*'
-      react-native: '*'
-    peerDependenciesMeta:
-      react-dom:
-        optional: true
-      react-native:
-        optional: true
-
-  mobx@6.12.3:
-    resolution: {integrity: sha512-c8NKkO4R2lShkSXZ2Ongj1ycjugjzFFo/UswHBnS62y07DMcTc9Rvo03/3nRyszIvwPNljlkd4S828zIBv/piw==}
 
   motion@10.16.2:
     resolution: {integrity: sha512-p+PurYqfUdcJZvtnmAqu5fJgV2kR0uLFQuBKtLeFVTrYEVllI99tiOTSefVNYuip9ELTEkepIIDftNdze76NAQ==}
@@ -10665,25 +10580,11 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@metamask/json-rpc-middleware-stream@6.0.2':
-    dependencies:
-      '@metamask/json-rpc-engine': 7.3.3
-      '@metamask/safe-event-emitter': 3.1.0
-      '@metamask/utils': 8.3.0
-      readable-stream: 3.6.2
-    transitivePeerDependencies:
-      - supports-color
-
   '@metamask/object-multiplex@1.3.0':
     dependencies:
       end-of-stream: 1.4.4
       once: 1.4.0
       readable-stream: 2.3.8
-
-  '@metamask/object-multiplex@2.0.0':
-    dependencies:
-      once: 1.4.0
-      readable-stream: 3.6.2
 
   '@metamask/onboarding@1.0.1':
     dependencies:
@@ -10710,23 +10611,6 @@ snapshots:
       json-rpc-middleware-stream: 4.2.3
       pump: 3.0.0
       webextension-polyfill-ts: 0.25.0
-
-  '@metamask/providers@16.0.0':
-    dependencies:
-      '@metamask/json-rpc-engine': 7.3.3
-      '@metamask/json-rpc-middleware-stream': 6.0.2
-      '@metamask/object-multiplex': 2.0.0
-      '@metamask/rpc-errors': 6.2.1
-      '@metamask/safe-event-emitter': 3.1.0
-      '@metamask/utils': 8.3.0
-      detect-browser: 5.3.0
-      extension-port-stream: 3.0.0
-      fast-deep-equal: 3.1.3
-      is-stream: 2.0.1
-      readable-stream: 3.6.2
-      webextension-polyfill: 0.10.0
-    transitivePeerDependencies:
-      - supports-color
 
   '@metamask/rpc-errors@6.2.1':
     dependencies:
@@ -11461,48 +11345,6 @@ snapshots:
       '@stablelib/random': 1.0.2
       '@stablelib/wipe': 1.0.1
 
-  '@supabase/functions-js@2.1.5':
-    dependencies:
-      '@supabase/node-fetch': 2.6.15
-
-  '@supabase/gotrue-js@2.62.2':
-    dependencies:
-      '@supabase/node-fetch': 2.6.15
-
-  '@supabase/node-fetch@2.6.15':
-    dependencies:
-      whatwg-url: 5.0.0
-
-  '@supabase/postgrest-js@1.9.2':
-    dependencies:
-      '@supabase/node-fetch': 2.6.15
-
-  '@supabase/realtime-js@2.9.3(bufferutil@4.0.8)':
-    dependencies:
-      '@supabase/node-fetch': 2.6.15
-      '@types/phoenix': 1.6.4
-      '@types/ws': 8.5.10
-      ws: 8.16.0(bufferutil@4.0.8)
-    transitivePeerDependencies:
-      - bufferutil
-      - utf-8-validate
-
-  '@supabase/storage-js@2.5.5':
-    dependencies:
-      '@supabase/node-fetch': 2.6.15
-
-  '@supabase/supabase-js@2.39.7(bufferutil@4.0.8)':
-    dependencies:
-      '@supabase/functions-js': 2.1.5
-      '@supabase/gotrue-js': 2.62.2
-      '@supabase/node-fetch': 2.6.15
-      '@supabase/postgrest-js': 1.9.2
-      '@supabase/realtime-js': 2.9.3(bufferutil@4.0.8)
-      '@supabase/storage-js': 2.5.5
-    transitivePeerDependencies:
-      - bufferutil
-      - utf-8-validate
-
   '@swc/counter@0.1.3': {}
 
   '@swc/helpers@0.5.5':
@@ -11589,8 +11431,6 @@ snapshots:
       undici-types: 5.26.5
 
   '@types/parse-json@4.0.2': {}
-
-  '@types/phoenix@1.6.4': {}
 
   '@types/prop-types@15.7.11': {}
 
@@ -13595,11 +13435,6 @@ snapshots:
     dependencies:
       webextension-polyfill: 0.10.0
 
-  extension-port-stream@3.0.0:
-    dependencies:
-      readable-stream: 4.5.2
-      webextension-polyfill: 0.10.0
-
   extract-files@11.0.0: {}
 
   fast-copy@3.0.1: {}
@@ -14926,26 +14761,6 @@ snapshots:
       pathe: 1.1.2
       pkg-types: 1.0.3
       ufo: 1.4.0
-
-  mobx-react-lite@4.0.7(mobx@6.12.3)(react-dom@18.2.0(react@18.2.0))(react-native@0.73.5(@babel/core@7.24.0)(@babel/preset-env@7.24.0(@babel/core@7.24.0))(bufferutil@4.0.8)(encoding@0.1.13)(react@18.2.0))(react@18.2.0):
-    dependencies:
-      mobx: 6.12.3
-      react: 18.2.0
-      use-sync-external-store: 1.2.0(react@18.2.0)
-    optionalDependencies:
-      react-dom: 18.2.0(react@18.2.0)
-      react-native: 0.73.5(@babel/core@7.24.0)(@babel/preset-env@7.24.0(@babel/core@7.24.0))(bufferutil@4.0.8)(encoding@0.1.13)(react@18.2.0)
-
-  mobx-react@9.1.1(mobx@6.12.3)(react-dom@18.2.0(react@18.2.0))(react-native@0.73.5(@babel/core@7.24.0)(@babel/preset-env@7.24.0(@babel/core@7.24.0))(bufferutil@4.0.8)(encoding@0.1.13)(react@18.2.0))(react@18.2.0):
-    dependencies:
-      mobx: 6.12.3
-      mobx-react-lite: 4.0.7(mobx@6.12.3)(react-dom@18.2.0(react@18.2.0))(react-native@0.73.5(@babel/core@7.24.0)(@babel/preset-env@7.24.0(@babel/core@7.24.0))(bufferutil@4.0.8)(encoding@0.1.13)(react@18.2.0))(react@18.2.0)
-      react: 18.2.0
-    optionalDependencies:
-      react-dom: 18.2.0(react@18.2.0)
-      react-native: 0.73.5(@babel/core@7.24.0)(@babel/preset-env@7.24.0(@babel/core@7.24.0))(bufferutil@4.0.8)(encoding@0.1.13)(react@18.2.0)
-
-  mobx@6.12.3: {}
 
   motion@10.16.2:
     dependencies:
