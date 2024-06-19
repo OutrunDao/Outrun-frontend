@@ -1,15 +1,13 @@
 import { useWalletClient, usePublicClient } from 'wagmi';
 import { WalletClient, getContract, parseEther, parseUnits, Address } from 'viem'
 import { abi } from './abi'
-import { ContractAddressMap } from '@/contants/address'
-import { ContractAddrKey } from '@/types/index.d'
 import { useToast } from '@chakra-ui/react';
 import { retry } from 'radash';
 
 function getLaunchContract(client: WalletClient) {
   return getContract({
     abi,
-    address: ContractAddressMap[ContractAddrKey.EthFFLauncher],
+    address: '0x000000000',
     client
   })
 }
