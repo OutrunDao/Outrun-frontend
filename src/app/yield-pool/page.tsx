@@ -1,10 +1,10 @@
 import { headers } from 'next/headers';
 
 import type { Metadata } from 'next';
-import Page from '@/views/positions/page';
+import Page from '@/views/yield-pool/page';
 
 export const metadata: Metadata = {
-  title: 'Stake Positions | OUTRUN',
+  title: 'Yield Pool | OUTRUN',
   description: 'Outrun app',
 };
 

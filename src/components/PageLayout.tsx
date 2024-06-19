@@ -93,7 +93,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   <Divider />
 
                   <Button pl={2} variant="link" fontSize={14} color={'grey.600'} fontWeight={'normal'} leftIcon={<Icon fontSize={16} as={GiProfit}></Icon>}>
-                    <Link href={'/pool'} prefetch={true}>
+                    <Link href={'/yield-pool'} prefetch={true}>
                       Yield Pool
                     </Link>
                   </Button>
