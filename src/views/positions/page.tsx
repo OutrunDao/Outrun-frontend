@@ -1,19 +1,28 @@
 'use client';
 
-import { Tabs, TabList, Tab, TabPanels, TabPanel, Box, Button, Card, CardBody, CardFooter, CardHeader, Container, HStack, SimpleGrid, Spacer, Text, Tag, Flex } from '@chakra-ui/react';
+import { Tabs, TabList, Tab, TabPanels, TabPanel, Box, Button, Link, Card, CardBody, CardFooter, CardHeader, Container, HStack, SimpleGrid, Spacer, Text, Tag, Flex, useToast } from '@chakra-ui/react';
 import { execute, RethPositionDocument, StakeORETH, RusdPositionDocument, StakeORUSD } from '@/subgraph';
 import dayjs from 'dayjs';
 import ExtendDaysModal from './extendDaysModal';
 import { useAccount, useChainId, usePublicClient, useWalletClient } from 'wagmi';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { formatUnits } from 'viem';
 import getOrethStake from '@/contracts/get/orethStakeManager';
 import useContract from '@/hook/useContract';
 import getOrUsdStake from '@/contracts/get/orusdStakeManager';
+import { RETH } from '@/contracts/reth';
+import { OSETH } from '@/contracts/oseth';
+import { OSUSD } from '@/contracts/osusd';
+import parseTokenTransferLogs from '@/utils/parseTokenEvents';
+import { addressMap } from '@/contracts/addressMap';
+import { BlockExplorers } from '@/contracts/chains';
+import { useMemo } from 'react';
 
 export default function PositionsView() {
   const account = useAccount();
+  const toast = useToast();
   const chainId = useChainId();
+  const queryClient = useQueryClient();
   const publicClient = usePublicClient();
   const { data: walletClient } = useWalletClient();
   const { write: writeContract } = useContract();
@@ -23,6 +32,10 @@ export default function PositionsView() {
       return execute(RethPositionDocument, { account: account.address }).then((res: { data: { stakeORETHs: StakeORETH[] } }) => res.data.stakeORETHs);
     },
   });
+
+  const blockExplore = useMemo(() => {
+    return BlockExplorers[chainId];
+  }, [chainId]);
   const { data: rusdPositions } = useQuery({
     queryKey: ['rusdPositions', account.address],
     queryFn: async (): Promise<StakeORUSD[]> => {
@@ -59,9 +72,28 @@ export default function PositionsView() {
     }
   }
 
-  async function unLock(type: string, positionId: number) {
+  async function unLock(type: string, positionId: number, deadline: number, pledgeAmount: string) {
+    if (!account.address || !publicClient)
+      return toast({
+        title: 'wallet disconnected',
+        status: 'error',
+      });
+    pledgeAmount = formatUnits(BigInt(pledgeAmount), 18);
+    let data;
+    if (deadline > Math.floor(new Date().getTime() / 1000)) {
+      const yes = confirm('Whether to force the closure of an unexpired position ?');
+      if (!yes) return;
+    }
     if (type === 'oreth') {
-      await writeContract(
+      const osBalance = await OSETH[chainId].balanceOf(account.address, publicClient);
+      // console.log(osBalance.toString());
+
+      if (osBalance.lessThan(pledgeAmount))
+        return toast({
+          title: `You need ${pledgeAmount} osETH to unlock your position`,
+          status: 'error',
+        });
+      data = await writeContract(
         // @ts-ignore
         getOrethStake(chainId, publicClient!, walletClient),
         {
@@ -73,8 +105,18 @@ export default function PositionsView() {
           account,
         }
       );
+
+      queryClient.invalidateQueries({
+        queryKey: ['rethPositions'],
+      });
     } else {
-      await writeContract(
+      const osBalance = await OSUSD[chainId].balanceOf(account.address, publicClient);
+      if (osBalance.lessThan(pledgeAmount))
+        return toast({
+          title: `You need ${pledgeAmount} osUSD to unlock your position`,
+          status: 'error',
+        });
+      data = await writeContract(
         // @ts-ignore
         getOrUsdStake(chainId, publicClient!, walletClient),
         {
@@ -86,6 +128,47 @@ export default function PositionsView() {
           account,
         }
       );
+      queryClient.invalidateQueries({
+        queryKey: ['rusdPositions'],
+      });
+    }
+    if (data && data.status === 'success') {
+      // console.log(data.logs);
+      const log = parseTokenTransferLogs(data.logs);
+      const adressSymbolMap = {
+        [addressMap[chainId].ORETH.toLocaleLowerCase()]: {
+          symbol: 'orETH',
+          decimal: 18,
+        },
+
+        [addressMap[chainId].ORUSD.toLocaleLowerCase()]: {
+          symbol: 'orUSD',
+          decimal: 18,
+        },
+      } as Record<string, { symbol: string; decimal: number }>;
+      const receivesText = Object.entries(log.to[account.address!])
+        .map((item) => {
+          if (!adressSymbolMap[item[0]]) return '';
+          return `${formatUnits(item[1], adressSymbolMap[item[0]].decimal)} ${adressSymbolMap[item[0]].symbol}`;
+        })
+        .filter((i) => i)
+        .join(', ');
+      toast({
+        title: 'unlock finished',
+        status: 'success',
+        position: 'bottom',
+        description: (
+          <>
+            {' '}
+            {`You have successfully received ${receivesText}`}. view on
+            <Link isExternal href={blockExplore + '/tx/' + data.transactionHash} textDecoration={'underline'} colorScheme="teal">
+              BlastScan
+            </Link>
+          </>
+        ),
+        duration: null,
+        isClosable: true,
+      });
     }
   }
 
@@ -129,7 +212,7 @@ export default function PositionsView() {
                       ) : (
                         <>
                           <ExtendDaysModal deadline={+item.deadline} onConfirmExtend={(days: number) => onConfirmExtend('oreth', +item.positionId, days)}></ExtendDaysModal>
-                          <Button size={'xs'} rounded={4} colorScheme={'blue'} onClick={() => unLock('oreth', +item.positionId)}>
+                          <Button size={'xs'} rounded={4} colorScheme={'blue'} onClick={() => unLock('oreth', +item.positionId, item.deadline, item.amountInOSETH)}>
                             unlock
                           </Button>
                         </>
@@ -175,7 +258,7 @@ export default function PositionsView() {
                       ) : (
                         <>
                           <ExtendDaysModal deadline={+item.deadline} onConfirmExtend={(days: number) => onConfirmExtend('orusd', +item.positionId, days)}></ExtendDaysModal>
-                          <Button size={'xs'} rounded={4} colorScheme={'blue'} onClick={() => unLock('orusd', +item.positionId)}>
+                          <Button size={'xs'} rounded={4} colorScheme={'blue'} onClick={() => unLock('orusd', +item.positionId, item.deadline, item.amountInOSUSD)}>
                             unlock
                           </Button>
                         </>

@@ -1,5 +1,5 @@
 query RethPosition($account: Bytes) {
-  stakeORETHs(first: 100, where: { account: $account }) {
+  stakeORETHs(first: 100, orderBy: deadline, orderDirection: desc, where: { account: $account }) {
     positionId
     account
     amountInORETH
@@ -14,7 +14,7 @@ query RethPosition($account: Bytes) {
 }
 
 query RusdPosition($account: Bytes) {
-  stakeORUSDs(first: 100, where: { account: $account }) {
+  stakeORUSDs(first: 100, orderBy: deadline, orderDirection: desc, where: { account: $account }) {
     positionId
     account
     status

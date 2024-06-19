@@ -76,7 +76,7 @@ export default function ExtendDaysModal({ deadline, onConfirmExtend }: { deadlin
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent mt={36} bgColor={'#0d0703'} borderColor={'#515151'} borderWidth={'1px'} color="#fff">
-          <ModalHeader>Extend position days</ModalHeader>
+          <ModalHeader>Extend Lock days</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <Container borderColor="gray.600" boxShadow="xs" rounded="md" borderWidth={'0.5px'} borderStyle={'solid'} padding="6px 0" borderTopRadius={0}>

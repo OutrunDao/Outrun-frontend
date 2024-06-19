@@ -26,7 +26,7 @@ query Pair($addr: Bytes) {
 }
 
 query Pools($id: Bytes) {
-  pairs(orderBy: reserveUSD, orderDirection: desc, first: 10) {
+  pairs(orderBy: reserveUSD, orderDirection: desc, first: 50) {
     id
     token0 {
       ...PoolToken
@@ -46,12 +46,7 @@ query Pools($id: Bytes) {
 }
 
 query LiquidityPositions($user: String, $pair: String) {
-  liquidityPositions(
-    where: { user: $user, pair: $pair, liquidityTokenBalance_gt: "0" }
-    first: 30
-    orderBy: liquidityTokenBalance
-    orderDirection: desc
-  ) {
+  liquidityPositions(where: { user: $user, pair: $pair, liquidityTokenBalance_gt: "0" }, first: 30, orderBy: liquidityTokenBalance, orderDirection: desc) {
     pair {
       id
       token0 {

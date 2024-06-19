@@ -51,6 +51,7 @@ import { useQuery } from '@tanstack/react-query';
 import getOrethStake from '@/contracts/get/orethStakeManager';
 import getOrUsdStake from '@/contracts/get/orusdStakeManager';
 import Decimal from 'decimal.js-light';
+import parseTokenTransferLogs from '@/utils/parseTokenEvents';
 
 export default function Stake() {
   const chainId = useChainId();
@@ -166,6 +167,60 @@ export default function Stake() {
           account,
         }
       );
+    }
+
+    if (data && data.status === 'success') {
+      // console.log(data.logs);
+      const log = parseTokenTransferLogs(data.logs);
+      const adressSymbolMap = {
+        [addressMap[chainId].ORETH.toLocaleLowerCase()]: {
+          symbol: 'orETH',
+          decimal: 18,
+        },
+        [addressMap[chainId].OSETH.toLocaleLowerCase()]: {
+          symbol: 'osETH',
+          decimal: 18,
+        },
+        [addressMap[chainId].ORUSD.toLocaleLowerCase()]: {
+          symbol: 'orUSD',
+          decimal: 18,
+        },
+        [addressMap[chainId].OSUSD.toLocaleLowerCase()]: {
+          symbol: 'osUSD',
+          decimal: 18,
+        },
+        [addressMap[chainId].REY.toLocaleLowerCase()]: {
+          symbol: 'REY',
+          decimal: 18,
+        },
+        [addressMap[chainId].RUY.toLocaleLowerCase()]: {
+          symbol: 'RUY',
+          decimal: 18,
+        },
+      } as Record<string, { symbol: string; decimal: number }>;
+      const receivesText = Object.entries(log.to[account.address!])
+        .map((item) => {
+          if (!adressSymbolMap[item[0]]) return '';
+          return `${formatUnits(item[1], adressSymbolMap[item[0]].decimal)} ${adressSymbolMap[item[0]].symbol}`;
+        })
+        .filter((i) => i)
+        .join(', ');
+      toast({
+        title: 'stake finished',
+        status: 'success',
+        position: 'bottom',
+        description: (
+          <>
+            {' '}
+            {`You have successfully received ${receivesText}`}. view on
+            <Link isExternal href={blockExplore + '/tx/' + data.transactionHash} textDecoration={'underline'} colorScheme="teal">
+              BlastScan
+            </Link>
+          </>
+        ),
+        duration: null,
+        isClosable: true,
+      });
     }
 
     setLoading(false);
