@@ -71,7 +71,7 @@ export default function ExtendDaysModal({ deadline, onConfirmExtend }: { deadlin
   return (
     <>
       <Button size={'xs'} rounded={4} color={'brand.500'} onClick={onOpen}>
-        extend days
+        Extend Staking Days
       </Button>
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />

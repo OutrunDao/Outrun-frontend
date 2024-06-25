@@ -13,13 +13,13 @@ const baseStyle = definePartsStyle({
     border: "solid 0.5px #383433"
   },
   header: {
-    paddingBottom: '2px',
+    paddingBottom: '4px',
     margin: 0
   },
   body: {
     paddingTop: '0',
-    paddingBottom: '2px',
-
+    paddingBottom: '4px',
+    marginBottom: '6px'
   },
   footer: {
     margin: 0,

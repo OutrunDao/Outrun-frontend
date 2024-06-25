@@ -225,8 +225,8 @@ export default function YieldPoolView() {
     <Container mt={12}>
       <Tabs>
         <TabList>
-          <Tab>REY</Tab>
-          <Tab>RUY</Tab>
+          <Tab>ETH Yield Pool</Tab>
+          <Tab>USDB Yield Pool</Tab>
         </TabList>
         <TabPanels>
           <TabPanel paddingX={0}>
@@ -234,14 +234,14 @@ export default function YieldPoolView() {
               <CardBody color={'gray'} fontSize={14}>
                 <StatGroup my={4}>
                   <Stat>
-                    <StatLabel>AvgStakeDays</StatLabel>
+                    <StatLabel>Average Staking Days</StatLabel>
                     <StatNumber color={'gray.100'} fontSize={18}>
                       {avgStakeDaysOreth}
                     </StatNumber>
                   </Stat>
 
                   <Stat>
-                    <StatLabel>TotalUnclaimed</StatLabel>
+                    <StatLabel>Unclaimed Yield</StatLabel>
                     <StatNumber color={'gray.100'} fontSize={18}>
                       {unclaimedYieldingOreth}
                     </StatNumber>
@@ -258,7 +258,7 @@ export default function YieldPoolView() {
             <Container borderStyle={'solid'} borderWidth={'0.5px'} borderRadius={'md'} borderColor="gray.600" boxShadow="xs" rounded="md">
               <Box position="relative" padding="6">
                 <AbsoluteCenter bg="#0d0703" px="4" fontSize={14}>
-                  Withdraw REY
+                  Burn REY To Claim ETH Native Yield
                 </AbsoluteCenter>
               </Box>
               <Container borderColor="gray.600" boxShadow="xs" rounded="md" borderWidth={'0.5px'} borderStyle={'solid'} padding="6px 0" borderTopRadius={0}>
@@ -283,7 +283,7 @@ export default function YieldPoolView() {
               </Flex>
               <Center width={'100%'} my={6}>
                 <Button width={'100%'} rounded={4} colorScheme="teal" onClick={() => withdrawHandler('rey')}>
-                  submit
+                  Burn
                 </Button>
               </Center>
             </Container>
@@ -293,14 +293,14 @@ export default function YieldPoolView() {
               <CardBody color={'gray'} fontSize={14}>
                 <StatGroup my={4}>
                   <Stat>
-                    <StatLabel>AvgStakeDays</StatLabel>
+                    <StatLabel>Average Staking Days</StatLabel>
                     <StatNumber color={'gray.100'} fontSize={18}>
                       {avgStakeDaysOrusd}
                     </StatNumber>
                   </Stat>
 
                   <Stat>
-                    <StatLabel>TotalUnclaimed</StatLabel>
+                    <StatLabel>Unclaimed Yield</StatLabel>
                     <StatNumber color={'gray.100'} fontSize={18}>
                       {unclaimedYieldingOrusd}
                     </StatNumber>
@@ -317,7 +317,7 @@ export default function YieldPoolView() {
             <Container borderStyle={'solid'} borderWidth={'0.5px'} borderRadius={'md'} borderColor="gray.600" boxShadow="xs" rounded="md">
               <Box position="relative" padding="6">
                 <AbsoluteCenter bg="#0d0703" px="4" fontSize={14}>
-                  Withdraw RUY
+                  Burn RUY To Claim ETH Native Yield
                 </AbsoluteCenter>
               </Box>
               <Container borderColor="gray.600" boxShadow="xs" rounded="md" borderWidth={'0.5px'} borderStyle={'solid'} padding="6px 0" borderTopRadius={0}>
@@ -342,7 +342,7 @@ export default function YieldPoolView() {
               </Flex>
               <Center width={'100%'} my={6}>
                 <Button width={'100%'} rounded={4} colorScheme="teal" onClick={() => withdrawHandler('ruy')}>
-                  submit
+                  Burn
                 </Button>
               </Center>
             </Container>

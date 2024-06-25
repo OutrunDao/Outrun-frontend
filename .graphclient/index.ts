@@ -2204,7 +2204,7 @@ const outrunTransforms = [];
 const additionalTypeDefs = [] as any[];
 const outrunHandler = new GraphqlHandler({
               name: "outrun",
-              config: {"endpoint":"https://api.studio.thegraph.com/query/68891/outrun/0.1.35"},
+              config: {"endpoint":"https://api.studio.thegraph.com/query/68891/outrun/0.1.36"},
               baseDir,
               cache,
               pubsub,
@@ -2386,7 +2386,7 @@ export const PairDocument = gql`
     ${PoolTokenFragmentDoc}` as unknown as DocumentNode<PairQuery, PairQueryVariables>;
 export const PoolsDocument = gql`
     query Pools($id: Bytes) {
-  pairs(orderBy: reserveUSD, orderDirection: desc, first: 10) {
+  pairs(orderBy: reserveUSD, orderDirection: desc, first: 50) {
     id
     token0 {
       ...PoolToken
@@ -2440,7 +2440,12 @@ export const LiquidityPositionsDocument = gql`
     ${PoolTokenFragmentDoc}` as unknown as DocumentNode<LiquidityPositionsQuery, LiquidityPositionsQueryVariables>;
 export const RethPositionDocument = gql`
     query RethPosition($account: Bytes) {
-  stakeORETHs(first: 100, where: {account: $account}) {
+  stakeORETHs(
+    first: 100
+    orderBy: deadline
+    orderDirection: desc
+    where: {account: $account}
+  ) {
     positionId
     account
     amountInORETH
@@ -2456,7 +2461,12 @@ export const RethPositionDocument = gql`
     ` as unknown as DocumentNode<RethPositionQuery, RethPositionQueryVariables>;
 export const RusdPositionDocument = gql`
     query RusdPosition($account: Bytes) {
-  stakeORUSDs(first: 100, where: {account: $account}) {
+  stakeORUSDs(
+    first: 100
+    orderBy: deadline
+    orderDirection: desc
+    where: {account: $account}
+  ) {
     positionId
     account
     status

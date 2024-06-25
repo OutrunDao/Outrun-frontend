@@ -60,7 +60,7 @@ export default function Stake() {
   const { open } = useWeb3Modal();
   const publicClient = usePublicClient();
   const { data: walletClient } = useWalletClient();
-  const [sliderValue, setSliderValue] = useState(100);
+  const [sliderValue, setSliderValue] = useState(365);
 
   const { write: writeContract, loading: routerContractLoading } = useContract();
   const { swapData, loading, setToken0, setToken1, setLoading, approveTokens, token0AmountInputHandler, updateTokenBalance, token1AmountInputHandler, setSlippage, maxHandler } = useSwap({

@@ -176,31 +176,33 @@ export default function PositionsView() {
     <Container mt={12}>
       <Tabs>
         <TabList>
-          <Tab>orETH</Tab>
-          <Tab>orUSD</Tab>
+          <Tab>ETH Position</Tab>
+          <Tab>USDB Position</Tab>
         </TabList>
         <TabPanels>
           <TabPanel paddingX={0}>
             {rethPositions?.map((item) => {
               return (
                 <Card m={0} colorScheme={'red'} key={item.positionId} mb={4}>
-                  <CardHeader>#{item.positionId}</CardHeader>
+                  <CardHeader textAlign={'right'} fontSize={13}>
+                    #{item.positionId}
+                  </CardHeader>
                   <CardBody color={'gray'} fontSize={14}>
                     <SimpleGrid columns={2} spacing={2}>
                       <Box>
-                        <Text color="#fff">orETH </Text>
+                        <Text color="#fff">Staked orETH </Text>
                         <Text>{formatUnits(BigInt(item.amountInORETH), 18)}</Text>
                       </Box>
                       <Box>
-                        <Text color="#fff">osETH</Text>
+                        <Text color="#fff">Generated osETH</Text>
                         <Text>{formatUnits(BigInt(item.amountInOSETH), 18)}</Text>
                       </Box>
                       <Box>
-                        <Text color="#fff">YieldToken</Text>
+                        <Text color="#fff">Generated YT</Text>
                         <Text>{formatUnits(BigInt(item.amountInREY), 18)} REY</Text>
                       </Box>
                       <Box>
-                        <Text color="#fff">EndDate </Text>
+                        <Text color="#fff">Unlock Time </Text>
                         <Text>{dayjs(+item.deadline * 1000).format('YYYY/MM/DD hh:mm')}</Text>
                       </Box>
                     </SimpleGrid>
@@ -213,7 +215,7 @@ export default function PositionsView() {
                         <>
                           <ExtendDaysModal deadline={+item.deadline} onConfirmExtend={(days: number) => onConfirmExtend('oreth', +item.positionId, days)}></ExtendDaysModal>
                           <Button size={'xs'} rounded={4} colorScheme={'blue'} onClick={() => unLock('oreth', +item.positionId, item.deadline, item.amountInOSETH)}>
-                            unlock
+                            UnStake
                           </Button>
                         </>
                       )}
@@ -222,6 +224,12 @@ export default function PositionsView() {
                 </Card>
               );
             })}
+            {!rethPositions ||
+              (!rethPositions.length && (
+                <Text textAlign={'center'} mt={4}>
+                  You have no ETH position
+                </Text>
+              ))}
           </TabPanel>
           <TabPanel paddingX={0}>
             {rusdPositions?.map((item) => {
@@ -234,19 +242,19 @@ export default function PositionsView() {
                   <CardBody color={'gray'} fontSize={14}>
                     <SimpleGrid columns={2} spacing={2}>
                       <Box>
-                        <Text color="#fff">orUSD </Text>
+                        <Text color="#fff">Staked orUSD </Text>
                         <Text>{formatUnits(BigInt(item.amountInORUSD), 18)}</Text>
                       </Box>
                       <Box>
-                        <Text color="#fff">osUSD</Text>
+                        <Text color="#fff">Generated osUSD</Text>
                         <Text>{formatUnits(BigInt(item.amountInOSUSD), 18)}</Text>
                       </Box>
                       <Box>
-                        <Text color="#fff">YieldToken</Text>
+                        <Text color="#fff">Generated YT</Text>
                         <Text>{formatUnits(BigInt(item.amountInRUY), 18)} RUY</Text>
                       </Box>
                       <Box>
-                        <Text color="#fff">EndDate </Text>
+                        <Text color="#fff">Unlock Time </Text>
                         <Text>{dayjs(+item.deadline * 1000).format('YYYY/MM/DD hh:mm')}</Text>
                       </Box>
                     </SimpleGrid>
@@ -259,7 +267,7 @@ export default function PositionsView() {
                         <>
                           <ExtendDaysModal deadline={+item.deadline} onConfirmExtend={(days: number) => onConfirmExtend('orusd', +item.positionId, days)}></ExtendDaysModal>
                           <Button size={'xs'} rounded={4} colorScheme={'blue'} onClick={() => unLock('orusd', +item.positionId, item.deadline, item.amountInOSUSD)}>
-                            unlock
+                            UnStake
                           </Button>
                         </>
                       )}
@@ -268,6 +276,12 @@ export default function PositionsView() {
                 </Card>
               );
             })}
+            {!rusdPositions ||
+              (!rusdPositions.length && (
+                <Text textAlign={'center'} mt={4}>
+                  You have no USDB position
+                </Text>
+              ))}
           </TabPanel>
         </TabPanels>
       </Tabs>
